@@ -1,0 +1,108 @@
+<div class="admin" [class.collapsed]="state.collapsed()" [class.mobile-open]="state.mobileOpen()">
+  <!-- Sidebar -->
+  <aside class="adm-sidebar">
+    <div class="adm-brand">
+      <span class="adm-brand-mark">A</span>
+      <div style="overflow: hidden">
+        <div class="adm-brand-name">ASTECAA</div>
+        <div class="adm-brand-sub">Admin Console</div>
+      </div>
+      <button class="adm-collapse-btn" (click)="state.toggleCollapsed()" aria-label="Collapse sidebar">«</button>
+    </div>
+
+    <nav class="adm-nav">
+      @for (group of nav; track group.section) {
+        <div class="adm-nav-section">{{ group.section }}</div>
+        @for (item of group.items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/admin/dashboard' }"
+            class="adm-nav-item"
+            (click)="closeMobile()"
+          >
+            <span class="adm-nav-ico">{{ item.icon }}</span>
+            <span>{{ item.label }}</span>
+            @if (item.badge) {
+              <span class="adm-nav-badge">{{ item.badge }}</span>
+            }
+          </a>
+        }
+      }
+    </nav>
+
+    <div class="adm-sidebar-foot">
+      <div class="adm-user-chip">
+        <img class="adm-user-avatar" [src]="user.avatar" [alt]="user.name" />
+        <div style="overflow: hidden">
+          <div class="adm-user-name">{{ user.name }}</div>
+          <div class="adm-user-role">{{ auth.userEmail() || user.role }}</div>
+        </div>
+        <button class="adm-logout-btn" (click)="logout()" title="Sign out">⏻</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="adm-main">
+    <header class="adm-topbar">
+      <button class="adm-icon-btn" (click)="state.toggleMobile()" aria-label="Menu" style="display: none" [style.display.px]="mobileMenuBtn">
+        ☰
+      </button>
+      <div class="adm-breadcrumb">
+        @for (crumb of crumbs(); track crumb; let last = $last) {
+          @if (!last) {
+            <a [routerLink]="crumbPath(crumb)">{{ crumb }}</a>
+            <span class="sep">/</span>
+          } @else {
+            <span class="current">{{ crumb }}</span>
+          }
+        }
+      </div>
+
+      <div class="adm-search">
+        <span class="adm-search-ico">⌕</span>
+        <input
+          type="search"
+          placeholder="Search events, users, stories…  (⌘K)"
+          [ngModel]="state.search()"
+          (ngModelChange)="state.search.set($event)"
+        />
+      </div>
+
+      <button class="adm-icon-btn" (click)="toggleNotif($event)" aria-label="Notifications">
+        🔔
+        @if (unreadCount() > 0) {
+          <span class="adm-icon-btn-dot"></span>
+        }
+      </button>
+      <button class="adm-theme-toggle" (click)="state.toggleTheme()" aria-label="Toggle theme">
+        {{ state.theme() === 'light' ? '☾' : '☀' }}
+      </button>
+
+      @if (state.notifOpen()) {
+        <div class="adm-notif-panel" (click)="$event.stopPropagation()">
+          <div class="adm-notif-head">
+            <strong>Notifications</strong>
+            <button class="adm-btn adm-btn-ghost adm-btn-sm">Mark all read</button>
+          </div>
+          <div class="adm-notif-list">
+            @for (n of notifications; track n.id) {
+              <div class="adm-notif-item" [class.unread]="n.unread">
+                <div class="adm-notif-ico">{{ notifIcon(n.type) }}</div>
+                <div>
+                  <div class="adm-notif-text">{{ n.text }}</div>
+                  <div class="adm-notif-time">{{ n.time }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </header>
+
+    <main class="adm-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

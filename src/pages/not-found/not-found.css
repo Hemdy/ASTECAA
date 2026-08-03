@@ -1,0 +1,10 @@
+.nf {
+  padding: clamp(100px, 18vw, 180px) 0;
+}
+.nf-seal {
+  margin: 0 auto 28px;
+  font-size: 1rem;
+}
+.nf h1 {
+  margin-bottom: 8px;
+}

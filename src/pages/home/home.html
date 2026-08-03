@@ -1,0 +1,274 @@
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true">
+    <img [src]="featured.banner" alt="" class="hero-img" />
+    <div class="hero-veil"></div>
+    <div class="hero-grain"></div>
+  </div>
+
+  <div class="container hero-inner">
+    <div class="hero-content">
+      <span class="eyebrow hero-eyebrow">Est. 1993 · Maple Hollow</span>
+      <h1 class="hero-title">
+        Where memories live<br />
+        and new <em>stories</em> begin.
+      </h1>
+      <p class="hero-lede lede">
+        A living archive of a community's gatherings — the songs, the suppers, the lantern-lit
+        walks through the old orchard. Step inside, and add your chapter.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/events" class="btn btn-gold">Upcoming Gatherings</a>
+        <a routerLink="/timeline" class="btn btn-outline hero-outline">Walk the Timeline</a>
+      </div>
+    </div>
+
+    <div class="hero-card" appReveal>
+      <div class="hero-card-head">
+        <span class="tag tag-burgundy">Featured · {{ featured.category }}</span>
+        <span class="type hero-card-date">{{ ui.shortDate(featured.date) }}</span>
+      </div>
+      <img [src]="featured.poster" alt="" class="hero-card-img" />
+      <div class="hero-card-body">
+        <h3>{{ featured.title }}</h3>
+        <p class="hero-card-sub">{{ featured.subtitle }}</p>
+        <div class="hero-card-meta">
+          <span>📍 {{ featured.venue }}</span>
+          <span>🕕 {{ featured.time }}</span>
+        </div>
+        <app-countdown [target]="featured.date" />
+        <a
+          [routerLink]="['/events', featured.id]"
+          class="btn btn-primary btn-sm hero-card-cta"
+          >View gathering →</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll type" aria-hidden="true">scroll ↓ to wander</div>
+</section>
+
+<!-- ============ FEATURED EVENT (large) ============ -->
+<section class="section">
+  <div class="container featured">
+    <div class="featured-media" appReveal>
+      <img [src]="featured.banner" alt="" class="photo-vintage" />
+      <div class="featured-seal seal">Since<br />1993</div>
+      <div class="tape tape-tl"></div>
+      <div class="tape tape-br"></div>
+    </div>
+    <div class="featured-text" appReveal delay="120">
+      <span class="eyebrow">The next gathering</span>
+      <h2>{{ featured.title }}</h2>
+      <p class="lede">{{ featured.subtitle }}</p>
+      <p>{{ featured.description }}</p>
+      <div class="featured-stats">
+        <div>
+          <span class="featured-stat-num">{{ ui.formatDate(featured.date).split(',')[0] }}</span>
+          <span class="featured-stat-lbl">{{ dateMonthYear(featured.date) }}</span>
+        </div>
+        <div>
+          <span class="featured-stat-num">{{ featured.registered | number }}</span>
+          <span class="featured-stat-lbl">Already registered</span>
+        </div>
+        <div>
+          <span class="featured-stat-num">{{ featured.venue }}</span>
+          <span class="featured-stat-lbl">{{ featured.city }}</span>
+        </div>
+      </div>
+      <div class="featured-actions">
+        <a [routerLink]="['/events', featured.id]" class="btn btn-primary">Read & Register</a>
+        <button class="btn btn-ghost">Share ↗</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LATEST MEMORIES ============ -->
+<section class="section section-paper">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">From the archive</span>
+      <h2>Latest memories</h2>
+      <p>A few pages from the scrapbook — recently added to the digital archive.</p>
+    </div>
+
+    <div class="mem-grid">
+      @for (m of latestMemories; track m.id; let i = $index) {
+        <figure
+          class="polaroid mem-card"
+          appReveal
+          [attr.style]="'--r:' + (rotations[i % rotations.length]) + 'deg'"
+          [style.transform]="'rotate(' + rotations[i % rotations.length] + 'deg)'"
+        >
+          <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+          <figcaption class="caption">{{ m.caption }}</figcaption>
+          <span class="mem-year">{{ m.year }}</span>
+        </figure>
+      }
+    </div>
+
+    <div class="text-center" style="margin-top: 40px" appReveal>
+      <a routerLink="/gallery" class="btn btn-outline">Open the full gallery →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ UPCOMING EVENTS ============ -->
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">Mark your calendar</span>
+      <h2>Upcoming gatherings</h2>
+      <p>Every event is a new chapter — and a chance to add your voice to the archive.</p>
+    </div>
+
+    <div class="events-grid">
+      @for (ev of upcoming; track ev.id) {
+        <article class="card event-card" appReveal>
+          <div class="event-card-media">
+            <img [src]="ev.poster" alt="" class="photo-vintage" />
+            <div class="event-date-chip">
+              <span class="ec-month">{{ ui.monthDay(ev.date).month }}</span>
+              <span class="ec-day">{{ ui.monthDay(ev.date).day }}</span>
+            </div>
+          </div>
+          <div class="event-card-body">
+            <span class="tag tag-gold">{{ ev.category }}</span>
+            <h3 class="event-card-title">{{ ev.title }}</h3>
+            <p class="event-card-sub">{{ ev.subtitle }}</p>
+            <div class="event-card-meta">
+              <span>📅 {{ ui.shortDate(ev.date) }}</span>
+              <span>📍 {{ ev.venue }}</span>
+            </div>
+            <div class="event-card-foot">
+              <a [routerLink]="['/events', ev.id]" class="link-arrow">Details →</a>
+              <span class="type event-card-cap">{{ ev.registered }}/{{ ev.capacity }}</span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="text-center" style="margin-top: 40px" appReveal>
+      <a routerLink="/events" class="btn btn-outline">See all events →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TIMELINE PREVIEW ============ -->
+<section class="section section-paper">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">A century in moments</span>
+      <h2>The timeline</h2>
+      <p>From a single harvest supper in 1993 to a living archive in 2026.</p>
+    </div>
+
+    <div class="tl-preview" appReveal>
+      @for (m of timelinePreview; track m.id; let i = $index) {
+        <div class="tl-prev-item" [class.right]="i % 2 === 1">
+          <div class="tl-prev-year">{{ m.year }}</div>
+          <div class="tl-prev-dot"></div>
+          <div class="tl-prev-card">
+            <img [src]="m.image" alt="" class="photo-vintage" />
+            <div class="tl-prev-text">
+              <h4>{{ m.title }}</h4>
+              <p>{{ m.story }}</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="text-center" style="margin-top: 40px" appReveal>
+      <a routerLink="/timeline" class="btn btn-outline">Walk the full timeline →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GALLERY PREVIEW (film strip) ============ -->
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">Flickering frames</span>
+      <h2>From the gallery</h2>
+      <p>A film strip of moments, preserved across the decades.</p>
+    </div>
+
+    <div class="filmstrip" appReveal>
+      <div class="filmstrip-track">
+        @for (m of galleryPreview; track m.id) {
+          <figure class="film-frame">
+            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+            <figcaption class="type">{{ m.year }} · {{ m.event }}</figcaption>
+          </figure>
+        }
+      </div>
+    </div>
+
+    <div class="text-center" style="margin-top: 40px" appReveal>
+      <a routerLink="/gallery" class="btn btn-outline">Enter the gallery →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMMUNITY MESSAGES PREVIEW ============ -->
+<section class="section section-paper">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">Voices from the wall</span>
+      <h2>The community writes back</h2>
+      <p>Messages left by visitors — a few of the many. Add your own to the wall.</p>
+    </div>
+
+    <div class="msg-grid">
+      @for (msg of messagesPreview; track msg.id) {
+        <article class="card msg-card" appReveal [class.pinned]="msg.pinned">
+          @if (msg.pinned) {
+            <span class="msg-pin">★ Featured</span>
+          }
+          <p class="msg-body">"{{ msg.message }}"</p>
+          <div class="msg-foot">
+            <img [src]="msg.avatar" [alt]="msg.author" class="msg-avatar" />
+            <div>
+              <div class="msg-author">{{ msg.author }}</div>
+              <div class="type msg-loc">{{ msg.location }}</div>
+            </div>
+            <span class="msg-likes">♥ {{ msg.likes }}</span>
+          </div>
+        </article>
+      }
+    </div>
+
+    <div class="text-center" style="margin-top: 40px" appReveal>
+      <a routerLink="/community" class="btn btn-outline">Visit the community wall →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ORGANIZERS PREVIEW ============ -->
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">The hands behind it</span>
+      <h2>Stewards of the archive</h2>
+      <p>A small, devoted group keeps the gatherings and the memories alive.</p>
+    </div>
+
+    <div class="org-grid">
+      @for (o of organizers; track o.id) {
+        <article class="org-card" appReveal>
+          <div class="org-photo">
+            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" />
+          </div>
+          <h4>{{ o.name }}</h4>
+          <span class="tag tag-forest">{{ o.role }}</span>
+          <span class="type org-years">{{ o.years }}</span>
+          <p class="org-bio">{{ o.bio }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>

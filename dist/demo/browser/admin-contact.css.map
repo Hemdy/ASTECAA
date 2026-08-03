@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;d998c8c38685b41bac0aca17f398e1fa2b06845bbfd9a32228bb37f1f5c1325c;C:/My-projects/eze/project/src/admin/pages/admin-contact.ts"],
+  "sourcesContent": ["\n      .contact-row {\n        padding: 14px 18px;\n        border-bottom: 1px solid var(--ad-border);\n        cursor: pointer;\n        transition: background var(--ad-transition);\n      }\n      .contact-row:hover {\n        background: var(--ad-surface-2);\n      }\n      .contact-row.active {\n        background: var(--ad-primary-soft);\n        border-left: 3px solid var(--ad-primary);\n      }\n      @media (max-width: 900px) {\n        :host > div > div[style*='flex'] {\n          flex-direction: column !important;\n        }\n      }\n    "],
+  "mappings": ";AACM,CAAC;AACC,WAAS,KAAK;AACd,iBAAe,IAAI,MAAM,IAAI;AAC7B,UAAQ;AACR,cAAY,WAAW,IAAI;AAC7B;AACA,CANC,WAMW;AACV,cAAY,IAAI;AAClB;AACA,CATC,WASW,CAAC;AACX,cAAY,IAAI;AAChB,eAAa,IAAI,MAAM,IAAI;AAC7B;AACA,QAAO,WAAY;AACjB,QAAM,EAAE,IAAI,EAAE,GAAG,CAAC;AAChB,oBAAgB;AAClB;AACF;",
+  "names": []
+}

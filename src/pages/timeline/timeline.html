@@ -1,0 +1,75 @@
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow" appReveal>A century in moments</span>
+    <h1 appReveal delay="80">The timeline</h1>
+    <p class="lede" appReveal delay="160">
+      From a single harvest supper in 1993 to a living digital archive in 2026 — walk the years,
+      one memory at a time.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Era filter -->
+    <div class="era-filter" appReveal>
+      <button
+        class="era-chip"
+        [class.active]="era() === ''"
+        (click)="setEra('')"
+      >
+        All eras
+      </button>
+      @for (era of eras; track era.label) {
+        <button
+          class="era-chip"
+          [class.active]="eraActive(era)"
+          (click)="setEra(era.label)"
+        >
+          {{ era.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline">
+      @for (m of filtered(); track m.id; let i = $index) {
+        <div class="t-item" [class.right]="i % 2 === 1" appReveal>
+          <div class="t-marker">
+            <span class="t-year">{{ m.year }}</span>
+            <span class="t-dot"></span>
+          </div>
+          <article class="t-card">
+            <div class="t-media">
+              <img [src]="m.image" [alt]="m.title" class="photo-vintage" />
+              @if (m.hasVideo) {
+                <span class="t-video">▶</span>
+              }
+            </div>
+            <div class="t-body">
+              <span class="eyebrow">{{ m.year }}</span>
+              <h3>{{ m.title }}</h3>
+              <p>{{ m.story }}</p>
+              @if (m.quote) {
+                <blockquote class="t-quote">
+                  "{{ m.quote }}"
+                  <cite>{{ m.quoteAuthor }}</cite>
+                </blockquote>
+              }
+            </div>
+          </article>
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section section-paper">
+  <div class="container text-center cta" appReveal>
+    <h2>The story continues.</h2>
+    <p class="lede" style="max-width: 56ch; margin: 12px auto 28px">
+      The next milestone is being written this season. Come to a gathering and be part of it.
+    </p>
+    <a routerLink="/events" class="btn btn-gold">See upcoming events</a>
+  </div>
+</section>

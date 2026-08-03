@@ -1,0 +1,131 @@
+.page-hero {
+  padding: clamp(72px, 12vw, 140px) 0 clamp(40px, 6vw, 72px);
+  text-align: center;
+  background: var(--c-brown-700);
+  background-image: linear-gradient(160deg, var(--c-brown-600), var(--c-brown-700));
+  color: var(--c-bg-50);
+}
+.page-hero .eyebrow {
+  color: var(--c-gold-300);
+}
+.page-hero h1 {
+  color: var(--c-bg-50);
+  margin: 18px 0 18px;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+.page-hero .lede {
+  color: rgba(248, 243, 232, 0.85);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+.contact {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: clamp(32px, 5vw, 56px);
+  align-items: start;
+}
+
+.contact-form-wrap {
+  padding: clamp(28px, 4vw, 40px);
+}
+.contact-form-wrap h2 {
+  margin-bottom: 6px;
+}
+.contact-sub {
+  font-size: 0.82rem;
+  margin-bottom: 24px;
+}
+.field {
+  margin-bottom: 18px;
+}
+.field input,
+.field textarea,
+.field select {
+  background: var(--surface-raised);
+  border: 1px solid rgba(92, 64, 51, 0.25);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  width: 100%;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--c-gold-500);
+  box-shadow: 0 0 0 3px rgba(196, 154, 69, 0.18);
+}
+.field textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+.captcha {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  background: var(--c-paper-100);
+  border: 1px solid rgba(92, 64, 51, 0.18);
+  border-radius: var(--r-sm);
+  margin-bottom: 22px;
+}
+.captcha-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-cinzel);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--c-brown-600);
+  cursor: pointer;
+  font-weight: 600;
+}
+.captcha-box input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--c-gold-500);
+}
+.captcha-note {
+  font-size: 0.74rem;
+}
+.contact-submit {
+  width: 100%;
+}
+
+.contact-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.contact-card {
+  padding: 24px;
+}
+.contact-card .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
+.contact-card h3 {
+  margin-bottom: 12px;
+}
+.contact-card address {
+  font-style: normal;
+  line-height: 1.7;
+  color: var(--c-ink-soft);
+}
+.contact-card a {
+  display: block;
+  margin-bottom: 6px;
+}
+.contact-stewards {
+  font-size: 0.94rem;
+  color: var(--c-ink-soft);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 880px) {
+  .contact {
+    grid-template-columns: 1fr;
+  }
+}

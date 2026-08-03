@@ -1,0 +1,196 @@
+@if (ev(); as e) {
+  <!-- Banner -->
+  <section class="banner">
+    <img [src]="e.banner" alt="" class="banner-img" />
+    <div class="banner-veil"></div>
+    <div class="container banner-inner">
+      <nav class="crumbs type" appReveal>
+        <a routerLink="/events">Gatherings</a> <span>/</span> {{ e.title }}
+      </nav>
+      <span class="tag tag-gold banner-tag" appReveal>{{ e.category }}</span>
+      <h1 appReveal delay="80">{{ e.title }}</h1>
+      <p class="lede banner-lede" appReveal delay="140">{{ e.subtitle }}</p>
+      <div class="banner-meta" appReveal delay="200">
+        <span>📅 {{ ui.formatDate(e.date) }}</span>
+        <span>🕕 {{ e.time }}</span>
+        <span>📍 {{ e.venue }}, {{ e.city }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Countdown bar -->
+  <section class="cd-bar section-tight">
+    <div class="container cd-bar-inner">
+      <div class="cd-bar-text">
+        <span class="eyebrow">The gathering begins in</span>
+      </div>
+      <app-countdown [target]="e.date" />
+      <div class="cd-bar-actions">
+        <button class="btn btn-gold btn-sm" (click)="register()">Register</button>
+        <button class="btn btn-outline btn-sm" (click)="share()">Share ↗</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Body -->
+  <section class="section">
+    <div class="container detail">
+      <div class="detail-main">
+        <!-- About -->
+        <div appReveal>
+          <span class="eyebrow">About this gathering</span>
+          <h2 style="margin: 12px 0 18px">The story</h2>
+          <p class="detail-long">{{ e.longDescription }}</p>
+
+          <div class="detail-tags">
+            @for (t of e.tags; track t) {
+              <span class="tag">{{ t }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="detail-block" appReveal>
+          <span class="eyebrow">The programme</span>
+          <h2 style="margin: 12px 0 22px">Schedule</h2>
+          <ol class="schedule">
+            @for (item of e.schedule; track item.title) {
+              <li class="sched-item">
+                <span class="sched-time">{{ item.time }}</span>
+                <div class="sched-body">
+                  <h4>{{ item.title }}</h4>
+                  <p>{{ item.detail }}</p>
+                </div>
+              </li>
+            }
+          </ol>
+        </div>
+
+        <!-- Gallery -->
+        <div class="detail-block" appReveal>
+          <span class="eyebrow">From past gatherings</span>
+          <h2 style="margin: 12px 0 22px">Gallery</h2>
+          <div class="detail-gallery">
+            @for (img of e.gallery; track img) {
+              <figure class="dg-frame">
+                <img [src]="img" alt="" class="photo-vintage" />
+              </figure>
+            }
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div class="detail-block" appReveal>
+          <span class="eyebrow">Voices</span>
+          <h2 style="margin: 12px 0 22px">Comments</h2>
+
+          <form class="comment-form" (ngSubmit)="addComment()">
+            <textarea
+              name="comment"
+              placeholder="Leave a note about this gathering…"
+              [(ngModel)]="commentText"
+              required
+            ></textarea>
+            <button type="submit" class="btn btn-primary btn-sm" [disabled]="!commentText.trim()">
+              Post note
+            </button>
+          </form>
+
+          <div class="comment-list">
+            @for (c of comments(); track c.id) {
+              <article class="comment">
+                <img [src]="c.avatar" [alt]="c.author" class="comment-avatar" />
+                <div class="comment-body">
+                  <div class="comment-head">
+                    <strong>{{ c.author }}</strong>
+                    <span class="type comment-date">{{ c.location }}</span>
+                  </div>
+                  <p>{{ c.message }}</p>
+                  <button class="comment-like" (click)="like(c.id)">♥ {{ c.likes }}</button>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="detail-side">
+        <div class="card reg-card" appReveal>
+          <h3>Register</h3>
+          <div class="reg-progress">
+            <div class="reg-progress-bar" [style.width.%]="ui.percentageOf(e)"></div>
+          </div>
+          <p class="reg-count">
+            <strong>{{ e.registered | number }}</strong> of {{ e.capacity | number }} registered
+          </p>
+          <button class="btn btn-gold reg-btn" (click)="register()">
+            Reserve my place
+          </button>
+          <p class="type reg-note">No ticket needed — just your name at the gate.</p>
+
+          <ul class="reg-list">
+            <li><span>When</span><span>{{ ui.shortDate(e.date) }}</span></li>
+            <li><span>Time</span><span>{{ e.time }}</span></li>
+            <li><span>Venue</span><span>{{ e.venue }}</span></li>
+            <li><span>City</span><span>{{ e.city }}</span></li>
+            <li><span>Category</span><span>{{ e.category }}</span></li>
+          </ul>
+        </div>
+
+        <div class="card organizer-card" appReveal delay="100">
+          <span class="eyebrow">Your host</span>
+          <img [src]="e.organizerPhoto" [alt]="e.organizer" class="organizer-photo" />
+          <h4>{{ e.organizer }}</h4>
+          <p class="type organizer-role">{{ e.organizerRole }}</p>
+        </div>
+
+        <div class="card map-card" appReveal delay="150">
+          <span class="eyebrow">Where to find us</span>
+          <h4 style="margin: 8px 0 14px">{{ e.venue }}</h4>
+          <div class="map">
+            <div class="map-pin">📍</div>
+            <span class="type map-label">{{ e.venue }} · {{ e.city }}</span>
+          </div>
+          <p class="map-address">{{ e.venue }}, {{ e.city }}</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Related -->
+  <section class="section section-paper">
+    <div class="container">
+      <div class="shead" appReveal>
+        <span class="eyebrow">More to come</span>
+        <h2>Other gatherings</h2>
+      </div>
+      <div class="related-grid">
+        @for (r of related(); track r.id) {
+          <article class="card event-card" appReveal>
+            <div class="event-card-media">
+              <img [src]="r.poster" alt="" class="photo-vintage" />
+              <div class="event-date-chip">
+                <span class="ec-month">{{ ui.monthDay(r.date).month }}</span>
+                <span class="ec-day">{{ ui.monthDay(r.date).day }}</span>
+              </div>
+            </div>
+            <div class="event-card-body">
+              <span class="tag tag-gold">{{ r.category }}</span>
+              <h3 class="event-card-title">{{ r.title }}</h3>
+              <div class="event-card-foot" style="margin-top: 12px">
+                <a [routerLink]="['/events', r.id]" class="link-arrow">Details →</a>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+} @else {
+  <section class="section container text-center">
+    <h2>Gathering not found</h2>
+    <p style="margin: 16px 0 24px">This event may have been archived or moved.</p>
+    <a routerLink="/events" class="btn btn-primary">Back to all gatherings</a>
+  </section>
+}

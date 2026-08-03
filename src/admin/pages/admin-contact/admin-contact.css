@@ -1,0 +1,18 @@
+.contact-row {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--ad-border);
+  cursor: pointer;
+  transition: background var(--ad-transition);
+}
+.contact-row:hover {
+  background: var(--ad-surface-2);
+}
+.contact-row.active {
+  background: var(--ad-primary-soft);
+  border-left: 3px solid var(--ad-primary);
+}
+@media (max-width: 900px) {
+  :host > div > div[style*='flex'] {
+    flex-direction: column !important;
+  }
+}

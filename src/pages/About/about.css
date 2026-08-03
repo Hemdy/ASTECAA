@@ -1,0 +1,205 @@
+.page-hero {
+  padding: clamp(72px, 12vw, 140px) 0 clamp(40px, 6vw, 72px);
+  text-align: center;
+  background: var(--c-brown-700);
+  background-image: linear-gradient(160deg, var(--c-brown-600), var(--c-brown-700));
+  color: var(--c-bg-50);
+}
+.page-hero .eyebrow {
+  color: var(--c-gold-300);
+}
+.page-hero h1 {
+  color: var(--c-bg-50);
+  margin: 18px 0 18px;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+.page-hero .lede {
+  color: rgba(248, 243, 232, 0.85);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+.section-paper {
+  background: var(--c-paper-100);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.25 0 0 0 0 0.20 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+.origin {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: clamp(32px, 6vw, 72px);
+  align-items: center;
+}
+.origin-media {
+  position: relative;
+}
+.origin-media img {
+  width: 100%;
+  height: clamp(360px, 48vw, 520px);
+  object-fit: cover;
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+}
+.origin-seal {
+  position: absolute;
+  bottom: -22px;
+  right: -22px;
+  width: 96px;
+  height: 96px;
+  font-size: 0.78rem;
+}
+.tape-tl {
+  top: -14px;
+  left: 24px;
+  transform: rotate(-8deg);
+}
+.origin-text h2 {
+  margin: 12px 0 18px;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.mission-card {
+  padding: 32px 28px;
+  text-align: center;
+}
+.mission-ico {
+  font-size: 2.2rem;
+  margin-bottom: 16px;
+}
+.mission-card h3 {
+  margin-bottom: 10px;
+}
+
+.milestones {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0;
+}
+.mile {
+  position: relative;
+  padding: 0 18px 32px;
+}
+.mile-year {
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--c-burgundy-600);
+  margin-bottom: 14px;
+}
+.mile-dot {
+  position: absolute;
+  top: 38px;
+  left: 18px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--c-gold-500);
+  box-shadow: 0 0 0 3px var(--c-bg-100), 0 0 0 5px var(--c-gold-300);
+}
+.mile-line {
+  position: absolute;
+  top: 44px;
+  left: 32px;
+  right: -18px;
+  height: 2px;
+  background: linear-gradient(to right, var(--c-gold-400), rgba(196, 154, 69, 0.2));
+}
+.mile-body h4 {
+  font-size: 1.1rem;
+  margin: 18px 0 8px;
+}
+.mile-body p {
+  font-size: 0.92rem;
+  color: var(--c-ink-soft);
+  margin: 0;
+}
+
+.narrow {
+  max-width: var(--container-narrow);
+  margin: 0 auto;
+}
+.big-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+  line-height: 1.3;
+  color: var(--c-brown-700);
+  margin: 8px 0;
+}
+.quote-attrib {
+  font-size: 0.86rem;
+  letter-spacing: 0.06em;
+}
+
+.org-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.org-card {
+  text-align: center;
+  padding: 24px 20px;
+}
+.org-photo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--c-paper-200);
+  box-shadow: var(--shadow-md);
+}
+.org-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.org-card h4 {
+  font-size: 1.15rem;
+  margin-bottom: 10px;
+}
+.org-card .tag {
+  margin-bottom: 8px;
+}
+.org-years {
+  display: block;
+  font-size: 0.72rem;
+  margin-bottom: 12px;
+}
+.org-bio {
+  font-size: 0.9rem;
+  color: var(--c-ink-soft);
+  line-height: 1.55;
+  text-align: left;
+  margin: 0;
+}
+
+.cta h2 {
+  margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+  .origin {
+    grid-template-columns: 1fr;
+  }
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+  .org-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 540px) {
+  .org-grid {
+    grid-template-columns: 1fr;
+  }
+  .mile-line {
+    display: none;
+  }
+}

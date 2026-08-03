@@ -1,0 +1,10 @@
+@if (!isAdmin) {
+  <app-navbar />
+}
+<main class="app-main">
+  <router-outlet />
+</main>
+@if (!isAdmin) {
+  <app-footer />
+}
+<app-toast />

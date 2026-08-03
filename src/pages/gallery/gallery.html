@@ -1,0 +1,122 @@
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow" appReveal>From the archive</span>
+    <h1 appReveal delay="80">The memory gallery</h1>
+    <p class="lede" appReveal delay="160">
+      Photographs and films from a century of gatherings — preserved, digitised, and gathered
+      here as a community scrapbook.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Controls -->
+    <div class="g-controls" appReveal>
+      <div class="g-style-toggle">
+        <button
+          class="style-btn"
+          [class.active]="style() === 'scrapbook'"
+          (click)="style.set('scrapbook')"
+        >
+          Scrapbook
+        </button>
+        <button
+          class="style-btn"
+          [class.active]="style() === 'filmstrip'"
+          (click)="style.set('filmstrip')"
+        >
+          Film strip
+        </button>
+        <button
+          class="style-btn"
+          [class.active]="style() === 'polaroid'"
+          (click)="style.set('polaroid')"
+        >
+          Polaroid wall
+        </button>
+      </div>
+
+      <div class="g-filters">
+        <select name="album" [(ngModel)]="album" aria-label="Filter by album">
+          <option value="">All albums</option>
+          @for (a of albums; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+        <select name="year" [(ngModel)]="year" aria-label="Filter by year">
+          <option value="">All years</option>
+          @for (y of years; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <p class="result-count type" appReveal>
+      {{ filtered().length }} memor{{ filtered().length === 1 ? 'y' : 'ies' }}
+    </p>
+
+    <!-- Scrapbook style -->
+    @if (style() === 'scrapbook') {
+      <div class="scrapbook">
+        @for (m of filtered(); track m.id; let i = $index) {
+          <figure
+            class="polaroid sb-item"
+            appReveal
+            [style.transform]="'rotate(' + rot(i) + 'deg)'"
+          >
+            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+            <figcaption class="caption">{{ m.caption }}</figcaption>
+            <span class="sb-year">{{ m.year }}</span>
+            @if (m.format === 'video') {
+              <span class="sb-video">▶</span>
+            }
+          </figure>
+        }
+      </div>
+    }
+
+    <!-- Film strip style -->
+    @if (style() === 'filmstrip') {
+      <div class="filmstrip-wrap" appReveal>
+        <div class="filmstrip-big">
+          <div class="fs-track">
+            @for (m of filtered(); track m.id) {
+              <figure class="fs-frame">
+                <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+                <figcaption class="type">{{ m.year }} · {{ m.event }}</figcaption>
+              </figure>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Polaroid wall style -->
+    @if (style() === 'polaroid') {
+      <div class="polaroid-wall">
+        @for (m of filtered(); track m.id; let i = $index) {
+          <figure
+            class="polaroid pw-item"
+            appReveal
+            [style.transform]="'rotate(' + rot(i) + 'deg)'"
+          >
+            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+            <figcaption class="caption">{{ m.caption }}</figcaption>
+            <span class="pw-meta type">{{ m.year }}</span>
+          </figure>
+        }
+      </div>
+    }
+
+    @if (filtered().length === 0) {
+      <div class="empty">
+        <div class="empty-mark">✦</div>
+        <h3>No memories in this album yet.</h3>
+        <p>Try a different filter combination.</p>
+        <button class="btn btn-outline" (click)="clear()">Clear filters</button>
+      </div>
+    }
+  </div>
+</section>

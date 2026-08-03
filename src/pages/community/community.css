@@ -1,0 +1,211 @@
+.page-hero {
+  padding: clamp(72px, 12vw, 140px) 0 clamp(40px, 6vw, 72px);
+  text-align: center;
+  background: var(--c-brown-700);
+  background-image: linear-gradient(160deg, var(--c-brown-600), var(--c-brown-700));
+  color: var(--c-bg-50);
+}
+.page-hero .eyebrow {
+  color: var(--c-gold-300);
+}
+.page-hero h1 {
+  color: var(--c-bg-50);
+  margin: 18px 0 18px;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+}
+.page-hero .lede {
+  color: rgba(248, 243, 232, 0.85);
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+.post-card {
+  padding: clamp(24px, 4vw, 36px);
+  margin-bottom: 40px;
+}
+.post-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.post-moderation {
+  font-size: 0.78rem;
+}
+.post-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.post-card input,
+.post-card textarea {
+  background: var(--surface-raised);
+  border: 1px solid rgba(92, 64, 51, 0.25);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  width: 100%;
+}
+.post-card input:focus,
+.post-card textarea:focus {
+  outline: none;
+  border-color: var(--c-gold-500);
+  box-shadow: 0 0 0 3px rgba(196, 154, 69, 0.18);
+}
+.post-card textarea {
+  min-height: 120px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+.post-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.post-count {
+  font-size: 0.78rem;
+}
+
+.wall-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.filter-chip {
+  font-family: var(--font-cinzel);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--surface-raised);
+  border: 1px solid rgba(92, 64, 51, 0.2);
+  color: var(--c-brown-600);
+  font-weight: 600;
+  transition: all 0.25s var(--ease);
+}
+.filter-chip:hover {
+  border-color: var(--c-gold-500);
+  color: var(--c-gold-700);
+}
+.filter-chip.active {
+  background: var(--c-brown-600);
+  color: var(--c-bg-50);
+  border-color: var(--c-brown-600);
+}
+.wall-count {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px 24px;
+  padding: 12px 0;
+}
+.note {
+  padding: 26px 24px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+}
+.note:hover {
+  transform: rotate(0deg) translateY(-4px) !important;
+  box-shadow: var(--shadow-md);
+  z-index: 5;
+}
+.note.pinned {
+  background: var(--c-gold-100);
+  border-color: var(--c-gold-300);
+}
+.note-pin {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-family: var(--font-cinzel);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-gold-700);
+  font-weight: 700;
+}
+.note-tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  width: 70px;
+  height: 22px;
+  background: rgba(196, 154, 69, 0.32);
+  border-left: 1px dashed rgba(92, 64, 51, 0.18);
+  border-right: 1px dashed rgba(92, 64, 51, 0.18);
+  box-shadow: 0 1px 3px rgba(60, 40, 25, 0.18);
+}
+.note-body {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.5;
+  color: var(--c-ink);
+  margin-bottom: 18px;
+  flex: 1;
+}
+.note-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(92, 64, 51, 0.12);
+}
+.note-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--c-paper-300);
+}
+.note-author strong {
+  display: block;
+  font-family: var(--font-display);
+  color: var(--c-brown-700);
+  font-size: 0.95rem;
+}
+.note-loc {
+  font-size: 0.72rem;
+}
+.note-like {
+  margin-left: auto;
+  font-family: var(--font-cinzel);
+  font-size: 0.74rem;
+  color: var(--c-burgundy-600);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+.note-like:hover {
+  color: var(--c-gold-700);
+  transform: scale(1.1);
+}
+
+@media (max-width: 900px) {
+  .wall {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .wall {
+    grid-template-columns: 1fr;
+  }
+  .post-row {
+    grid-template-columns: 1fr;
+  }
+}

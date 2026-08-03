@@ -1,0 +1,94 @@
+<div class="adm-toolbar">
+  <div>
+    <div class="adm-section-title">Media Library</div>
+    <div class="adm-section-sub">Centralized management of all images, videos, and files across the platform.</div>
+  </div>
+  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="upload()">+ Upload File</button>
+</div>
+
+<div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: flex-start">
+  <!-- Folders sidebar -->
+  <div class="adm-card adm-card-pad">
+    <div class="adm-field-label" style="margin-bottom: 10px">Folders</div>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <button class="folder-btn" [class.active]="folder() === 'all'" (click)="folder.set('all')">
+        <span>🗂</span> All files <span class="adm-cell-user-sub" style="margin-left: auto">{{ items().length }}</span>
+      </button>
+      @for (f of folders; track f) {
+        <button class="folder-btn" [class.active]="folder() === f" (click)="folder.set(f)">
+          <span>📁</span> {{ f }} <span class="adm-cell-user-sub" style="margin-left: auto">{{ countFolder(f) }}</span>
+        </button>
+      }
+    </div>
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--ad-border)">
+      <div class="adm-field-label" style="margin-bottom: 8px">Storage</div>
+      <div class="adm-progress"><div class="adm-progress-bar" style="width: 48%"></div></div>
+      <div class="adm-cell-user-sub" style="margin-top: 6px">4.8 GB of 10 GB used</div>
+    </div>
+  </div>
+
+  <!-- Media grid -->
+  <div class="adm-card">
+    <div class="adm-card-pad" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid var(--ad-border)">
+      <div class="adm-search" style="flex: 1; width: auto; max-width: none">
+        <span class="adm-search-ico">⌕</span>
+        <input type="search" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Search media by name or tag…" />
+      </div>
+      <select class="adm-select" style="width: auto" [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
+        <option value="">All types</option>
+        <option value="image">Images</option>
+        <option value="video">Videos</option>
+      </select>
+    </div>
+    <div class="adm-card-pad">
+      @if (filtered().length === 0) {
+        <div class="adm-empty"><div class="adm-empty-ico">🗂</div><p>No files found.</p></div>
+      } @else {
+        <div class="adm-gallery-grid">
+          @for (m of filtered(); track m.id) {
+            <div class="adm-gallery-item" (click)="select(m)">
+              @if (m.type === 'video') {
+                <span class="adm-badge adm-badge-info" style="position: absolute; top: 8px; right: 8px; z-index: 2">▶</span>
+              }
+              <img [src]="m.url" [alt]="m.name" />
+              <div class="adm-gallery-item-overlay">
+                <span class="adm-badge adm-badge-muted" style="font-size: 0.62rem">{{ m.size }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+@if (selected(); as m) {
+  <div class="adm-modal-backdrop" (click)="selected.set(null)">
+    <div class="adm-modal" (click)="$event.stopPropagation()">
+      <div class="adm-modal-head">
+        <h3 class="adm-modal-title">{{ m.name }}</h3>
+        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selected.set(null)">✕</button>
+      </div>
+      <div class="adm-modal-body">
+        <img [src]="m.url" [alt]="m.name" style="width: 100%; border-radius: var(--ad-radius-sm); margin-bottom: 16px" />
+        <div class="adm-grid-2" style="gap: 12px">
+          <div><span class="adm-field-label">Type</span><div>{{ m.type }}</div></div>
+          <div><span class="adm-field-label">Size</span><div>{{ m.size }}</div></div>
+          <div><span class="adm-field-label">Folder</span><div>{{ m.folder }}</div></div>
+          <div><span class="adm-field-label">Uploaded</span><div>{{ m.date }}</div></div>
+        </div>
+        <div style="margin-top: 14px">
+          <span class="adm-field-label">Tags</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px">
+            @for (t of m.tags; track t) { <span class="adm-badge adm-badge-muted">{{ t }}</span> }
+          </div>
+        </div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-btn adm-btn-ghost" (click)="remove(m)">🗑 Delete</button>
+        <button class="adm-btn adm-btn-outline">Copy URL</button>
+        <button class="adm-btn adm-btn-primary">Insert into page</button>
+      </div>
+    </div>
+  </div>
+}

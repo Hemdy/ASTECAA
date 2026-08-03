@@ -1,0 +1,13 @@
+<svg class="adm-chart-line" viewBox="0 0 600 200" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="admLineFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="var(--ad-gold)" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="var(--ad-gold)" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+  <path [attr.d]="areaPath()" fill="url(#admLineFill)" />
+  <path [attr.d]="linePath()" fill="none" stroke="var(--ad-gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  @for (p of points(); track p.label) {
+    <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3" fill="var(--ad-gold)" />
+  }
+</svg>

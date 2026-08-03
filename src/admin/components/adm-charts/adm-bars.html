@@ -1,0 +1,12 @@
+<div class="adm-chart-bars">
+  @for (p of data; track p.label) {
+    <div class="adm-chart-bar-col">
+      <div
+        class="adm-chart-bar"
+        [style.height.%]="heights()[p.label]"
+        [title]="p.label + ': ' + p.value"
+      ></div>
+      <span class="adm-chart-bar-label">{{ p.label }}</span>
+    </div>
+  }
+</div>

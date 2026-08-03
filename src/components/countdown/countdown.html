@@ -1,0 +1,21 @@
+<div class="cd" [class.done]="done">
+  <div class="cd-unit">
+    <span class="cd-num">{{ pad(c.days) }}</span>
+    <span class="cd-lbl">Days</span>
+  </div>
+  <span class="cd-sep">:</span>
+  <div class="cd-unit">
+    <span class="cd-num">{{ pad(c.hours) }}</span>
+    <span class="cd-lbl">Hrs</span>
+  </div>
+  <span class="cd-sep">:</span>
+  <div class="cd-unit">
+    <span class="cd-num">{{ pad(c.minutes) }}</span>
+    <span class="cd-lbl">Min</span>
+  </div>
+  <span class="cd-sep">:</span>
+  <div class="cd-unit">
+    <span class="cd-num">{{ pad(c.seconds) }}</span>
+    <span class="cd-lbl">Sec</span>
+  </div>
+</div>

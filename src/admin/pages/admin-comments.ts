@@ -1,0 +1,163 @@
+import { Component, signal, computed, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AdmModal } from '../components/adm-modal';
+import { ADMIN_COMMENTS, AdminComment } from '../admin-data';
+import { ToastService } from '../../ui-state';
+
+@Component({
+  selector: 'app-admin-comments',
+  standalone: true,
+  imports: [FormsModule, AdmModal],
+  template: `
+    <div class="adm-toolbar">
+      <div>
+        <div class="adm-section-title">Comments & Engagement</div>
+        <div class="adm-section-sub">Moderate community messages, approve pending notes, and handle reported content.</div>
+      </div>
+    </div>
+
+    <!-- Status tabs -->
+    <div class="adm-tabs">
+      <button class="adm-tab" [class.active]="tab() === 'all'" (click)="tab.set('all')">All <span class="adm-badge adm-badge-muted" style="margin-left: 6px">{{ counts().all }}</span></button>
+      <button class="adm-tab" [class.active]="tab() === 'pending'" (click)="tab.set('pending')">Pending <span class="adm-badge adm-badge-warning" style="margin-left: 6px">{{ counts().pending }}</span></button>
+      <button class="adm-tab" [class.active]="tab() === 'approved'" (click)="tab.set('approved')">Approved <span class="adm-badge adm-badge-success" style="margin-left: 6px">{{ counts().approved }}</span></button>
+      <button class="adm-tab" [class.active]="tab() === 'reported'" (click)="tab.set('reported')">Reported <span class="adm-badge adm-badge-danger" style="margin-left: 6px">{{ counts().reported }}</span></button>
+      <button class="adm-tab" [class.active]="tab() === 'spam'" (click)="tab.set('spam')">Spam <span class="adm-badge adm-badge-muted" style="margin-left: 6px">{{ counts().spam }}</span></button>
+    </div>
+
+    <div class="adm-card adm-card-pad" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end">
+      <div class="adm-field" style="margin: 0; flex: 1; min-width: 200px">
+        <label class="adm-field-label">Search</label>
+        <input class="adm-input" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Search by author or content…" />
+      </div>
+      <div class="adm-field" style="margin: 0; min-width: 160px">
+        <label class="adm-field-label">Page</label>
+        <select class="adm-select" [ngModel]="pageFilter()" (ngModelChange)="pageFilter.set($event)">
+          <option value="">All pages</option>
+          @for (p of pages; track p) { <option [value]="p">{{ p }}</option> }
+        </select>
+      </div>
+    </div>
+
+    <!-- Comments list -->
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      @for (c of filtered(); track c.id) {
+        <div class="adm-card adm-card-pad" style="display: flex; gap: 16px; align-items: flex-start">          <img class="adm-avatar" [src]="c.avatar" [alt]="c.author" />
+          <div style="flex: 1; min-width: 0">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
+              <strong>{{ c.author }}</strong>
+              <span class="adm-cell-user-sub">on {{ c.page }}</span>
+              <span class="adm-badge" [class.adm-badge-success]="c.status === 'approved'" [class.adm-badge-warning]="c.status === 'pending'" [class.adm-badge-danger]="c.status === 'reported'" [class.adm-badge-muted]="c.status === 'spam'">{{ c.status }}</span>
+              @if (c.reports > 0) {
+                <span class="adm-badge adm-badge-danger">⚠ {{ c.reports }} reports</span>
+              }
+              <span style="margin-left: auto" class="adm-card-sub">{{ shortDate(c.date) }}</span>
+            </div>
+            <p style="color: var(--ad-text-soft); margin: 0 0 12px; line-height: 1.5; font-style: italic">"{{ c.message }}"</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap">
+              @if (c.status !== 'approved') {
+                <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="approve(c.id)">✓ Approve</button>
+              }
+              @if (c.status !== 'spam') {
+                <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="markSpam(c.id)">⊘ Spam</button>
+              }
+              <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="openReply(c)">↩ Reply</button>
+              <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="deleteComment(c.id)">🗑 Delete</button>
+              <span style="margin-left: auto; align-self: center" class="adm-card-sub">♥ {{ c.likes }}</span>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="adm-card adm-card-pad adm-empty">
+          <div class="adm-empty-ico">💬</div>
+          <p>No comments in this view.</p>
+        </div>
+      }
+    </div>
+
+    @if (replyTarget()) {
+      <app-adm-modal title="Reply to Comment" (close)="replyTarget.set(null)">
+        <div style="display: flex; gap: 12px; margin-bottom: 16px; padding: 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm)">
+          <img class="adm-avatar adm-avatar-sm" [src]="replyTarget()!.avatar" [alt]="replyTarget()!.author" />
+          <div>
+            <strong>{{ replyTarget()!.author }}</strong>
+            <p style="font-size: 0.85rem; color: var(--ad-text-soft); margin: 4px 0 0; font-style: italic">"{{ replyTarget()!.message }}"</p>
+          </div>
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label">Your reply</label>
+          <textarea class="adm-textarea" [(ngModel)]="replyText" placeholder="Write a reply as a moderator…"></textarea>
+        </div>
+        <div foot>
+          <button class="adm-btn adm-btn-outline" (click)="replyTarget.set(null)">Cancel</button>
+          <button class="adm-btn adm-btn-primary" (click)="sendReply()">Post reply</button>
+        </div>
+      </app-adm-modal>
+    }
+  `,
+})
+export class AdminComments {
+  private toast = inject(ToastService);
+  comments = signal<AdminComment[]>(ADMIN_COMMENTS);
+  tab = signal<'all' | 'pending' | 'approved' | 'reported' | 'spam'>('all');
+  query = signal('');
+  pageFilter = signal('');
+  replyTarget = signal<AdminComment | null>(null);
+  replyText = '';
+
+  pages = [...new Set(ADMIN_COMMENTS.map((c) => c.page))];
+
+  counts = computed(() => {
+    const all = this.comments();
+    return {
+      all: all.length,
+      pending: all.filter((c) => c.status === 'pending').length,
+      approved: all.filter((c) => c.status === 'approved').length,
+      reported: all.filter((c) => c.status === 'reported').length,
+      spam: all.filter((c) => c.status === 'spam').length,
+    };
+  });
+
+  filtered = computed(() => {
+    const t = this.tab();
+    const q = this.query().toLowerCase();
+    const p = this.pageFilter();
+    return this.comments().filter((c) => {
+      const mt = t === 'all' || c.status === t;
+      const mq = !q || c.author.toLowerCase().includes(q) || c.message.toLowerCase().includes(q);
+      const mp = !p || c.page === p;
+      return mt && mq && mp;
+    });
+  });
+
+  shortDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  approve(id: string) {
+    this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'approved' } : c)));
+    this.toast.show('Comment approved and published.');
+  }
+
+  markSpam(id: string) {
+    this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'spam' } : c)));
+    this.toast.show('Comment marked as spam.');
+  }
+
+  deleteComment(id: string) {
+    this.comments.update((list) => list.filter((c) => c.id !== id));
+    this.toast.show('Comment deleted.');
+  }
+
+  openReply(c: AdminComment) {
+    this.replyTarget.set(c);
+    this.replyText = '';
+  }
+
+  sendReply() {
+    if (!this.replyText.trim()) return;
+    this.toast.show('Reply posted.');
+    this.replyTarget.set(null);
+    this.replyText = '';
+  }
+}

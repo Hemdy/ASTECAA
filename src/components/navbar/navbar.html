@@ -1,0 +1,35 @@
+<header class="nav" [class.scrolled]="scrolled()" [class.open]="open()">
+  <div class="nav-bar container">
+    <a routerLink="/" class="brand" (click)="close()">
+      <span class="brand-mark">A</span>
+      <span class="brand-text">
+        <span class="brand-name">ASTECAA</span>
+        <span class="brand-sub">est. 1993</span>
+      </span>
+    </a>
+
+    <button
+      class="nav-toggle"
+      (click)="open.set(!open())"
+      [attr.aria-label]="open() ? 'Close menu' : 'Open menu'"
+      aria-controls="primary-nav"
+    >
+      <span [class.x]="open()"></span>
+      <span [class.x]="open()"></span>
+      <span [class.x]="open()"></span>
+    </button>
+
+    <nav class="nav-links" id="primary-nav" [class.show]="open()">
+      @for (item of items; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+          (click)="close()"
+          >{{ item.label }}</a
+        >
+      }
+      <a routerLink="/events" (click)="close()" class="btn btn-gold btn-sm nav-cta">Register</a>
+    </nav>
+  </div>
+</header>

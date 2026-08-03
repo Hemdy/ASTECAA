@@ -1,0 +1,353 @@
+import { Component, signal, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AdmBars, AdmDonut, AdmLine } from '../components/adm-charts';
+import { AdmModal } from '../components/adm-modal';
+import {
+  ADMIN_ACTIVITY,
+  ADMIN_COMMENTS,
+  ADMIN_EVENTS,
+  ADMIN_STORIES,
+  ADMIN_USERS,
+  GROWTH_DATA,
+  ENGAGEMENT_DATA,
+  TRAFFIC_DATA,
+} from '../admin-data';
+import { ToastService } from '../../ui-state';
+
+@Component({
+  selector: 'app-admin-dashboard',
+  standalone: true,
+  imports: [RouterLink, AdmBars, AdmDonut, AdmLine, AdmModal],
+  template: `
+    <div class="adm-section-title">Dashboard</div>
+    <div class="adm-section-sub">A real-time overview of the ASTECAA platform — welcome back, Marlene.</div>
+
+    <!-- Stat cards -->
+    <div class="adm-grid-stats">
+      <div class="adm-stat">
+        <div class="adm-stat-top">
+          <div>
+            <div class="adm-stat-label">Total Users</div>
+            <div class="adm-stat-value">2,380</div>
+          </div>
+          <div class="adm-stat-ico">👥</div>
+        </div>
+        <span class="adm-stat-delta up">↑ 12.4% this month</span>
+      </div>
+
+      <div class="adm-stat forest">
+        <div class="adm-stat-top">
+          <div>
+            <div class="adm-stat-label">Upcoming Events</div>
+            <div class="adm-stat-value">6</div>
+          </div>
+          <div class="adm-stat-ico">📅</div>
+        </div>
+        <span class="adm-stat-delta up">↑ 2 new this week</span>
+      </div>
+
+      <div class="adm-stat burgundy">
+        <div class="adm-stat-top">
+          <div>
+            <div class="adm-stat-label">Pending Approvals</div>
+            <div class="adm-stat-value">8</div>
+          </div>
+          <div class="adm-stat-ico">⏳</div>
+        </div>
+        <span class="adm-stat-delta down">3 comments, 2 users, 3 gallery</span>
+      </div>
+
+      <div class="adm-stat info">
+        <div class="adm-stat-top">
+          <div>
+            <div class="adm-stat-label">Newsletter Subscribers</div>
+            <div class="adm-stat-value">1,427</div>
+          </div>
+          <div class="adm-stat-ico">✉</div>
+        </div>
+        <span class="adm-stat-delta up">↑ 86 new this week</span>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="dash-grid" style="margin-top: 20px">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <div class="adm-card-title">Community Growth</div>
+            <div class="adm-card-sub">New registrations, last 7 months</div>
+          </div>
+          <select class="adm-select" style="width: auto">
+            <option>7 months</option>
+            <option>12 months</option>
+          </select>
+        </div>
+        <div class="adm-card-pad">
+          <app-adm-bars [data]="growthData" />
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <div class="adm-card-title">Engagement Rate</div>
+            <div class="adm-card-sub">Active members vs. total</div>
+          </div>
+        </div>
+        <div class="adm-card-pad" style="display: flex; flex-direction: column; align-items: center; gap: 16px">
+          <app-adm-donut [value]="68" label="engaged" />
+          <div style="display: flex; gap: 20px; font-size: 0.82rem">
+            <span><span class="adm-dot adm-dot-success"></span> Engaged: 1,618</span>
+            <span><span class="adm-dot adm-dot-muted"></span> Inactive: 762</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="adm-grid-2" style="margin-top: 20px">
+      <!-- Traffic line chart -->
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <div class="adm-card-title">Website Traffic</div>
+            <div class="adm-card-sub">Weekly visits, last 6 weeks</div>
+          </div>
+          <span class="adm-badge adm-badge-success">↑ 31%</span>
+        </div>
+        <div class="adm-card-pad">
+          <app-adm-line [data]="trafficData" />
+        </div>
+      </div>
+
+      <!-- Engagement bars -->
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div>
+            <div class="adm-card-title">Daily Engagement</div>
+            <div class="adm-card-sub">Comments, likes & shares this week</div>
+          </div>
+        </div>
+        <div class="adm-card-pad">
+          <app-adm-bars [data]="engagementData" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick actions -->
+    <div class="adm-card" style="margin-top: 20px">
+      <div class="adm-card-head">
+        <div class="adm-card-title">Quick Actions</div>
+      </div>
+      <div class="adm-card-pad">
+        <div class="adm-quick">
+          <button class="adm-quick-item" (click)="quickNew('event')">
+            <span class="adm-quick-ico">📅</span>
+            <span class="adm-quick-label">New Event</span>
+          </button>
+          <button class="adm-quick-item" (click)="quickNew('story')">
+            <span class="adm-quick-ico">✎</span>
+            <span class="adm-quick-label">Write Story</span>
+          </button>
+          <button class="adm-quick-item" (click)="quickNew('upload')">
+            <span class="adm-quick-ico">📤</span>
+            <span class="adm-quick-label">Upload Media</span>
+          </button>
+          <button class="adm-quick-item" (click)="quickNew('announce')">
+            <span class="adm-quick-ico">📢</span>
+            <span class="adm-quick-label">Announce</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row: activity + pending -->
+    <div class="dash-grid-2" style="margin-top: 20px">
+      <!-- Recent activity -->
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div class="adm-card-title">Recent Activity</div>
+          <a routerLink="/admin" class="adm-btn adm-btn-ghost adm-btn-sm">View all</a>
+        </div>
+        <div class="adm-card-pad">
+          <div class="adm-feed">
+            @for (a of activity; track a.id) {
+              <div class="adm-feed-item">
+                <div class="adm-feed-ico">{{ a.icon }}</div>
+                <div style="flex: 1">
+                  <div class="adm-feed-text">
+                    <strong>{{ a.user }}</strong> {{ a.action }}
+                    <strong>{{ a.target }}</strong>
+                  </div>
+                  <div class="adm-feed-time">{{ a.time }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Pending approvals -->
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div class="adm-card-title">Pending Approvals</div>
+          <span class="adm-badge adm-badge-warning">8 waiting</span>
+        </div>
+        <div class="adm-card-pad">
+          <div class="adm-feed">
+            @for (c of pendingComments; track c.id) {
+              <div class="adm-feed-item">
+                <img class="adm-avatar adm-avatar-sm" [src]="c.avatar" [alt]="c.author" />
+                <div style="flex: 1">
+                  <div class="adm-feed-text">
+                    <strong>{{ c.author }}</strong> on {{ c.page }}
+                  </div>
+                  <div class="adm-feed-time" style="font-style: italic">"{{ truncate(c.message) }}"</div>
+                </div>
+                <div style="display: flex; gap: 4px">
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(c.id)" title="Approve">✓</button>
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="reject(c.id)" title="Reject">✕</button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick glance tables -->
+    <div class="dash-grid-2" style="margin-top: 20px">
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div class="adm-card-title">Upcoming Events</div>
+          <a routerLink="/admin/events" class="adm-btn adm-btn-ghost adm-btn-sm">Manage</a>
+        </div>
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead>
+              <tr><th>Event</th><th>Date</th><th>Registered</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (e of upcomingEvents; track e.id) {
+                <tr>
+                  <td class="row-title">{{ e.title }}</td>
+                  <td>{{ shortDate(e.date) }}</td>
+                  <td>{{ e.registered }}/{{ e.capacity }}</td>
+                  <td><span class="adm-badge" [class.adm-badge-success]="e.status === 'published'" [class.adm-badge-warning]="e.status !== 'published'">{{ e.status }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="adm-card">
+        <div class="adm-card-head">
+          <div class="adm-card-title">New Users</div>
+          <a routerLink="/admin/users" class="adm-btn adm-btn-ghost adm-btn-sm">Manage</a>
+        </div>
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead>
+              <tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              @for (u of newUsers; track u.id) {
+                <tr>
+                  <td>
+                    <div class="adm-cell-user">
+                      <img class="adm-avatar adm-avatar-sm" [src]="u.avatar" [alt]="u.name" />
+                      <div>
+                        <div class="adm-cell-user-name">{{ u.name }}</div>
+                        <div class="adm-cell-user-sub">{{ u.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ u.role }}</td>
+                  <td>{{ shortDate(u.joined) }}</td>
+                  <td>
+                    <span class="adm-badge" [class.adm-badge-success]="u.status === 'active'" [class.adm-badge-warning]="u.status === 'pending'" [class.adm-badge-danger]="u.status === 'suspended'">{{ u.status }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    @if (quickModal()) {
+      <app-adm-modal [title]="quickModalTitle()" (close)="quickModal.set('')">
+        <p style="color: var(--ad-text-soft)">This opens the {{ quickModalTitle() }} editor. In the full build, the form fields for this action would appear here.</p>
+        <div foot>
+          <button class="adm-btn adm-btn-outline" (click)="quickModal.set('')">Cancel</button>
+          <button class="adm-btn adm-btn-primary" (click)="confirmQuick()">Continue</button>
+        </div>
+      </app-adm-modal>
+    }
+  `,
+  styles: [
+    `
+      .dash-grid {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        gap: 16px;
+      }
+      .dash-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 1100px) {
+        .dash-grid,
+        .dash-grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    `,
+  ],
+})
+export class AdminDashboard {
+  private toast = inject(ToastService);
+  growthData = GROWTH_DATA;
+  engagementData = ENGAGEMENT_DATA;
+  trafficData = TRAFFIC_DATA;
+  activity = ADMIN_ACTIVITY;
+  pendingComments = ADMIN_COMMENTS.filter((c) => c.status === 'pending').slice(0, 4);
+  upcomingEvents = ADMIN_EVENTS.filter((e) => e.status === 'published' || e.status === 'scheduled').slice(0, 4);
+  newUsers = ADMIN_USERS.slice(0, 4);
+
+  quickModal = signal('');
+  quickModalTitle = signal('');
+
+  shortDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  truncate(s: string): string {
+    return s.length > 60 ? s.slice(0, 60) + '…' : s;
+  }
+
+  quickNew(kind: string) {
+    const titles: Record<string, string> = {
+      event: 'Create New Event',
+      story: 'Write a New Story',
+      upload: 'Upload Media',
+      announce: 'Publish Announcement',
+    };
+    this.quickModal.set(kind);
+    this.quickModalTitle.set(titles[kind] ?? 'New');
+  }
+
+  confirmQuick() {
+    this.toast.show('Opening the editor for this action.');
+    this.quickModal.set('');
+  }
+
+  approve(id: string) {
+    this.toast.show('Comment approved and published to the wall.');
+  }
+
+  reject(id: string) {
+    this.toast.show('Comment rejected.');
+  }
+}

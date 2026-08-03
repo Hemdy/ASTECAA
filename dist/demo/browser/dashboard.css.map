@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;0106a416748e60c83d285233125c67d036a4171d57ede3ee69a7212822c08ed7;C:/My-projects/eze/project/src/admin/pages/dashboard.ts"],
+  "sourcesContent": ["\n      .dash-grid {\n        display: grid;\n        grid-template-columns: 1.5fr 1fr;\n        gap: 16px;\n      }\n      .dash-grid-2 {\n        display: grid;\n        grid-template-columns: 1fr 1fr;\n        gap: 16px;\n      }\n      @media (max-width: 1100px) {\n        .dash-grid,\n        .dash-grid-2 {\n          grid-template-columns: 1fr;\n        }\n      }\n    "],
+  "mappings": ";AACM,CAAC;AACC,WAAS;AACT,yBAAuB,MAAM;AAC7B,OAAK;AACP;AACA,CAAC;AACC,WAAS;AACT,yBAAuB,IAAI;AAC3B,OAAK;AACP;AACA,QAAO,WAAY;AACjB,GAXD;AAAA,EAYC,CAPD;AAQG,2BAAuB;AACzB;AACF;",
+  "names": []
+}

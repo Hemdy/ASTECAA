@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/admin/pages/admin-media/admin-media.css"],
+  "sourcesContent": [".folder-btn {\n  display: flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 10px;\n  border-radius: var(--ad-radius-sm);\n  color: var(--ad-text-soft);\n  font-size: 0.86rem;\n  text-align: left;\n  cursor: pointer;\n  transition: all var(--ad-transition);\n  width: 100%;\n}\n.folder-btn:hover {\n  background: var(--ad-surface-2);\n  color: var(--ad-text);\n}\n.folder-btn.active {\n  background: var(--ad-primary-soft);\n  color: var(--ad-primary);\n  font-weight: 600;\n}\n@media (max-width: 768px) {\n  :host > div[style*='grid-template-columns: 240px'] {\n    grid-template-columns: 1fr !important;\n  }\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,WAAS;AACT,eAAa;AACb,OAAK;AACL,WAAS,IAAI;AACb,iBAAe,IAAI;AACnB,SAAO,IAAI;AACX,aAAW;AACX,cAAY;AACZ,UAAQ;AACR,cAAY,IAAI,IAAI;AACpB,SAAO;AACT;AACA,CAbC,UAaU;AACT,cAAY,IAAI;AAChB,SAAO,IAAI;AACb;AACA,CAjBC,UAiBU,CAAC;AACV,cAAY,IAAI;AAChB,SAAO,IAAI;AACX,eAAa;AACf;AACA,QAAO,WAAY;AACjB,QAAM,EAAE,GAAG,CAAC;AACV,2BAAuB;AACzB;AACF;",
+  "names": []
+}

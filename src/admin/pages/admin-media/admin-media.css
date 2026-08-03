@@ -1,0 +1,27 @@
+.folder-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--ad-radius-sm);
+  color: var(--ad-text-soft);
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--ad-transition);
+  width: 100%;
+}
+.folder-btn:hover {
+  background: var(--ad-surface-2);
+  color: var(--ad-text);
+}
+.folder-btn.active {
+  background: var(--ad-primary-soft);
+  color: var(--ad-primary);
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  :host > div[style*='grid-template-columns: 240px'] {
+    grid-template-columns: 1fr !important;
+  }
+}

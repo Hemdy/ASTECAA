@@ -1,0 +1,72 @@
+<div class="adm-toolbar">
+  <div>
+    <div class="adm-section-title">Announcements & News</div>
+    <div class="adm-section-sub">Publish community updates, news, and scheduled notifications.</div>
+  </div>
+  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="openCreate()">+ New Announcement</button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+  @for (a of items(); track a.id) {
+    <div class="adm-card adm-card-pad">
+      <div style="display: flex; gap: 16px; align-items: flex-start">
+        <div style="flex: 1; min-width: 0">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
+            @if (a.pinned) { <span class="adm-badge adm-badge-gold">★ Pinned</span> }
+            <span class="adm-badge" [class.adm-badge-success]="a.status === 'published'" [class.adm-badge-info]="a.status === 'scheduled'" [class.adm-badge-warning]="a.status === 'draft'">{{ a.status }}</span>
+            <span class="adm-badge adm-badge-muted">{{ channelLabel(a.channel) }}</span>
+            <span style="margin-left: auto" class="adm-card-sub">{{ shortDate(a.date) }}</span>
+          </div>
+          <h3 style="font-family: var(--font-display); margin-bottom: 6px">{{ a.title }}</h3>
+          <p style="color: var(--ad-text-soft); margin: 0; line-height: 1.5">{{ a.body }}</p>
+        </div>
+        <div style="display: flex; gap: 4px">
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="togglePin(a)" title="Pin/unpin">{{ a.pinned ? '★' : '☆' }}</button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="edit(a)" title="Edit">✎</button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="remove(a)" title="Delete">🗑</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <app-adm-modal [title]="editing() ? 'Edit Announcement' : 'New Announcement'" size="lg" (close)="showModal.set(false)">
+    <div style="display: grid; gap: 16px">
+      <div class="adm-field">
+        <label class="adm-field-label">Title</label>
+        <input class="adm-input" [(ngModel)]="form.title" placeholder="An announcement title…" />
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div class="adm-field">
+          <label class="adm-field-label">Channel</label>
+          <select class="adm-select" [(ngModel)]="form.channel">
+            <option value="site">Website only</option>
+            <option value="email">Email newsletter</option>
+            <option value="push">Push notification</option>
+          </select>
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label">Schedule for</label>
+          <input class="adm-input" type="date" [(ngModel)]="form.date" />
+        </div>
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Message</label>
+        <textarea class="adm-textarea" [(ngModel)]="form.body" placeholder="Write the announcement…"></textarea>
+      </div>
+      <div class="adm-toggle-row" style="border: none; padding: 0">
+        <div class="adm-toggle-row-text">
+          <div class="adm-toggle-row-title">Pin to top</div>
+          <div class="adm-toggle-row-desc">Pinned announcements appear at the top of the community feed.</div>
+        </div>
+        <label class="adm-switch"><input type="checkbox" [(ngModel)]="form.pinned" /><span class="adm-switch-slider"></span></label>
+      </div>
+    </div>
+    <div foot>
+      <button class="adm-btn adm-btn-outline" (click)="showModal.set(false)">Cancel</button>
+      <button class="adm-btn adm-btn-outline" (click)="save(true)">Save draft</button>
+      <button class="adm-btn adm-btn-primary" (click)="save(false)">{{ form.date ? 'Schedule' : 'Publish now' }}</button>
+    </div>
+  </app-adm-modal>
+}

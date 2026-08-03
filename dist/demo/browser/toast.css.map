@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/components/toast/toast.css"],
+  "sourcesContent": [".toast {\n  position: fixed;\n  bottom: 28px;\n  left: 50%;\n  transform: translateX(-50%);\n  z-index: 200;\n  background: var(--c-brown-700);\n  color: var(--c-gold-100);\n  padding: 14px 24px;\n  border-radius: var(--r-pill);\n  box-shadow: var(--shadow-lg);\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  font-family: var(--font-serif);\n  font-size: 1.02rem;\n  max-width: 90vw;\n  animation: toastIn 0.4s var(--ease);\n}\n.toast-mark {\n  color: var(--c-gold-400);\n  font-size: 1.1rem;\n}\n@keyframes toastIn {\n  from {\n    opacity: 0;\n    transform: translate(-50%, 20px);\n  }\n  to {\n    opacity: 1;\n    transform: translate(-50%, 0);\n  }\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,YAAU;AACV,UAAQ;AACR,QAAM;AACN,aAAW,WAAW;AACtB,WAAS;AACT,cAAY,IAAI;AAChB,SAAO,IAAI;AACX,WAAS,KAAK;AACd,iBAAe,IAAI;AACnB,cAAY,IAAI;AAChB,WAAS;AACT,eAAa;AACb,OAAK;AACL,eAAa,IAAI;AACjB,aAAW;AACX,aAAW;AACX,aAAW,QAAQ,KAAK,IAAI;AAC9B;AACA,CAAC;AACC,SAAO,IAAI;AACX,aAAW;AACb;AACA,WANa;AAOX;AACE,aAAS;AACT,eAAW,UAAU,IAAI,EAAE;AAC7B;AACA;AACE,aAAS;AACT,eAAW,UAAU,IAAI,EAAE;AAC7B;AACF;",
+  "names": []
+}

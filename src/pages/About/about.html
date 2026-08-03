@@ -1,0 +1,159 @@
+<!-- Page hero -->
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow" appReveal>Our story</span>
+    <h1 appReveal delay="80">Generations of excellence</h1>
+    <p class="lede" appReveal delay="160">
+      ASTECAA began with a pioneer class in Owerrinta and a vision for the future. Today, it is a living archive of our shared legacy — and an open invitation to connect.
+    </p>
+  </div>
+
+</section>
+
+<!-- Origin story -->
+<section class="section">
+  <div class="container origin">
+    <div class="origin-media" appReveal>
+      <img [src]="heritagePhoto" alt="" class="photo-vintage" />
+      <div class="tape tape-tl"></div>
+      <div class="seal origin-seal">Since<br />1998</div>
+    </div>
+    <div class="origin-text" appReveal delay="120">
+      <span class="eyebrow">Our Legacy</span>
+      <h2>One vision, one campus, one shared journey.</h2>
+      <p>
+        In the classrooms of Owerrinta, our journey began with a shared commitment to academic excellence, 
+        integrity, and spiritual growth. What started as individual student paths quickly forged into 
+        lifelong bonds, built on the foundations of hard work, technical skill, and the unforgettable 
+        moments that defined our school days.
+      </p>
+      <p>
+        As we stepped past the school gates into the wider world, that original camaraderie evolved into a 
+        powerful global network. Today, the ASTEC Alumni Association spans generations of graduates who continue 
+        to support one another, mentor the next generation, and give back to our beloved alma mater through 
+        impactful development projects.
+      </p>
+      <p class="lede">
+        This portal is the home for all of it: the memories, the milestones, the reunions, and the 
+        collective future we are building together.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- Mission -->
+<section class="section section-paper">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">What we hold</span>
+      <h2>Our mission</h2>
+    </div>
+    <div class="mission-grid">
+      <article class="card mission-card" appReveal>
+        <div class="mission-ico">📜</div>
+        <h3>Preserve</h3>
+        <p>
+          We collect, digitise, and care for the photographs, recordings, and stories of our
+          community — over 4,000 items and growing.
+        </p>
+      </article>
+      <article class="card mission-card" appReveal delay="100">
+        <div class="mission-ico">🕯</div>
+        <h3>Gather</h3>
+        <p>
+          We organise the festivals, evenings, and reunions that give people a reason to come
+          together, and a reason to remember.
+        </p>
+      </article>
+      <article class="card mission-card" appReveal delay="200">
+        <div class="mission-ico">✦</div>
+        <h3>Invite</h3>
+        <p>
+          We open the archive to the world, and we open our gatherings to anyone who wants to
+          add their chapter to the story.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Historical milestones (horizontal) -->
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">Our Journey in Moments</span>
+      <h2>Historical Milestones</h2>
+      <p>The turning points that shaped our alma mater and the global alumni network.</p>
+    </div>
+
+    <div class="milestones" appReveal>
+      @for (m of milestones; track m.year; let last = $last) {
+        <div class="mile">
+          <div class="mile-year">{{ m.year }}</div>
+          <div class="mile-dot"></div>
+          <div class="mile-body">
+            <h4>{{ m.title }}</h4>
+            <p>{{ m.text }}</p>
+          </div>
+          @if (!last) {
+            <div class="mile-line"></div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</section>
+
+
+<!-- Quote / values -->
+<section class="section section-paper">
+  <div class="container narrow text-center">
+    <span class="rule" appReveal>
+      <span class="rule-mark">❦</span>
+    </span>
+    <blockquote class="big-quote" appReveal delay="80">
+      "We had nothing but what the land gave us, and that was enough."
+    </blockquote>
+    <p class="type quote-attrib" appReveal delay="140">— Eleanor Voss, recorded 1962</p>
+  </div>
+</section>
+
+<!-- Stewards -->
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">The hands behind it</span>
+      <h2>Stewards of the archive</h2>
+      <p>A small, devoted group keeps the gatherings and the memories alive.</p>
+    </div>
+    <div class="org-grid">
+      @for (o of organizers; track o.id) {
+        <article class="org-card" appReveal>
+          <div class="org-photo">
+            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" />
+          </div>
+          <h4>{{ o.name }}</h4>
+          <span class="tag tag-forest">{{ o.role }}</span>
+          <span class="type org-years">{{ o.years }}</span>
+          <p class="org-bio">{{ o.bio }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section section-paper">
+  <div class="container text-center cta" appReveal>
+    <h2>Add your chapter.</h2>
+    <p class="lede" style="max-width: 56ch; margin: 12px auto 28px">
+      Come to a gathering, browse the archive, or leave a message on the community wall. Every
+      voice is a line in the story.
+    </p>
+    <div class="flex gap-2" style="justify-content: center; flex-wrap: wrap">
+      <a routerLink="/events" class="btn btn-gold">See upcoming events</a>
+      <a routerLink="/gallery" class="btn btn-outline">Browse the archive</a>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,108 @@
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow" appReveal>Write to us</span>
+    <h1 appReveal delay="80">Get in touch</h1>
+    <p class="lede" appReveal delay="160">
+      A question, a memory to share, an offer to help — we read every letter that comes through.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container contact">
+    <!-- Form -->
+    <div class="contact-form-wrap paper" appReveal>
+      <h2>Send a letter</h2>
+      <p class="contact-sub type">We reply within a few days.</p>
+
+      <form (ngSubmit)="submit()">
+        <div class="field">
+          <label for="name">Your name</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            [(ngModel)]="form.name"
+            required
+            placeholder="e.g. Eleanor Voss"
+          />
+        </div>
+        <div class="field">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            [(ngModel)]="form.email"
+            required
+            placeholder="you@example.com"
+          />
+        </div>
+        <div class="field">
+          <label for="subject">Subject</label>
+          <select id="subject" name="subject" [(ngModel)]="form.subject" required>
+            <option value="" disabled>Choose a subject…</option>
+            <option value="general">A general question</option>
+            <option value="memory">I have a memory to share</option>
+            <option value="photo">I have photographs to donate</option>
+            <option value="event">A question about an event</option>
+            <option value="volunteer">I'd like to volunteer</option>
+            <option value="press">Press or media</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">Your message</label>
+          <textarea
+            id="message"
+            name="message"
+            [(ngModel)]="form.message"
+            required
+            placeholder="Write your letter here…"
+          ></textarea>
+        </div>
+
+        <!-- Fake CAPTCHA -->
+        <div class="captcha">
+          <label class="captcha-box">
+            <input type="checkbox" name="captcha" [(ngModel)]="form.captcha" />
+            <span>I'm not a robot</span>
+          </label>
+          <span class="type captcha-note">A simple check to keep the wall clean.</span>
+        </div>
+
+        <button type="submit" class="btn btn-gold contact-submit" [disabled]="!canSubmit()">
+          Send letter
+        </button>
+      </form>
+    </div>
+
+    <!-- Side info -->
+    <aside class="contact-side">
+      <div class="card contact-card" appReveal delay="80">
+        <span class="eyebrow">Visit the hall</span>
+        <h3>Community Hall</h3>
+        <address>
+          42 Elm Street<br />
+          Maple Hollow<br />
+          Open Wed–Sat, 10am – 4pm
+        </address>
+      </div>
+
+      <div class="card contact-card" appReveal delay="140">
+        <span class="eyebrow">Write directly</span>
+        <h3>By post or wire</h3>
+        <a href="mailto:hello@ASTECAA.example">hello@ASTECAA.example</a>
+        <a href="tel:+15555550123">+1 (555) 555-0123</a>
+      </div>
+
+      <div class="card contact-card" appReveal delay="200">
+        <span class="eyebrow">Stewards</span>
+        <h3>The hands behind it</h3>
+        <p class="contact-stewards">
+          A small volunteer group keeps the archive and the gatherings alive. New hands are
+          always welcome.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>

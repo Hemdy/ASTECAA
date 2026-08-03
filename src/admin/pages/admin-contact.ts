@@ -1,0 +1,157 @@
+import { Component, signal, computed, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { AdmModal } from '../components/adm-modal';
+import { ADMIN_CONTACT, AdminContactMsg } from '../admin-data';
+import { ToastService } from '../../ui-state';
+
+@Component({
+  selector: 'app-admin-contact',
+  standalone: true,
+  imports: [FormsModule],
+  template: `
+    <div class="adm-toolbar">
+      <div>
+        <div class="adm-section-title">Contact & Support</div>
+        <div class="adm-section-sub">Inquiries from the website contact form and support requests.</div>
+      </div>
+    </div>
+
+    <div class="adm-grid-3" style="margin-bottom: 20px">
+      <div class="adm-stat"><div class="adm-stat-top"><div><div class="adm-stat-label">New</div><div class="adm-stat-value">{{ countStatus('new') }}</div></div><div class="adm-stat-ico">✉</div></div></div>
+      <div class="adm-stat forest"><div class="adm-stat-top"><div><div class="adm-stat-label">Awaiting Reply</div><div class="adm-stat-value">{{ countStatus('read') }}</div></div><div class="adm-stat-ico">⏳</div></div></div>
+      <div class="adm-stat info"><div class="adm-stat-top"><div><div class="adm-stat-label">Replied</div><div class="adm-stat-value">{{ countStatus('replied') }}</div></div><div class="adm-stat-ico">↩</div></div></div>
+    </div>
+
+    <div class="adm-tabs">
+      <button class="adm-tab" [class.active]="tab() === 'all'" (click)="tab.set('all')">All</button>
+      <button class="adm-tab" [class.active]="tab() === 'new'" (click)="tab.set('new')">New</button>
+      <button class="adm-tab" [class.active]="tab() === 'read'" (click)="tab.set('read')">Awaiting Reply</button>
+      <button class="adm-tab" [class.active]="tab() === 'replied'" (click)="tab.set('replied')">Replied</button>
+      <button class="adm-tab" [class.active]="tab() === 'closed'" (click)="tab.set('closed')">Closed</button>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: flex-start">
+      <!-- List -->
+      <div class="adm-card" style="flex: 1; min-width: 0">
+        <div style="display: flex; flex-direction: column">
+          @for (m of filtered(); track m.id) {
+            <div
+              class="contact-row"
+              [class.active]="selected()?.id === m.id"
+              (click)="select(m)"
+            >
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px">
+                <strong>{{ m.name }}</strong>
+                <span class="adm-badge" [class.adm-badge-warning]="m.status === 'new'" [class.adm-badge-info]="m.status === 'read'" [class.adm-badge-success]="m.status === 'replied'" [class.adm-badge-muted]="m.status === 'closed'">{{ m.status }}</span>
+              </div>
+              <div style="font-size: 0.86rem; color: var(--ad-text)">{{ m.subject }}</div>
+              <div class="adm-cell-user-sub" style="margin-top: 2px">{{ shortDate(m.date) }} · {{ m.email }}</div>
+            </div>
+          } @empty {
+            <div class="adm-empty"><div class="adm-empty-ico">✉</div><p>No messages in this view.</p></div>
+          }
+        </div>
+      </div>
+
+      <!-- Detail -->
+      <div class="adm-card" style="flex: 1.4; min-width: 0">
+        @if (selected(); as m) {
+          <div class="adm-card-head">
+            <div>
+              <div class="adm-card-title">{{ m.subject }}</div>
+              <div class="adm-card-sub">From {{ m.name }} · {{ m.email }}</div>
+            </div>
+            <span class="adm-badge" [class.adm-badge-warning]="m.status === 'new'" [class.adm-badge-info]="m.status === 'read'" [class.adm-badge-success]="m.status === 'replied'" [class.adm-badge-muted]="m.status === 'closed'">{{ m.status }}</span>
+          </div>
+          <div class="adm-card-pad">
+            <p style="color: var(--ad-text-soft); line-height: 1.6; margin-bottom: 20px">{{ m.message }}</p>
+            <div class="adm-field">
+              <label class="adm-field-label">Reply</label>
+              <textarea class="adm-textarea" [(ngModel)]="replyText" placeholder="Write your reply…"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <button class="adm-btn adm-btn-primary" (click)="sendReply(m)">Send reply</button>
+              <button class="adm-btn adm-btn-outline" (click)="markClosed(m)">Close ticket</button>
+              <button class="adm-btn adm-btn-ghost" (click)="markRead(m)" [disabled]="m.status !== 'new'">Mark as read</button>
+            </div>
+          </div>
+        } @else {
+          <div class="adm-empty"><div class="adm-empty-ico">✉</div><p>Select a message to read and reply.</p></div>
+        }
+      </div>
+    </div>
+  `,
+  styles: [
+    `
+      .contact-row {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--ad-border);
+        cursor: pointer;
+        transition: background var(--ad-transition);
+      }
+      .contact-row:hover {
+        background: var(--ad-surface-2);
+      }
+      .contact-row.active {
+        background: var(--ad-primary-soft);
+        border-left: 3px solid var(--ad-primary);
+      }
+      @media (max-width: 900px) {
+        :host > div > div[style*='flex'] {
+          flex-direction: column !important;
+        }
+      }
+    `,
+  ],
+})
+export class AdminContact {
+  private toast = inject(ToastService);
+  messages = signal<AdminContactMsg[]>(ADMIN_CONTACT);
+  tab = signal<'all' | 'new' | 'read' | 'replied' | 'closed'>('all');
+  selected = signal<AdminContactMsg | null>(null);
+  replyText = '';
+
+  filtered = computed(() => {
+    const t = this.tab();
+    return t === 'all' ? this.messages() : this.messages().filter((m) => m.status === t);
+  });
+
+  countStatus(s: string): number {
+    return this.messages().filter((m) => m.status === s).length;
+  }
+
+  shortDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  select(m: AdminContactMsg) {
+    this.selected.set(m);
+    this.replyText = '';
+    if (m.status === 'new') {
+      this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'read' } : x)));
+      this.selected.set({ ...m, status: 'read' });
+    }
+  }
+
+  markRead(m: AdminContactMsg) {
+    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'read' } : x)));
+    this.selected.set({ ...m, status: 'read' });
+  }
+
+  sendReply(m: AdminContactMsg) {
+    if (!this.replyText.trim()) {
+      this.toast.show('Please write a reply first.');
+      return;
+    }
+    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'replied' } : x)));
+    this.selected.set({ ...m, status: 'replied' });
+    this.toast.show(`Reply sent to ${m.name}.`);
+    this.replyText = '';
+  }
+
+  markClosed(m: AdminContactMsg) {
+    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'closed' } : x)));
+    this.selected.set({ ...m, status: 'closed' });
+    this.toast.show('Ticket closed.');
+  }
+}

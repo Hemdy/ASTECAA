@@ -1,0 +1,105 @@
+<div class="adm-login-page">
+  <div class="adm-login-card">
+    <div class="adm-login-brand">
+      <span class="adm-brand-mark">A</span>
+      <div>
+        <div class="adm-login-name">ASTECAA</div>
+        <div class="adm-login-sub">Admin Console</div>
+      </div>
+    </div>
+
+    @if (mode() === 'login') {
+      <h1 class="adm-login-title">Welcome back</h1>
+      <p class="adm-login-desc">Sign in to manage the ASTECAA community platform.</p>
+
+      <form (ngSubmit)="submitLogin($event)">
+        <div class="adm-field">
+          <label class="adm-field-label">Email address</label>
+          <input
+            class="adm-input"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="admin@ASTECAA.example"
+            required
+            autocomplete="email"
+          />
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label">Password</label>
+          <div class="adm-pw-wrap">
+            <input
+              class="adm-input"
+              [type]="showPw() ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+            <button type="button" class="adm-pw-toggle" (click)="showPw.set(!showPw())">
+              {{ showPw() ? '🙈' : '👁' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="adm-login-row">
+          <label class="adm-remember">
+            <input type="checkbox" [(ngModel)]="remember" name="remember" />
+            <span>Remember me</span>
+          </label>
+          <button type="button" class="adm-forgot-link" (click)="mode.set('forgot')">Forgot password?</button>
+        </div>
+
+        @if (auth.authError()) {
+          <div class="adm-login-error">{{ auth.authError() }}</div>
+        }
+
+        <button class="adm-btn adm-btn-primary adm-login-submit" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <div class="adm-login-foot">
+        <a routerLink="/" class="adm-back-link">← Back to ASTECAA website</a>
+      </div>
+    }
+
+    @if (mode() === 'forgot') {
+      <h1 class="adm-login-title">Reset your password</h1>
+      <p class="adm-login-desc">Enter your email and we'll send you a secure link to reset your password.</p>
+
+      <form (ngSubmit)="submitReset($event)">
+        <div class="adm-field">
+          <label class="adm-field-label">Email address</label>
+          <input
+            class="adm-input"
+            type="email"
+            [(ngModel)]="resetEmail"
+            name="resetEmail"
+            placeholder="admin@ASTECAA.example"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        @if (resetSent()) {
+          <div class="adm-login-success">A reset link has been sent to {{ resetEmail }}.</div>
+        }
+        @if (auth.authError()) {
+          <div class="adm-login-error">{{ auth.authError() }}</div>
+        }
+
+        <button class="adm-btn adm-btn-primary adm-login-submit" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Sending…' : 'Send reset link' }}
+        </button>
+      </form>
+
+      <div class="adm-login-foot">
+        <button class="adm-back-link" (click)="backToLogin()">← Back to sign in</button>
+      </div>
+    }
+  </div>
+
+  <p class="adm-login-secure">🔒 Secured by Supabase Auth · Administrative access only</p>
+</div>

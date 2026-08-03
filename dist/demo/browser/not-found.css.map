@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/pages/not-found/not-found.css"],
+  "sourcesContent": [".nf {\n  padding: clamp(100px, 18vw, 180px) 0;\n}\n.nf-seal {\n  margin: 0 auto 28px;\n  font-size: 1rem;\n}\n.nf h1 {\n  margin-bottom: 8px;\n}\n"],
+  "mappings": ";AAAA,CAAC;AACC,WAAS,MAAM,KAAK,EAAE,IAAI,EAAE,OAAO;AACrC;AACA,CAAC;AACC,UAAQ,EAAE,KAAK;AACf,aAAW;AACb;AACA,CAPC,GAOG;AACF,iBAAe;AACjB;",
+  "names": []
+}

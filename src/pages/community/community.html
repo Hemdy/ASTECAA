@@ -1,0 +1,93 @@
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow" appReveal>Voices from the wall</span>
+    <h1 appReveal delay="80">The community wall</h1>
+    <p class="lede" appReveal delay="160">
+      A place to leave a memory, a note of thanks, or a word for the next visitor. Every message
+      is read, and the kindest ones are pinned.
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <!-- Leave a message -->
+    <div class="post-card paper" appReveal>
+      <div class="post-head">
+        <span class="eyebrow">Pin a note</span>
+        <span class="type post-moderation">Messages are reviewed before they appear</span>
+      </div>
+      <form (ngSubmit)="submit()">
+        <div class="post-row">
+          <input
+            type="text"
+            name="author"
+            placeholder="Your name"
+            [(ngModel)]="form.author"
+            required
+            aria-label="Your name"
+          />
+          <input
+            type="text"
+            name="location"
+            placeholder="Where you're writing from"
+            [(ngModel)]="form.location"
+            aria-label="Your location"
+          />
+        </div>
+        <textarea
+          name="message"
+          placeholder="Leave a memory, a note, or a word for the community…"
+          [(ngModel)]="form.message"
+          required
+          aria-label="Your message"
+        ></textarea>
+        <div class="post-foot">
+          <span class="type post-count">{{ form.message.length }} / 400 characters</span>
+          <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit()">
+            Post to the wall
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filter -->
+    <div class="wall-controls" appReveal>
+      <button class="filter-chip" [class.active]="filter() === 'all'" (click)="filter.set('all')">
+        All messages
+      </button>
+      <button class="filter-chip" [class.active]="filter() === 'pinned'" (click)="filter.set('pinned')">
+        ★ Pinned
+      </button>
+      <span class="type wall-count">{{ visible().length }} notes on the wall</span>
+    </div>
+
+    <!-- Wall -->
+    <div class="wall">
+      @for (msg of visible(); track msg.id; let i = $index) {
+        <article
+          class="card note"
+          [class.pinned]="msg.pinned"
+          appReveal
+          [style.transform]="'rotate(' + rot(i) + 'deg)'"
+        >
+          @if (msg.pinned) {
+            <span class="note-pin">★ Featured</span>
+          }
+          <p class="note-body">"{{ msg.message }}"</p>
+          <div class="note-foot">
+            <img [src]="msg.avatar" [alt]="msg.author" class="note-avatar" />
+            <div class="note-author">
+              <strong>{{ msg.author }}</strong>
+              <span class="type note-loc">{{ msg.location }}</span>
+            </div>
+            <button class="note-like" (click)="like(msg.id)">
+              ♥ <span>{{ msg.likes }}</span>
+            </button>
+          </div>
+          <div class="note-tape"></div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
