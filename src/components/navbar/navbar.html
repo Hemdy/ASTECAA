@@ -4,7 +4,7 @@
       <span class="brand-mark">A</span>
       <span class="brand-text">
         <span class="brand-name">ASTECAA</span>
-        <span class="brand-sub">est. 1993</span>
+        <span class="brand-sub">est. 1998</span>
       </span>
     </a>
 
@@ -19,6 +19,7 @@
       <span [class.x]="open()"></span>
     </button>
 
+
     <nav class="nav-links" id="primary-nav" [class.show]="open()">
       @for (item of items; track item.path) {
         <a
@@ -29,7 +30,16 @@
           >{{ item.label }}</a
         >
       }
-      <a routerLink="/events" (click)="close()" class="btn btn-gold btn-sm nav-cta">Register</a>
+      @if (auth.loading()) {
+        <span class="nav-auth-placeholder"></span>
+      } @else if (auth.isAuthenticated()) {
+        <span class="nav-greeting">Hi, {{ auth.displayName().split(' ')[0] }}</span>
+        <button class="btn btn-outline btn-sm nav-signout" (click)="signOut()">Sign out</button>
+      } @else {
+        <a routerLink="/login" (click)="close()" class="nav-signin">Sign in</a>
+        <a routerLink="/register" (click)="close()" class="btn btn-gold btn-sm nav-cta">Register</a>
+      }
     </nav>
+  
   </div>
 </header>

@@ -1,38 +1,112 @@
 <div class="adm-toolbar">
   <div>
-    <div class="adm-section-title">Settings</div>
-    <div class="adm-section-sub">Configure the website, branding, SEO, and platform-wide options.</div>
+    <div class="adm-section-title">ASTECAA Settings</div>
+    <div class="adm-section-sub">
+      Manage ASTECAA website settings, alumni branding, search visibility, navigation,
+      communications, and association-wide preferences.
+    </div>
   </div>
 </div>
 
 <div class="adm-tabs">
-  <button class="adm-tab" [class.active]="tab() === 'general'" (click)="tab.set('general')">General</button>
-  <button class="adm-tab" [class.active]="tab() === 'branding'" (click)="tab.set('branding')">Branding</button>
-  <button class="adm-tab" [class.active]="tab() === 'seo'" (click)="tab.set('seo')">SEO</button>
-  <button class="adm-tab" [class.active]="tab() === 'nav'" (click)="tab.set('nav')">Navigation</button>
-  <button class="adm-tab" [class.active]="tab() === 'legal'" (click)="tab.set('legal')">Legal</button>
-  <button class="adm-tab" [class.active]="tab() === 'email'" (click)="tab.set('email')">Email Templates</button>
+  <button class="adm-tab" [class.active]="tab() === 'general'" (click)="tab.set('general')">
+    General
+  </button>
+  <button class="adm-tab" [class.active]="tab() === 'branding'" (click)="tab.set('branding')">
+    Branding
+  </button>
+  <button class="adm-tab" [class.active]="tab() === 'seo'" (click)="tab.set('seo')">
+    SEO
+  </button>
+  <button class="adm-tab" [class.active]="tab() === 'nav'" (click)="tab.set('nav')">
+    Navigation
+  </button>
+  <button class="adm-tab" [class.active]="tab() === 'legal'" (click)="tab.set('legal')">
+    Legal & Policies
+  </button>
+  <button class="adm-tab" [class.active]="tab() === 'email'" (click)="tab.set('email')">
+    Email Templates
+  </button>
 </div>
 
 @if (tab() === 'general') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
     <div style="display: grid; gap: 16px">
-      <div class="adm-field"><label class="adm-field-label">Site Name</label><input class="adm-input" [(ngModel)]="general.siteName" /></div>
-      <div class="adm-field"><label class="adm-field-label">Tagline</label><input class="adm-input" [(ngModel)]="general.tagline" /></div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
-        <div class="adm-field"><label class="adm-field-label">Contact Email</label><input class="adm-input" [(ngModel)]="general.contactEmail" /></div>
-        <div class="adm-field"><label class="adm-field-label">Contact Phone</label><input class="adm-input" [(ngModel)]="general.contactPhone" /></div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Association Name</label>
+        <input
+          class="adm-input"
+          [(ngModel)]="general.siteName"
+          placeholder="ASTECAA"
+        />
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
-        <div class="adm-field"><label class="adm-field-label">Timezone</label><select class="adm-select"><option>America/New_York</option><option>Europe/London</option></select></div>
-        <div class="adm-field"><label class="adm-field-label">Language</label><select class="adm-select"><option>English (US)</option></select></div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Tagline</label>
+        <input
+          class="adm-input"
+          [(ngModel)]="general.tagline"
+          placeholder="Reconnect. Celebrate. Give back."
+        />
       </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div class="adm-field">
+          <label class="adm-field-label">Association Email</label>
+          <input
+            class="adm-input"
+            [(ngModel)]="general.contactEmail"
+            placeholder="info@astecaa.org"
+          />
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field-label">Association Phone</label>
+          <input
+            class="adm-input"
+            [(ngModel)]="general.contactPhone"
+            placeholder="+234..."
+          />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+        <div class="adm-field">
+          <label class="adm-field-label">Timezone</label>
+          <select class="adm-select">
+            <option>Africa/Lagos</option>
+            <option>Europe/London</option>
+            <option>America/New_York</option>
+          </select>
+        </div>
+
+        <div class="adm-field">
+          <label class="adm-field-label">Language</label>
+          <select class="adm-select">
+            <option>English</option>
+          </select>
+        </div>
+      </div>
+
       @for (opt of generalToggles; track opt.key) {
         <div class="adm-toggle-row">
-          <div class="adm-toggle-row-text"><div class="adm-toggle-row-title">{{ opt.title }}</div><div class="adm-toggle-row-desc">{{ opt.desc }}</div></div>
-          <label class="adm-switch"><input type="checkbox" [checked]="general[opt.key]" (change)="toggleGeneral(opt.key)" /><span class="adm-switch-slider"></span></label>
+          <div class="adm-toggle-row-text">
+            <div class="adm-toggle-row-title">{{ opt.title }}</div>
+            <div class="adm-toggle-row-desc">{{ opt.desc }}</div>
+          </div>
+
+          <label class="adm-switch">
+            <input
+              type="checkbox"
+              [checked]="general[opt.key]"
+              (change)="toggleGeneral(opt.key)"
+            />
+            <span class="adm-switch-slider"></span>
+          </label>
         </div>
       }
+
     </div>
   </div>
 }
@@ -40,32 +114,80 @@
 @if (tab() === 'branding') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
     <div style="display: grid; gap: 16px">
+
       <div class="adm-field">
-        <label class="adm-field-label">Logo</label>
+        <label class="adm-field-label">ASTECAA Logo</label>
+
         <div style="display: flex; gap: 16px; align-items: center">
-          <div style="width: 60px; height: 60px; display: grid; place-items: center; font-family: var(--font-cinzel); font-weight: 800; font-size: 1.6rem; color: var(--ad-gold); background: radial-gradient(circle at 35% 30%, var(--ad-burgundy), #5a2a2a); border-radius: 50%">E</div>
-          <button class="adm-btn adm-btn-outline">Replace logo</button>
+          <div
+            style="
+              width: 60px;
+              height: 60px;
+              display: grid;
+              place-items: center;
+              font-family: var(--font-cinzel);
+              font-weight: 800;
+              font-size: 1.2rem;
+              color: var(--ad-gold);
+              background: radial-gradient(
+                circle at 35% 30%,
+                var(--ad-burgundy),
+                #5a2a2a
+              );
+              border-radius: 50%;
+            "
+          >
+            ASTECAA
+          </div>
+
+          <button class="adm-btn adm-btn-outline">
+            Replace logo
+          </button>
         </div>
       </div>
+
       <div class="adm-field">
         <label class="adm-field-label">Brand Colors</label>
+
         <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px">
           @for (c of colors; track c.name) {
             <div style="text-align: center">
-              <div style="width: 100%; aspect-ratio: 1; border-radius: var(--ad-radius-sm); border: 1px solid var(--ad-border); margin-bottom: 6px" [style.background]="c.value"></div>
-              <div class="adm-cell-user-sub" style="font-size: 0.7rem">{{ c.name }}</div>
+              <div
+                style="
+                  width: 100%;
+                  aspect-ratio: 1;
+                  border-radius: var(--ad-radius-sm);
+                  border: 1px solid var(--ad-border);
+                  margin-bottom: 6px;
+                "
+                [style.background]="c.value"
+              ></div>
+
+              <div class="adm-cell-user-sub" style="font-size: 0.7rem">
+                {{ c.name }}
+              </div>
             </div>
           }
         </div>
       </div>
+
       <div class="adm-field">
         <label class="adm-field-label">Heading Font</label>
-        <select class="adm-select"><option>Playfair Display</option><option>Cormorant Garamond</option><option>Cinzel</option></select>
+        <select class="adm-select">
+          <option>Playfair Display</option>
+          <option>Cormorant Garamond</option>
+          <option>Cinzel</option>
+        </select>
       </div>
+
       <div class="adm-field">
         <label class="adm-field-label">Body Font</label>
-        <select class="adm-select"><option>Lora</option><option>Libre Baskerville</option></select>
+        <select class="adm-select">
+          <option>Lora</option>
+          <option>Libre Baskerville</option>
+        </select>
       </div>
+
     </div>
   </div>
 }
@@ -73,63 +195,279 @@
 @if (tab() === 'seo') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
     <div style="display: grid; gap: 16px">
-      <div class="adm-field"><label class="adm-field-label">Meta Title</label><input class="adm-input" [(ngModel)]="seo.title" /><span class="adm-field-hint">{{ seo.title.length }}/60 characters</span></div>
-      <div class="adm-field"><label class="adm-field-label">Meta Description</label><textarea class="adm-textarea" [(ngModel)]="seo.description" style="min-height: 80px"></textarea><span class="adm-field-hint">{{ seo.description.length }}/160 characters</span></div>
-      <div class="adm-field"><label class="adm-field-label">OG Image</label><div class="adm-dropzone" style="padding: 20px">🖼 Click to upload social share image (1200×630)</div></div>
-      <div class="adm-field"><label class="adm-field-label">Keywords</label><input class="adm-input" value="community, archive, heritage, events, maple hollow" /></div>
-      <div class="adm-toggle-row"><div class="adm-toggle-row-text"><div class="adm-toggle-row-title">Generate sitemap automatically</div></div><label class="adm-switch"><input type="checkbox" checked /><span class="adm-switch-slider"></span></label></div>
-      <div class="adm-toggle-row"><div class="adm-toggle-row-text"><div class="adm-toggle-row-title">Structured data (schema.org)</div></div><label class="adm-switch"><input type="checkbox" checked /><span class="adm-switch-slider"></span></label></div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Meta Title</label>
+        <input
+          class="adm-input"
+          [(ngModel)]="seo.title"
+          placeholder="ASTECAA | Alumni Association"
+        />
+        <span class="adm-field-hint">
+          {{ seo.title.length }}/60 characters
+        </span>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Meta Description</label>
+        <textarea
+          class="adm-textarea"
+          [(ngModel)]="seo.description"
+          style="min-height: 80px"
+          placeholder="Connect with ASTECAA alumni, discover upcoming events, preserve school memories, support alumni initiatives, and stay connected with the ASTEC community."
+        ></textarea>
+
+        <span class="adm-field-hint">
+          {{ seo.description.length }}/160 characters
+        </span>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Social Share Image</label>
+
+        <div class="adm-dropzone" style="padding: 20px">
+          🖼 Click to upload ASTECAA social share image (1200×630)
+        </div>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">Keywords</label>
+
+        <input
+          class="adm-input"
+          value="ASTECAA, ASTEC alumni, alumni association, ASTEC, alumni reunion, alumni networking, ASTECAA events, mentorship, scholarship"
+        />
+      </div>
+
+      <div class="adm-toggle-row">
+        <div class="adm-toggle-row-text">
+          <div class="adm-toggle-row-title">
+            Generate sitemap automatically
+          </div>
+          <div class="adm-toggle-row-desc">
+            Keep event, story, gallery, and alumni pages discoverable by search engines.
+          </div>
+        </div>
+
+        <label class="adm-switch">
+          <input type="checkbox" checked />
+          <span class="adm-switch-slider"></span>
+        </label>
+      </div>
+
+      <div class="adm-toggle-row">
+        <div class="adm-toggle-row-text">
+          <div class="adm-toggle-row-title">
+            Structured data (schema.org)
+          </div>
+          <div class="adm-toggle-row-desc">
+            Help search engines understand ASTECAA events, organisation information,
+            and public pages.
+          </div>
+        </div>
+
+        <label class="adm-switch">
+          <input type="checkbox" checked />
+          <span class="adm-switch-slider"></span>
+        </label>
+      </div>
+
     </div>
   </div>
 }
 
 @if (tab() === 'nav') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
-    <div class="adm-field-label" style="margin-bottom: 12px">Menu Items (drag to reorder)</div>
+
+    <div class="adm-field-label" style="margin-bottom: 12px">
+      Main Navigation
+    </div>
+
     <div style="display: flex; flex-direction: column; gap: 8px">
+
       @for (item of nav; track item.label; let i = $index) {
-        <div style="display: flex; gap: 10px; align-items: center; padding: 10px 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm); cursor: grab">
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--ad-surface-2);
+            border-radius: var(--ad-radius-sm);
+            cursor: grab;
+          "
+        >
           <span style="color: var(--ad-text-muted)">⋮⋮</span>
-          <span style="flex: 1">{{ item.label }}</span>
-          <span class="adm-cell-user-sub">{{ item.path }}</span>
-          <button class="adm-btn adm-btn-ghost adm-btn-icon">✎</button>
-          <button class="adm-btn adm-btn-ghost adm-btn-icon">🗑</button>
+
+          <span style="flex: 1">
+            {{ item.label }}
+          </span>
+
+          <span class="adm-cell-user-sub">
+            {{ item.path }}
+          </span>
+
+          <button class="adm-btn adm-btn-ghost adm-btn-icon">
+            ✎
+          </button>
+
+          <button class="adm-btn adm-btn-ghost adm-btn-icon">
+            🗑
+          </button>
         </div>
       }
+
     </div>
-    <button class="adm-btn adm-btn-outline adm-btn-sm" style="margin-top: 12px">+ Add menu item</button>
+
+    <button
+      class="adm-btn adm-btn-outline adm-btn-sm"
+      style="margin-top: 12px"
+    >
+      + Add navigation item
+    </button>
+
   </div>
 }
 
 @if (tab() === 'legal') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
     <div style="display: grid; gap: 16px">
-      <div class="adm-field"><label class="adm-field-label">Privacy Policy</label><textarea class="adm-textarea" style="min-height: 140px" placeholder="Paste your privacy policy…"></textarea></div>
-      <div class="adm-field"><label class="adm-field-label">Terms & Conditions</label><textarea class="adm-textarea" style="min-height: 140px" placeholder="Paste your terms…"></textarea></div>
-      <div class="adm-field"><label class="adm-field-label">Cookie Notice</label><textarea class="adm-textarea" style="min-height: 80px" placeholder="Cookie usage text…"></textarea></div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">
+          Privacy Policy
+        </label>
+
+        <textarea
+          class="adm-textarea"
+          style="min-height: 140px"
+          placeholder="Enter ASTECAA's privacy policy, including how member information, contact details, event registrations, and submitted content are handled…"
+        ></textarea>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">
+          Terms & Conditions
+        </label>
+
+        <textarea
+          class="adm-textarea"
+          style="min-height: 140px"
+          placeholder="Enter the terms governing use of the ASTECAA website, alumni accounts, event registration, community contributions, and other services…"
+        ></textarea>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">
+          Community Guidelines
+        </label>
+
+        <textarea
+          class="adm-textarea"
+          style="min-height: 100px"
+          placeholder="Set guidelines for respectful alumni discussions, memories, comments, photographs, and other community contributions…"
+        ></textarea>
+      </div>
+
+      <div class="adm-field">
+        <label class="adm-field-label">
+          Cookie Notice
+        </label>
+
+        <textarea
+          class="adm-textarea"
+          style="min-height: 80px"
+          placeholder="Explain how ASTECAA uses cookies and similar technologies on the website…"
+        ></textarea>
+      </div>
+
     </div>
   </div>
 }
 
 @if (tab() === 'email') {
   <div class="adm-card adm-card-pad" style="max-width: 680px">
+
     <div class="adm-field">
-      <label class="adm-field-label">Template</label>
+      <label class="adm-field-label">Email Template</label>
+
       <select class="adm-select" [(ngModel)]="emailTemplate">
-        <option value="welcome">Welcome email</option>
-        <option value="newsletter">Newsletter dispatch</option>
-        <option value="event">Event reminder</option>
-        <option value="registration">Registration confirmation</option>
-        <option value="comment">Comment approved</option>
+        <option value="welcome">
+          Welcome to ASTECAA
+        </option>
+
+        <option value="newsletter">
+          Alumni Newsletter
+        </option>
+
+        <option value="event">
+          Event Reminder
+        </option>
+
+        <option value="registration">
+          Event Registration Confirmation
+        </option>
+
+        <option value="reunion">
+          Alumni Reunion Update
+        </option>
+
+        <option value="mentorship">
+          Mentorship Programme
+        </option>
+
+        <option value="comment">
+          Community Message Approved
+        </option>
       </select>
     </div>
-    <div class="adm-field"><label class="adm-field-label">Subject Line</label><input class="adm-input" [(ngModel)]="emailSubject" /></div>
-    <div class="adm-field"><label class="adm-field-label">Body</label><textarea class="adm-textarea" style="min-height: 180px" [(ngModel)]="emailBody"></textarea></div>
-    <span class="adm-field-hint">Use {{ '{name}' }}, {{ '{event}' }}, {{ '{date}' }} as placeholders.</span>
+
+    <div class="adm-field">
+      <label class="adm-field-label">
+        Subject Line
+      </label>
+
+      <input
+        class="adm-input"
+        [(ngModel)]="emailSubject"
+        placeholder="Welcome to ASTECAA"
+      />
+    </div>
+
+    <div class="adm-field">
+      <label class="adm-field-label">
+        Email Body
+      </label>
+
+      <textarea
+        class="adm-textarea"
+        style="min-height: 180px"
+        [(ngModel)]="emailBody"
+        placeholder="Write the email content here..."
+      ></textarea>
+    </div>
+
+    <span class="adm-field-hint">
+      Available placeholders:
+      {{ '{name}' }},
+      {{ '{event}' }},
+      {{ '{date}' }},
+      {{ '{venue}' }},
+      {{ '{set}' }}
+    </span>
+
   </div>
 }
 
 <div style="margin-top: 20px; display: flex; gap: 10px; max-width: 680px">
-  <button class="adm-btn adm-btn-primary" (click)="save()">Save changes</button>
-  <button class="adm-btn adm-btn-outline">Discard</button>
+  <button
+    class="adm-btn adm-btn-primary"
+    (click)="save()"
+  >
+    Save changes
+  </button>
+
+  <button class="adm-btn adm-btn-outline">
+    Discard
+  </button>
 </div>

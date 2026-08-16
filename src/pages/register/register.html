@@ -1,0 +1,105 @@
+<section class="auth-page">
+  <div class="auth-card paper">
+      <a routerLink="/" class="auth-back">← Back to Home</a>
+    <div class="auth-header">
+      <span class="eyebrow">Join the ASTECAA Community</span>
+      <h1>Create Your Alumni Account</h1>
+      <p class="lede">
+        Register to connect with fellow alumni, participate in elections,
+        share photos, post comments, and stay informed about ASTECAA events
+        and activities.
+      </p>
+    </div>
+
+    <form (ngSubmit)="submit($event)" class="auth-form">
+      <div class="field">
+        <label>Full Name</label>
+        <input
+          type="text"
+          name="fullName"
+          [(ngModel)]="fullName"
+          placeholder="Enter your full name"
+          required
+          autocomplete="name"
+        />
+      </div>
+
+      <div class="field">
+        <label>Graduation Set</label>
+        <input
+          type="text"
+          name="graduationSet"
+          [(ngModel)]="graduationSet"
+          placeholder="e.g. Class of 2005"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email address"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="field">
+        <label>
+          Phone Number
+          <span class="auth-optional">(Optional)</span>
+        </label>
+        <input
+          type="tel"
+          name="phone"
+          [(ngModel)]="phone"
+          placeholder="Enter your phone number"
+          autocomplete="tel"
+        />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="auth-pw-wrap">
+          <input
+            [type]="showPw() ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Create a secure password"
+            required
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="auth-pw-toggle"
+            (click)="showPw.set(!showPw())"
+          >
+            {{ showPw() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      @if (auth.authError()) {
+        <div class="auth-error">{{ auth.authError() }}</div>
+      }
+
+      <button
+        type="submit"
+        class="btn btn-gold auth-submit"
+        [disabled]="submitting() || !canSubmit()"
+      >
+        {{ submitting() ? 'Creating Account...' : 'Create Account' }}
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      <p>
+        Already have an alumni account?
+        <a routerLink="/login">Sign In</a>
+      </p>
+    </div>
+  </div>
+</section>

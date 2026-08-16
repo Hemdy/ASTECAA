@@ -70,8 +70,22 @@
               </div>
             </td>
             <td>
-              <span class="adm-badge" [class.adm-badge-burgundy]="u.role === 'Super Administrator'" [class.adm-badge-gold]="u.role === 'Content Manager'" [class.adm-badge-success]="u.role === 'Event Manager'" [class.adm-badge-info]="u.role === 'Community Moderator' || u.role === 'Gallery Manager' || u.role === 'Editor'">{{ u.role }}</span>
-            </td>
+              <span
+  class="adm-badge"
+  [class.adm-badge-burgundy]="u.role === 'Super Administrator'"
+  [class.adm-badge-gold]="u.role === 'Content Manager'"
+  [class.adm-badge-success]="
+    u.role === 'Event Manager' ||
+    u.role === 'Membership Manager'
+  "
+  [class.adm-badge-info]="
+    u.role === 'Community Moderator' ||
+    u.role === 'Gallery Manager' ||
+    u.role === 'Editor'
+  "
+>
+  {{ u.role }}
+</span>           </td>
             <td>
               <span class="adm-badge" [class.adm-badge-success]="u.status === 'active'" [class.adm-badge-warning]="u.status === 'pending'" [class.adm-badge-danger]="u.status === 'suspended'">
                 <span class="adm-dot" [class.adm-dot-success]="u.status === 'active'" [class.adm-dot-warning]="u.status === 'pending'" [class.adm-dot-danger]="u.status === 'suspended'"></span>

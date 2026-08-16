@@ -1,18 +1,21 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../reveal.directive';
 import { MESSAGES, CommunityMessage } from '../../data';
 import { ToastService } from '../../ui-state';
+import { MemberAuthService } from '../../services/member-auth';
 
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [FormsModule, RevealDirective],
+  imports: [FormsModule, RevealDirective, RouterLink],
   templateUrl: './community.html',
   styleUrl: './community.css',
 })
 export class Community {
   private toast = inject(ToastService);
+  auth = inject(MemberAuthService);
   filter = signal<'all' | 'pinned'>('all');
   messages = signal<CommunityMessage[]>(MESSAGES);
 

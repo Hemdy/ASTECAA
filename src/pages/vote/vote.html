@@ -1,0 +1,164 @@
+<section class="section">
+  <div class="container">
+    <div class="shead" appReveal>
+      <span class="eyebrow">Your voice matters</span>
+      <h2>Community Elections</h2>
+      <p>Vote in active community elections. Each member can vote once per position — your vote is secure and anonymous.</p>
+    </div>
+
+    @if (loading()) {
+      <div class="vote-loading paper">
+        <p class="text-muted">Loading elections…</p>
+      </div>
+    } @else if (!auth.isAuthenticated()) {
+      <!-- Not logged in -->
+      <div class="vote-auth-gate paper" appReveal>
+        <div class="vote-auth-inner">
+          <span class="eyebrow">Members only</span>
+          <h3>Sign in to vote</h3>
+          <p class="vote-auth-desc">You need a registered account to participate in elections. Sign in or create an account to get started.</p>
+          <div class="vote-auth-actions">
+            <a routerLink="/login" class="btn btn-outline">Sign in</a>
+            <a routerLink="/register" class="btn btn-gold">Register</a>
+          </div>
+        </div>
+      </div>
+    } @else if (selectedElection()) {
+      <!-- Election detail / voting view -->
+      @if (hasVoted()) {
+        <div class="vote-confirmation paper" appReveal>
+          <div class="vote-seal">✓</div>
+          <h2>Vote Submitted!</h2>
+          <p class="lede">Thank you for participating in {{ selectedElection()!.title }}. Your vote has been recorded securely.</p>
+          <div class="vote-confirmation-stats">
+            <div class="vote-stat">
+              <span class="vote-stat-label">Election</span>
+              <span class="vote-stat-value">{{ selectedElection()!.title }}</span>
+            </div>
+            <div class="vote-stat">
+              <span class="vote-stat-label">Total votes cast</span>
+              <span class="vote-stat-value">{{ selectedElection()!.total_votes }}</span>
+            </div>
+          </div>
+          <button class="btn btn-outline" (click)="backToList()">Back to elections</button>
+        </div>
+      } @else if (showReview()) {
+        <!-- Review selections -->
+        <div class="vote-review paper" appReveal>
+          <div class="vote-review-head">
+            <a class="vote-back" (click)="showReview.set(false)">← Back to candidates</a>
+            <span class="eyebrow">Review your votes</span>
+            <h2>Confirm your selections</h2>
+          </div>
+          <div class="vote-review-list">
+            @for (pos of selectedElection()!.positions; track pos.id) {
+              <div class="vote-review-item">
+                <div class="vote-review-position">{{ pos.title }}</div>
+                <div class="vote-review-candidate">{{ candidateName(pos.id) }}</div>
+              </div>
+            }
+          </div>
+          <div class="vote-review-actions">
+            <button class="btn btn-outline" (click)="showReview.set(false)">Edit selections</button>
+            <button class="btn btn-gold" (click)="submitVotes()" [disabled]="submitting()">
+              {{ submitting() ? 'Submitting…' : 'Submit my vote' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Voting form -->
+        <div class="vote-detail" appReveal>
+          <div class="vote-detail-head">
+            <a class="vote-back" (click)="backToList()">← All elections</a>
+            <span class="eyebrow">{{ formatDate(selectedElection()!.start_date) }} — {{ formatDate(selectedElection()!.end_date) }}</span>
+            <h2>{{ selectedElection()!.title }}</h2>
+            @if (selectedElection()!.description) {
+              <p class="lede">{{ selectedElection()!.description }}</p>
+            }
+          </div>
+
+          @for (pos of selectedElection()!.positions; track pos.id) {
+            <div class="vote-position paper" appReveal>
+              <div class="vote-position-head">
+                <h3>{{ pos.title }}</h3>
+                @if (pos.description) {
+                  <p class="text-muted">{{ pos.description }}</p>
+                }
+              </div>
+              <div class="vote-candidates">
+                @for (c of pos.candidates; track c.id) {
+                  <div
+                    class="vote-candidate"
+                    [class.selected]="selections()[pos.id] === c.id"
+                    (click)="selectCandidate(pos.id, c.id)"
+                  >
+                    <div class="vote-candidate-photo">
+                      @if (c.photo_url) {
+                        <img [src]="c.photo_url" [alt]="c.full_name" />
+                      } @else {
+                        <div class="vote-candidate-initials">{{ c.full_name.charAt(0) }}</div>
+                      }
+                    </div>
+                    <div class="vote-candidate-info">
+                      <div class="vote-candidate-name">{{ c.full_name }}</div>
+                      @if (c.biography) {
+                        <div class="vote-candidate-bio">{{ c.biography }}</div>
+                      }
+                      @if (c.manifesto) {
+                        <details class="vote-candidate-manifesto">
+                          <summary>Read manifesto</summary>
+                          <p>{{ c.manifesto }}</p>
+                        </details>
+                      }
+                    </div>
+                    <div class="vote-candidate-check">
+                      <span class="vote-check">✓</span>
+                    </div>
+                  </div>
+                } @empty {
+                  <p class="text-muted" style="padding: 16px">No candidates for this position.</p>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="vote-submit-bar">
+            <div class="vote-progress-text">
+              {{ selectedCount() }} / {{ selectedElection()!.positions.length }} positions selected
+            </div>
+            <button class="btn btn-gold" (click)="reviewVotes()" [disabled]="!allPositionsSelected()">
+              Review my votes
+            </button>
+          </div>
+        </div>
+      }
+    } @else if (activeElections().length > 0) {
+      <!-- Active elections list -->
+      <div class="vote-election-list">
+        @for (e of activeElections(); track e.id) {
+          <div class="vote-election-card paper" appReveal (click)="openElection(e)">
+            <div class="vote-election-card-head">
+              <span class="tag tag-forest">Active Election</span>
+              <span class="type vote-election-dates">{{ formatDate(e.start_date) }} — {{ formatDate(e.end_date) }}</span>
+            </div>
+            <h3>{{ e.title }}</h3>
+            @if (e.description) {
+              <p class="text-muted">{{ e.description }}</p>
+            }
+            <div class="vote-election-action">
+              <span class="btn btn-gold btn-sm">Vote now →</span>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="vote-empty paper" appReveal>
+        <div class="vote-empty-inner">
+          <span class="eyebrow">No active elections</span>
+          <h3>There are no elections open right now</h3>
+          <p class="text-muted">Check back later — new elections will appear here when the admin activates them.</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>

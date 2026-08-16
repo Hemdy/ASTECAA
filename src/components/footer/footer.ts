@@ -12,6 +12,26 @@ import { NAV_ITEMS } from '../../data';
   styleUrl: './footer.css',
 })
 export class Footer {
+
+  socials = [
+  {
+    name: 'Facebook',
+    icon: 'icons/facebook.png',
+    url: 'https://www.facebook.com/groups/111173245611375/'
+  },
+  {
+    name: 'Instagram',
+    icon: 'icons/instagram.png',
+    url: 'https://www.instagram.com/astec_alumni?igsh=MWc5ZWRqOGJlc2lyZg=='
+  },
+  {
+    name: 'Twitter',
+    icon: 'icons/twitter.png',
+    url: 'https://x.com/astecaa'
+  }
+];
+
+
   private toast = inject(ToastService);
   items = NAV_ITEMS;
   email = '';

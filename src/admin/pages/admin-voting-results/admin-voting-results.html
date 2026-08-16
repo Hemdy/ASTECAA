@@ -1,0 +1,114 @@
+<div class="adm-toolbar">
+  <div>
+    <div class="adm-section-title">Election Results</div>
+    <div class="adm-section-sub">View real-time vote counts and publish results to the public.</div>
+  </div>
+</div>
+
+@if (loading() && !details()) {
+  <div class="adm-card adm-card-pad" style="text-align: center; padding: 40px">
+    <p style="color: var(--ad-muted)">Loading…</p>
+  </div>
+}
+
+@if (!selectedId()) {
+  <div class="adm-card">
+    <div class="adm-table-wrap">
+      <table class="adm-table">
+        <thead>
+          <tr>
+            <th>Election</th>
+            <th>Voting</th>
+            <th>Results Published</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of elections(); track e.id) {
+            <tr>
+              <td><div class="adm-cell-user-name">{{ e.title }}</div></td>
+              <td>
+                <span class="adm-badge" [class.adm-badge-success]="e.is_active" [class.adm-badge-muted]="!e.is_active">{{ e.is_active ? 'Active' : 'Inactive' }}</span>
+              </td>
+              <td>
+                <label class="adm-switch">
+                  <input type="checkbox" [checked]="e.results_published" (change)="togglePublish(e)" />
+                  <span class="adm-switch-slider"></span>
+                </label>
+              </td>
+              <td>
+                <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="selectElection(e.id)">View Results →</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" style="text-align: center; color: var(--ad-muted); padding: 24px">No elections yet.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+@if (selectedId() && details()) {
+  <div style="margin-bottom: 16px">
+    <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="selectedId.set(null); details.set(null)">← All elections</button>
+  </div>
+
+  <div class="adm-card adm-card-pad" style="margin-bottom: 20px; display: flex; gap: 24px; flex-wrap: wrap">
+    <div>
+      <div class="adm-stat-label">Election</div>
+      <div class="adm-stat-value">{{ details()!.title }}</div>
+    </div>
+    <div>
+      <div class="adm-stat-label">Total Votes Cast</div>
+      <div class="adm-stat-value">{{ details()!.total_votes }}</div>
+    </div>
+    <div>
+      <div class="adm-stat-label">Status</div>
+      <div class="adm-stat-value">
+        <span class="adm-badge" [class.adm-badge-success]="details()!.is_active" [class.adm-badge-muted]="!details()!.is_active">{{ details()!.is_active ? 'Active' : 'Inactive' }}</span>
+      </div>
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center">
+      <button class="adm-btn" [class.adm-btn-primary]="!details()!.results_published" [class.adm-btn-outline]="details()!.results_published" (click)="togglePublish({ id: details()!.id, results_published: details()!.results_published })">
+        {{ details()!.results_published ? 'Hide Results' : 'Publish Results' }}
+      </button>
+    </div>
+  </div>
+
+  @for (pos of details()!.positions; track pos.id) {
+    <div class="adm-card" style="margin-bottom: 20px">
+      <div class="adm-card-head" style="border-bottom: 1px solid var(--ad-border)">
+        <div>
+          <div class="adm-card-title">{{ pos.title }}</div>
+          <div class="adm-card-sub">{{ pos.total_votes }} votes cast</div>
+        </div>
+        @if (winner(pos)) {
+          <span class="adm-badge adm-badge-gold">Winner: {{ winner(pos) }}</span>
+        }
+      </div>
+      <div style="padding: 16px">
+        @if (pos.candidates.length === 0) {
+          <p style="color: var(--ad-muted); text-align: center">No candidates for this position.</p>
+        } @else {
+          @for (c of pos.candidates; track c.id) {
+            <div style="margin-bottom: 12px">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px">
+                <div style="display: flex; align-items: center; gap: 8px">
+                  @if (c.photo_url) {
+                    <img [src]="c.photo_url" [alt]="c.full_name" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover" />
+                  }
+                  <span style="font-weight: 600">{{ c.full_name }}</span>
+                </div>
+                <span style="font-family: var(--font-type); font-size: 0.85rem; color: var(--ad-muted)">{{ c.vote_count }} votes ({{ pct(c.vote_count, pos.total_votes) }}%)</span>
+              </div>
+              <div class="adm-progress" style="width: 100%">
+                <div class="adm-progress-bar" [style.width.%]="pct(c.vote_count, pos.total_votes)" [class.adm-progress-bar-gold]="winner(pos) === c.full_name"></div>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+}

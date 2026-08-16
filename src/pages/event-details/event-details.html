@@ -115,46 +115,117 @@
       </div>
 
       <!-- Sidebar -->
-      <aside class="detail-side">
-        <div class="card reg-card" appReveal>
-          <h3>Register</h3>
-          <div class="reg-progress">
-            <div class="reg-progress-bar" [style.width.%]="ui.percentageOf(e)"></div>
-          </div>
-          <p class="reg-count">
-            <strong>{{ e.registered | number }}</strong> of {{ e.capacity | number }} registered
-          </p>
-          <button class="btn btn-gold reg-btn" (click)="register()">
-            Reserve my place
-          </button>
-          <p class="type reg-note">No ticket needed — just your name at the gate.</p>
+     <aside class="detail-side">
 
-          <ul class="reg-list">
-            <li><span>When</span><span>{{ ui.shortDate(e.date) }}</span></li>
-            <li><span>Time</span><span>{{ e.time }}</span></li>
-            <li><span>Venue</span><span>{{ e.venue }}</span></li>
-            <li><span>City</span><span>{{ e.city }}</span></li>
-            <li><span>Category</span><span>{{ e.category }}</span></li>
-          </ul>
-        </div>
+  <!-- Attendance -->
+  <div class="card reg-card" appReveal>
+    <span class="eyebrow">Alumni participation</span>
 
-        <div class="card organizer-card" appReveal delay="100">
-          <span class="eyebrow">Your host</span>
-          <img [src]="e.organizerPhoto" [alt]="e.organizer" class="organizer-photo" />
-          <h4>{{ e.organizer }}</h4>
-          <p class="type organizer-role">{{ e.organizerRole }}</p>
-        </div>
+    <h3>Join the Gathering</h3>
 
-        <div class="card map-card" appReveal delay="150">
-          <span class="eyebrow">Where to find us</span>
-          <h4 style="margin: 8px 0 14px">{{ e.venue }}</h4>
-          <div class="map">
-            <div class="map-pin">📍</div>
-            <span class="type map-label">{{ e.venue }} · {{ e.city }}</span>
-          </div>
-          <p class="map-address">{{ e.venue }}, {{ e.city }}</p>
-        </div>
-      </aside>
+    <p class="reg-intro">
+      Connect with fellow ASTECAA alumni, reconnect with old friends,
+      and be part of the next chapter of our alumni community.
+    </p>
+
+    <div class="reg-progress">
+      <div
+        class="reg-progress-bar"
+        [style.width.%]="ui.percentageOf(e)"
+      ></div>
+    </div>
+
+    <p class="reg-count">
+      <strong>{{ e.registered | number }}</strong>
+      alumni attending
+    </p>
+
+    <button
+      class="btn btn-gold reg-btn"
+      (click)="register()"
+    >
+      Confirm Attendance
+    </button>
+
+    <p class="type reg-note">
+      Registration helps us plan seating, fellowship activities,
+      and other arrangements for alumni.
+    </p>
+
+    <ul class="reg-list">
+      <li>
+        <span>Date</span>
+        <span>{{ ui.shortDate(e.date) }}</span>
+      </li>
+
+      <li>
+        <span>Time</span>
+        <span>{{ e.time }}</span>
+      </li>
+
+      <li>
+        <span>Venue</span>
+        <span>{{ e.venue }}</span>
+      </li>
+
+      <li>
+        <span>Location</span>
+        <span>{{ e.city }}</span>
+      </li>
+
+      <li>
+        <span>Event</span>
+        <span>{{ e.category }}</span>
+      </li>
+    </ul>
+  </div>
+
+
+  <!-- ASTECAA Leadership -->
+  <div class="card organizer-card" appReveal delay="100">
+    <span class="eyebrow">ASTECAA leadership</span>
+
+    <img
+      [src]="e.organizerPhoto"
+      [alt]="e.organizer"
+      class="organizer-photo"
+    />
+
+    <h4>{{ e.organizer }}</h4>
+
+    <p class="type organizer-role">
+      {{ e.organizerRole }}
+    </p>
+
+    <p class="organizer-intro">
+      Supporting the planning and coordination of this ASTECAA
+      alumni gathering.
+    </p>
+  </div>
+
+
+  <!-- Location -->
+  <div class="card map-card" appReveal delay="150">
+    <span class="eyebrow">Event location</span>
+
+    <h4 style="margin: 8px 0 14px">
+      {{ e.venue }}
+    </h4>
+
+    <div class="map">
+      <div class="map-pin">📍</div>
+
+      <span class="type map-label">
+        {{ e.city }}
+      </span>
+    </div>
+
+    <p class="map-address">
+      {{ e.venue }}, {{ e.city }}
+    </p>
+  </div>
+
+</aside>
     </div>
   </section>
 

@@ -1,10 +1,223 @@
 .nf {
+  position: relative;
+  overflow: hidden;
   padding: clamp(100px, 18vw, 180px) 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
 }
+
+/* Soft ASTECAA background accent */
+.nf::before {
+  content: '';
+  position: absolute;
+  width: clamp(280px, 40vw, 520px);
+  height: clamp(280px, 40vw, 520px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(126, 36, 58, 0.07) 0%,
+      rgba(184, 145, 62, 0.035) 45%,
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+.nf .container {
+  position: relative;
+  z-index: 1;
+}
+
+
+/* 404 seal */
+
+.nf {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(100px, 18vw, 180px) 0;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.nf .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Keep the original 404 seal */
 .nf-seal {
   margin: 0 auto 28px;
   font-size: 1rem;
+  position: relative;
 }
+
+/* Subtle ASTECAA atmosphere */
+.nf::before {
+  content: '';
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(126, 36, 58, 0.055),
+    rgba(184, 145, 62, 0.025) 45%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
 .nf h1 {
   margin-bottom: 8px;
+  line-height: 1.08;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+
+.nf .lede {
+  color: rgba(92, 64, 51, 0.68);
+  line-height: 1.7;
+}
+
+.nf .btn {
+  min-width: 150px;
+}
+
+.nf-links {
+  margin: 38px auto 0;
+  padding-top: 20px;
+  max-width: 600px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+
+  border-top: 1px solid rgba(92, 64, 51, 0.1);
+
+  color: rgba(92, 64, 51, 0.5);
+  font-size: 0.75rem;
+}
+
+.nf-links a {
+  color: var(--c-burgundy-600);
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.nf-links a:hover {
+  color: var(--c-gold-700);
+}
+
+@media (max-width: 600px) {
+  .nf {
+    min-height: 65vh;
+  }
+
+  .nf .flex {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 280px;
+    margin-inline: auto;
+  }
+
+  .nf .btn {
+    width: 100%;
+  }
+}
+
+/* Heading */
+
+.nf h1 {
+  margin-bottom: 8px;
+  font-size: clamp(2.1rem, 5vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+
+/* Description */
+
+.nf .lede {
+  color: rgba(92, 64, 51, 0.68);
+  line-height: 1.7;
+}
+
+
+/* Buttons */
+
+.nf .btn {
+  min-width: 150px;
+}
+
+
+/* Bottom navigation */
+
+.nf-links {
+  margin: 38px auto 0;
+  padding-top: 20px;
+
+  max-width: 620px;
+
+  border-top: 1px solid rgba(92, 64, 51, 0.1);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+
+  color: rgba(92, 64, 51, 0.52);
+  font-size: 0.76rem;
+}
+
+.nf-links a {
+  color: var(--c-burgundy-600);
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.nf-links a:hover {
+  color: var(--c-gold-700);
+}
+
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .nf {
+    min-height: 65vh;
+  }
+
+  .nf-seal {
+    width: 82px;
+    height: 82px;
+    margin-bottom: 24px;
+    font-size: 1.2rem;
+  }
+
+  .nf .flex {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 280px;
+    margin-inline: auto;
+  }
+
+  .nf .btn {
+    width: 100%;
+  }
+
+  .nf-links {
+    gap: 10px 14px;
+  }
 }

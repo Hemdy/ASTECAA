@@ -442,7 +442,7 @@ p {
 .tag-forest {
   background: var(--c-forest-200);
   color: var(--c-forest-700);
-  border-color: var(--c-forest-400);
+  /* border-color: var(--c-forest-400); */
 }
 .tag-burgundy {
   background: var(--c-burgundy-200);
@@ -844,6 +844,7 @@ p {
   background: var(--ad-surface-2);
 }
 .adm-user-avatar {
+  background: var(--ad-surface-2);
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -1414,6 +1415,7 @@ p {
   cursor: pointer;
 }
 .adm-avatar {
+  background: var(--ad-surface-2);
   width: 36px;
   height: 36px;
   border-radius: 50%;

@@ -6,8 +6,8 @@
           <span class="eyebrow">The Dispatch</span>
           <h3>Letters from the archive</h3>
           <p>
-            A quiet note, once a month — upcoming gatherings, a newly digitised memory, and a
-            story from the community. No noise, only ASTECAA.
+            A quiet note, once a month — upcoming gatherings, a newly digitised
+            memory, and a story from the community. No noise, only ASTECAA.
           </p>
         </div>
         <form class="news-form" (ngSubmit)="subscribe()">
@@ -37,12 +37,12 @@
           <span class="brand-mark">A</span>
           <div>
             <div class="brand-name">ASTECAA</div>
-            <div class="brand-sub">est. 1993 · Maple Hollow</div>
+            <div class="brand-sub">est. 1998</div>
           </div>
         </div>
         <p class="foot-mission">
-          A living digital archive where communities celebrate their heritage while building
-          excitement for what's next.
+          A living digital archive where communities celebrate their heritage
+          while building excitement for what's next.
         </p>
         <p class="type foot-quote">
           "Where memories live and new stories begin."
@@ -52,30 +52,42 @@
       <nav class="foot-col" aria-label="Pages">
         <h4 class="foot-title">Explore</h4>
         @for (item of items; track item.path) {
-          <a [routerLink]="item.path">{{ item.label }}</a>
+        <a [routerLink]="item.path">{{ item.label }}</a>
         }
       </nav>
+<div class="foot-col">
+  <h4 class="foot-title">Get Involved</h4>
 
-      <div class="foot-col">
-        <h4 class="foot-title">Visit</h4>
-        <p>Community Hall<br />42 Elm Street<br />Maple Hollow</p>
-        <p class="foot-hours">Archive open Wed–Sat<br />10am – 4pm</p>
-      </div>
-
+  <p>✔ Register as an alumnus</p>
+  <p>✔ Participate in elections</p>
+  <p>✔ Share memories and photos</p>
+  <p>✔ Attend reunions and events</p>
+</div>
       <div class="foot-col">
         <h4 class="foot-title">Write to us</h4>
         <a href="mailto:hello@ASTECAA.example">hello@ASTECAA.example</a>
-        <a href="tel:+15555550123">+1 (555) 555-0123</a>
+        <a href="tel:+23409012221212">09012221212</a>
+
         <div class="socials">
-          <a href="#" aria-label="Instagram" class="soc">IG</a>
-          <a href="#" aria-label="Facebook" class="soc">FB</a>
-          <a href="#" aria-label="YouTube" class="soc">YT</a>
+          @for (social of socials; track social.name) {
+          <a
+            [href]="social.url"
+            target="_blank"
+            rel="noopener"
+            [attr.aria-label]="social.name"
+            class="soc"
+          >
+            <img [src]="social.icon" [alt]="social.name" />
+          </a>
+          }
         </div>
       </div>
     </div>
 
     <div class="foot-base">
-      <p class="type">© 2026 ASTECAA Community Archive · A non-profit preservation project</p>
+      <p class="type">
+        © 2026 ASTECAA Community Archive · A non-profit preservation project
+      </p>
       <div class="foot-base-links">
         <a href="#">Privacy</a>
         <a href="#">Accessibility</a>

@@ -17,51 +17,121 @@ interface HomeSection {
 })
 export class AdminHomepage {
   private toast = inject(ToastService);
+
   tab = signal<'hero' | 'featured' | 'sections' | 'footer'>('hero');
 
   hero = {
-    headline: 'Where memories live and new stories begin.',
-    subheadline: 'A living archive of a community\'s gatherings.',
-    tagline: 'Est. 1993 · Maple Hollow',
-    primaryBtn: 'Upcoming Gatherings',
-    secondaryBtn: 'Walk the Timeline',
+    headline: 'Reconnect. Celebrate. Give Back.',
+    subheadline:
+      'The official digital home of ASTECAA alumni — connecting former students, celebrating our shared journey, and building a stronger future together.',
+    tagline: 'ASTECAA · Alumni Association',
+    primaryBtn: 'Explore Upcoming Events',
+    secondaryBtn: 'Discover ASTECAA',
   };
 
   featured = {
-    eventId: 'harvest-festival-2026',
-    stories: ['The Supper That Started It All', 'A Century of Carol Nights'],
+    eventId: 'astecaa-annual-reunion-2026',
+    stories: [
+      'The ASTECAA Journey: From School Days to Alumni Community',
+      'Why ASTECAA Still Matters: Connecting Generations of Alumni',
+    ],
   };
 
-  storyOptions = ['The Supper That Started It All', 'Voices: Preserving the Spoken Word', 'A Century of Carol Nights', 'Remembering Mrs. Aldous'];
+  storyOptions = [
+    'The ASTECAA Journey: From School Days to Alumni Community',
+    'Why ASTECAA Still Matters: Connecting Generations of Alumni',
+    'Remembering Our School Days: Stories from ASTECAA Alumni',
+    'Giving Back: How Alumni Are Supporting the Next Generation',
+  ];
 
   stats = [
-    { label: 'Years of gathering', value: '100+' },
-    { label: 'Archive items', value: '4,000+' },
-    { label: 'Annual events', value: '38' },
+    { label: 'Alumni community', value: '1000+' },
+    { label: 'Graduating sets', value: '50+' },
+    { label: 'Annual programmes', value: '6+' },
   ];
 
   sections = signal<HomeSection[]>([
-    { id: 'hero', name: 'Hero Banner', description: 'The large opening section with headline and featured event card.', enabled: true },
-    { id: 'featured', name: 'Featured Event', description: 'Highlights the next upcoming gathering with a countdown.', enabled: true },
-    { id: 'memories', name: 'Latest Memories', description: 'Polaroid-style preview of recently added archive photos.', enabled: true },
-    { id: 'events', name: 'Upcoming Events', description: 'Grid of upcoming gatherings with posters and dates.', enabled: true },
-    { id: 'timeline', name: 'Timeline Preview', description: 'A century of milestones shown as a center-spine timeline.', enabled: true },
-    { id: 'gallery', name: 'Gallery Preview', description: 'Film strip of photographs from the archive.', enabled: true },
-    { id: 'community', name: 'Community Messages', description: 'Preview of notes left on the community wall.', enabled: true },
-    { id: 'organizers', name: 'Stewards', description: 'Profiles of the team behind the gatherings.', enabled: true },
-    { id: 'newsletter', name: 'Newsletter Signup', description: 'The dispatch subscription form in the footer.', enabled: true },
+    {
+      id: 'hero',
+      name: 'Hero Banner',
+      description:
+        'The main opening section introducing ASTECAA and highlighting the alumni community.',
+      enabled: true,
+    },
+    {
+      id: 'featured',
+      name: 'Featured Event',
+      description:
+        'Highlights the next major ASTECAA event with event details and registration information.',
+      enabled: true,
+    },
+    {
+      id: 'memories',
+      name: 'Alumni Memories',
+      description:
+        'A preview of photographs, school memories, and moments shared by ASTECAA alumni.',
+      enabled: true,
+    },
+    {
+      id: 'events',
+      name: 'Upcoming Events',
+      description:
+        'Displays upcoming ASTECAA reunions, networking forums, AGMs, fundraisers, and other programmes.',
+      enabled: true,
+    },
+    {
+      id: 'timeline',
+      name: 'ASTECAA Timeline',
+      description:
+        'Highlights important milestones in the history and development of ASTECAA.',
+      enabled: true,
+    },
+    {
+      id: 'gallery',
+      name: 'Alumni Gallery',
+      description:
+        'A visual collection of alumni reunions, school memories, events, and ASTECAA activities.',
+      enabled: true,
+    },
+    {
+      id: 'community',
+      name: 'Alumni Community Wall',
+      description:
+        'Displays messages, memories, congratulations, and reflections shared by alumni.',
+      enabled: true,
+    },
+    {
+      id: 'organizers',
+      name: 'ASTECAA Leadership',
+      description:
+        'Profiles of the association executives, committees, and members helping to drive ASTECAA forward.',
+      enabled: true,
+    },
+    {
+      id: 'newsletter',
+      name: 'Alumni Updates',
+      description:
+        'Newsletter subscription for ASTECAA announcements, events, opportunities, and alumni news.',
+      enabled: true,
+    },
   ]);
 
   footer = {
-    mission: 'A living digital archive where communities celebrate their heritage while building excitement for what\'s next.',
-    copyright: '© 2026 ASTECAA Community Archive · A non-profit preservation project',
+    mission:
+      'ASTECAA connects alumni across generations, celebrates our shared heritage, supports our school community, and creates opportunities for members to reconnect, contribute, and grow together.',
+    copyright:
+      '© 2026 ASTECAA · Alumni Association · Reconnecting Generations, Building the Future',
     instagram: '#',
     facebook: '#',
-    youtube: '#',
+    twitter: '#',
   };
 
   toggleSection(id: string) {
-    this.sections.update((list) => list.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)));
+    this.sections.update((list) =>
+      list.map((s) =>
+        s.id === id ? { ...s, enabled: !s.enabled } : s
+      )
+    );
   }
 
   toggleStory(s: string) {
@@ -71,6 +141,6 @@ export class AdminHomepage {
   }
 
   saveAll() {
-    this.toast.show('Homepage content saved. Changes are now live.');
+    this.toast.show('ASTECAA homepage content saved. Changes are now live.');
   }
 }

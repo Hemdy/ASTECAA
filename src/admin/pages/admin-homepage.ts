@@ -1,6 +1,6 @@
-import { Component, signal, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ToastService } from '../../ui-state';
+import { Component, signal, inject } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { ToastService } from "../../ui-state";
 
 interface HomeSection {
   id: string;
@@ -10,26 +10,59 @@ interface HomeSection {
 }
 
 @Component({
-  selector: 'app-admin-homepage',
+  selector: "app-admin-homepage",
   standalone: true,
   imports: [FormsModule],
   template: `
     <div class="adm-toolbar">
       <div>
         <div class="adm-section-title">Homepage Content</div>
-        <div class="adm-section-sub">Update every section of the public homepage — no code changes required.</div>
+        <div class="adm-section-sub">
+          Update every section of the public homepage — no code changes
+          required.
+        </div>
       </div>
-      <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="saveAll()">Save all changes</button>
+      <button
+        class="adm-btn adm-btn-primary"
+        style="margin-left: auto"
+        (click)="saveAll()"
+      >
+        Save all changes
+      </button>
     </div>
 
     <div class="adm-tabs">
-      <button class="adm-tab" [class.active]="tab() === 'hero'" (click)="tab.set('hero')">Hero Banner</button>
-      <button class="adm-tab" [class.active]="tab() === 'featured'" (click)="tab.set('featured')">Featured Event</button>
-      <button class="adm-tab" [class.active]="tab() === 'sections'" (click)="tab.set('sections')">Sections</button>
-      <button class="adm-tab" [class.active]="tab() === 'footer'" (click)="tab.set('footer')">Footer</button>
+      <button
+        class="adm-tab"
+        [class.active]="tab() === 'hero'"
+        (click)="tab.set('hero')"
+      >
+        Hero Banner
+      </button>
+      <button
+        class="adm-tab"
+        [class.active]="tab() === 'featured'"
+        (click)="tab.set('featured')"
+      >
+        Featured Event
+      </button>
+      <button
+        class="adm-tab"
+        [class.active]="tab() === 'sections'"
+        (click)="tab.set('sections')"
+      >
+        Sections
+      </button>
+      <button
+        class="adm-tab"
+        [class.active]="tab() === 'footer'"
+        (click)="tab.set('footer')"
+      >
+        Footer
+      </button>
     </div>
 
-    @if (tab() === 'hero') {
+    @if (tab() === "hero") {
       <div class="adm-card adm-card-pad">
         <div style="display: grid; gap: 16px">
           <div class="adm-field">
@@ -58,31 +91,52 @@ interface HomeSection {
             <label class="adm-field-label">Background Image</label>
             <div class="adm-dropzone" style="padding: 24px">
               <div style="font-size: 1.4rem">🖼</div>
-              <div style="margin-top: 6px">Current: hero-orchard.jpg · Click to replace</div>
+              <div style="margin-top: 6px">
+                Current: hero-orchard.jpg · Click to replace
+              </div>
             </div>
           </div>
         </div>
       </div>
     }
 
-    @if (tab() === 'featured') {
+    @if (tab() === "featured") {
       <div class="adm-card adm-card-pad">
         <div style="display: grid; gap: 16px">
           <div class="adm-field">
             <label class="adm-field-label">Featured Event</label>
             <select class="adm-select" [(ngModel)]="featured.eventId">
-<option value="worship-concert-2026">Sounds of Worship Concert 2026</option>              <option value="voices-oral-history-2026">Voices: An Oral History Evening</option>
-              <option value="winter-carol-night-2026">Winter Carol Night</option>
+              <option value="worship-concert-2026">
+                Sounds of Worship Concert 2026
+              </option>
+              <option value="voices-oral-history-2026">
+                Voices: An Oral History Evening
+              </option>
+              <option value="winter-carol-night-2026">
+                Winter Carol Night
+              </option>
               <option value="spring-reunion-2027">Spring Alumni Reunion</option>
             </select>
-            <span class="adm-field-hint">This event appears in the hero card and the featured section.</span>
+            <span class="adm-field-hint"
+              >This event appears in the hero card and the featured
+              section.</span
+            >
           </div>
           <div class="adm-field">
             <label class="adm-field-label">Featured Stories (pick 3)</label>
-            <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm)">
+            <div
+              style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm)"
+            >
               @for (s of storyOptions; track s) {
-                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer">
-                  <input type="checkbox" class="adm-cb" [checked]="featured.stories.includes(s)" (change)="toggleStory(s)" />
+                <label
+                  style="display: flex; align-items: center; gap: 10px; cursor: pointer"
+                >
+                  <input
+                    type="checkbox"
+                    class="adm-cb"
+                    [checked]="featured.stories.includes(s)"
+                    (change)="toggleStory(s)"
+                  />
                   <span>{{ s }}</span>
                 </label>
               }
@@ -92,7 +146,7 @@ interface HomeSection {
       </div>
     }
 
-    @if (tab() === 'sections') {
+    @if (tab() === "sections") {
       <div class="adm-card">
         <div style="display: flex; flex-direction: column">
           @for (s of sections(); track s.id) {
@@ -102,7 +156,11 @@ interface HomeSection {
                 <div class="adm-toggle-row-desc">{{ s.description }}</div>
               </div>
               <label class="adm-switch">
-                <input type="checkbox" [checked]="s.enabled" (change)="toggleSection(s.id)" />
+                <input
+                  type="checkbox"
+                  [checked]="s.enabled"
+                  (change)="toggleSection(s.id)"
+                />
                 <span class="adm-switch-slider"></span>
               </label>
             </div>
@@ -112,17 +170,31 @@ interface HomeSection {
       <div class="adm-card adm-card-pad" style="margin-top: 16px">
         <div class="adm-field">
           <label class="adm-field-label">Statistics Displayed</label>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px">
+          <div
+            style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px"
+          >
             <div class="adm-field" style="margin: 0">
-              <input class="adm-input" [(ngModel)]="stats[0].value" placeholder="100+" />
+              <input
+                class="adm-input"
+                [(ngModel)]="stats[0].value"
+                placeholder="100+"
+              />
               <span class="adm-field-hint">{{ stats[0].label }}</span>
             </div>
             <div class="adm-field" style="margin: 0">
-              <input class="adm-input" [(ngModel)]="stats[1].value" placeholder="4,000+" />
+              <input
+                class="adm-input"
+                [(ngModel)]="stats[1].value"
+                placeholder="4,000+"
+              />
               <span class="adm-field-hint">{{ stats[1].label }}</span>
             </div>
             <div class="adm-field" style="margin: 0">
-              <input class="adm-input" [(ngModel)]="stats[2].value" placeholder="38" />
+              <input
+                class="adm-input"
+                [(ngModel)]="stats[2].value"
+                placeholder="38"
+              />
               <span class="adm-field-hint">{{ stats[2].label }}</span>
             </div>
           </div>
@@ -130,21 +202,36 @@ interface HomeSection {
       </div>
     }
 
-    @if (tab() === 'footer') {
+    @if (tab() === "footer") {
       <div class="adm-card adm-card-pad">
         <div style="display: grid; gap: 16px">
           <div class="adm-field">
             <label class="adm-field-label">Footer Mission Text</label>
-            <textarea class="adm-textarea" [(ngModel)]="footer.mission" style="min-height: 80px"></textarea>
+            <textarea
+              class="adm-textarea"
+              [(ngModel)]="footer.mission"
+              style="min-height: 80px"
+            ></textarea>
           </div>
           <div class="adm-field">
             <label class="adm-field-label">Copyright Line</label>
             <input class="adm-input" [(ngModel)]="footer.copyright" />
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px">
-            <div class="adm-field" style="margin: 0"><label class="adm-field-label">Instagram URL</label><input class="adm-input" [(ngModel)]="footer.instagram" /></div>
-            <div class="adm-field" style="margin: 0"><label class="adm-field-label">Facebook URL</label><input class="adm-input" [(ngModel)]="footer.facebook" /></div>
-            <div class="adm-field" style="margin: 0"><label class="adm-field-label">YouTube URL</label><input class="adm-input" [(ngModel)]="footer.youtube" /></div>
+          <div
+            style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px"
+          >
+            <div class="adm-field" style="margin: 0">
+              <label class="adm-field-label">Instagram URL</label
+              ><input class="adm-input" [(ngModel)]="footer.instagram" />
+            </div>
+            <div class="adm-field" style="margin: 0">
+              <label class="adm-field-label">Facebook URL</label
+              ><input class="adm-input" [(ngModel)]="footer.facebook" />
+            </div>
+            <div class="adm-field" style="margin: 0">
+              <label class="adm-field-label">Twitter URL</label
+              ><input class="adm-input" [(ngModel)]="footer.twitter" />
+            </div>
           </div>
         </div>
       </div>
@@ -153,51 +240,115 @@ interface HomeSection {
 })
 export class AdminHomepage {
   private toast = inject(ToastService);
-  tab = signal<'hero' | 'featured' | 'sections' | 'footer'>('hero');
+
+  tab = signal<"hero" | "featured" | "sections" | "footer">("hero");
 
   hero = {
-    headline: 'Where memories live and new stories begin.',
-    subheadline: 'A living archive of a community\'s gatherings.',
-    tagline: 'Est. 1993 · Maple Hollow',
-    primaryBtn: 'Upcoming Gatherings',
-    secondaryBtn: 'Walk the Timeline',
+    headline: "Reconnect with the people and memories that shaped us.",
+    subheadline:
+      "ASTECAA brings alumni together to celebrate our shared history, strengthen lifelong connections, and give back to the school community.",
+    tagline: "ASTECAA · Alumni Association",
+    primaryBtn: "Explore Upcoming Events",
+    secondaryBtn: "Discover Our Story",
   };
 
   featured = {
-    eventId: 'harvest-festival-2026',
-    stories: ['The Supper That Started It All', 'A Century of Carol Nights'],
+    eventId: "astecaa-annual-reunion-2026",
+    stories: ["Remembering Our ASTEC Years", "The Journey of ASTECAA"],
   };
 
-  storyOptions = ['The Supper That Started It All', 'Voices: Preserving the Spoken Word', 'A Century of Carol Nights', 'Remembering Mrs. Aldous'];
+  storyOptions = [
+    "Remembering Our ASTEC Years",
+    "The Journey of ASTECAA",
+    "From Classmates to Lifelong Connections",
+    "Giving Back to the Next Generation",
+  ];
 
   stats = [
-    { label: 'Years of gathering', value: '100+' },
-    { label: 'Archive items', value: '4,000+' },
-    { label: 'Annual events', value: '38' },
+    { label: "Alumni Community", value: "1000+" },
+    { label: "Years of Legacy", value: "50+" },
+    { label: "Annual Programmes", value: "6+" },
   ];
 
   sections = signal<HomeSection[]>([
-    { id: 'hero', name: 'Hero Banner', description: 'The large opening section with headline and featured event card.', enabled: true },
-    { id: 'featured', name: 'Featured Event', description: 'Highlights the next upcoming gathering with a countdown.', enabled: true },
-    { id: 'memories', name: 'Latest Memories', description: 'Polaroid-style preview of recently added archive photos.', enabled: true },
-    { id: 'events', name: 'Upcoming Events', description: 'Grid of upcoming gatherings with posters and dates.', enabled: true },
-    { id: 'timeline', name: 'Timeline Preview', description: 'A century of milestones shown as a center-spine timeline.', enabled: true },
-    { id: 'gallery', name: 'Gallery Preview', description: 'Film strip of photographs from the archive.', enabled: true },
-    { id: 'community', name: 'Community Messages', description: 'Preview of notes left on the community wall.', enabled: true },
-    { id: 'organizers', name: 'Stewards', description: 'Profiles of the team behind the gatherings.', enabled: true },
-    { id: 'newsletter', name: 'Newsletter Signup', description: 'The dispatch subscription form in the footer.', enabled: true },
+    {
+      id: "hero",
+      name: "Hero Banner",
+      description:
+        "The opening section introducing ASTECAA and highlighting the association’s purpose and upcoming activities.",
+      enabled: true,
+    },
+    {
+      id: "featured",
+      name: "Featured Event",
+      description:
+        "Highlights the next major ASTECAA event, reunion, or association programme.",
+      enabled: true,
+    },
+    {
+      id: "memories",
+      name: "Alumni Memories",
+      description:
+        "A preview of photographs, school memories, and moments shared by ASTECAA alumni.",
+      enabled: true,
+    },
+    {
+      id: "events",
+      name: "Upcoming Events",
+      description:
+        "Displays upcoming ASTECAA reunions, networking programmes, meetings, sports days, and other activities.",
+      enabled: true,
+    },
+    {
+      id: "timeline",
+      name: "ASTECAA Timeline",
+      description:
+        "Highlights important milestones in the history of ASTEC and the alumni association.",
+      enabled: true,
+    },
+    {
+      id: "gallery",
+      name: "Alumni Gallery",
+      description:
+        "Showcases photographs and visual memories from ASTEC and ASTECAA activities.",
+      enabled: true,
+    },
+    {
+      id: "community",
+      name: "Alumni Community",
+      description:
+        "Displays messages, memories, reflections, and contributions from members of the alumni community.",
+      enabled: true,
+    },
+    {
+      id: "organizers",
+      name: "ASTECAA Leadership",
+      description:
+        "Introduces the association leadership, committees, and members responsible for ASTECAA programmes.",
+      enabled: true,
+    },
+    {
+      id: "newsletter",
+      name: "Alumni Updates",
+      description:
+        "Allows alumni to subscribe for event announcements, association updates, and important ASTECAA news.",
+      enabled: true,
+    },
   ]);
 
   footer = {
-    mission: 'A living digital archive where communities celebrate their heritage while building excitement for what\'s next.',
-    copyright: '© 2026 ASTECAA Community Archive · A non-profit preservation project',
-    instagram: '#',
-    facebook: '#',
-    youtube: '#',
+    mission:
+      "ASTECAA connects former students of ASTEC, celebrates our shared heritage, supports lifelong friendships, and gives back to the school and future generations.",
+    copyright: "© 2026 ASTECAA · All rights reserved",
+    instagram: "#",
+    facebook: "#",
+    twitter: "#",
   };
 
   toggleSection(id: string) {
-    this.sections.update((list) => list.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)));
+    this.sections.update((list) =>
+      list.map((s) => (s.id === id ? { ...s, enabled: !s.enabled } : s)),
+    );
   }
 
   toggleStory(s: string) {
@@ -207,6 +358,6 @@ export class AdminHomepage {
   }
 
   saveAll() {
-    this.toast.show('Homepage content saved. Changes are now live.');
+    this.toast.show("ASTECAA homepage content saved. Changes are now live.");
   }
 }

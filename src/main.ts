@@ -10,6 +10,8 @@ import { Gallery } from './pages/gallery/gallery';
 import { Community } from './pages/community/community';
 import { Contact } from './pages/contact/contact';
 import { NotFound } from './pages/not-found/not-found';
+import { Register } from './pages/register/register';
+import { Login } from './pages/login/login';
 import { AdminLogin } from './admin/pages/admin-login/admin-login';
 import { AdminLayout } from './admin/admin-layout';
 import { AdminDashboard } from './admin/pages/dashboard/dashboard';
@@ -24,7 +26,11 @@ import { AdminHomepage } from './admin/pages/admin-homepage/admin-homepage';
 import { AdminMedia } from './admin/pages/admin-media/admin-media';
 import { AdminSettings } from './admin/pages/admin-settings/admin-settings';
 import { AdminRoles } from './admin/pages/admin-roles/admin-roles';
+import { AdminVoting } from './admin/pages/admin-voting/admin-voting';
+import { AdminVotingResults } from './admin/pages/admin-voting-results/admin-voting-results';
+import { Vote } from './pages/vote/vote';
 import { adminGuard } from './admin/admin.guard';
+import { memberGuard } from './services/member.guard';
 
 bootstrapApplication(App, {
   providers: [
@@ -38,6 +44,9 @@ bootstrapApplication(App, {
         { path: 'gallery', component: Gallery },
         { path: 'community', component: Community },
         { path: 'contact', component: Contact },
+        { path: 'vote', component: Vote, canActivate: [memberGuard] },
+        { path: 'register', component: Register },
+        { path: 'login', component: Login },
         {
           path: 'admin',
           canActivate: [adminGuard],
@@ -57,6 +66,8 @@ bootstrapApplication(App, {
             { path: 'media', component: AdminMedia },
             { path: 'settings', component: AdminSettings },
             { path: 'roles', component: AdminRoles },
+            { path: 'voting', component: AdminVoting },
+            { path: 'voting-results', component: AdminVotingResults },
           ],
         },
         { path: 'admin/login', component: AdminLogin },

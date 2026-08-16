@@ -1,0 +1,68 @@
+<section class="auth-page">
+  <div class="auth-card paper">
+    <a routerLink="/" class="auth-back">← Back to Home</a>
+
+    <div class="auth-header">
+      <span class="eyebrow">Welcome Back</span>
+      <h1>ASTECAA Alumni Portal</h1>
+      <p class="lede">
+        Sign in to connect with fellow alumni, participate in elections, share
+        updates, upload photos, and stay engaged with the ASTECAA community.
+      </p>
+    </div>
+
+    <form (ngSubmit)="submit($event)" class="auth-form">
+      <div class="field">
+        <label>Email Address</label>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="Enter your email address"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="auth-pw-wrap">
+          <input
+            [type]="showPw() ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="auth-pw-toggle"
+            (click)="showPw.set(!showPw())"
+          >
+            {{ showPw() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      @if (auth.authError()) {
+        <div class="auth-error">{{ auth.authError() }}</div>
+      }
+
+      <button
+        type="submit"
+        class="btn btn-gold auth-submit"
+        [disabled]="submitting() || !canSubmit()"
+      >
+        {{ submitting() ? 'Signing in...' : 'Sign In' }}
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      <p>
+        Not yet a member?
+        <a routerLink="/register">Create your alumni account</a>
+      </p>
+    </div>
+  </div>
+</section>

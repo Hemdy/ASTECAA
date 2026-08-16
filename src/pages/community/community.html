@@ -3,8 +3,8 @@
     <span class="eyebrow" appReveal>Voices from the wall</span>
     <h1 appReveal delay="80">The community wall</h1>
     <p class="lede" appReveal delay="160">
-      A place to leave a memory, a note of thanks, or a word for the next visitor. Every message
-      is read, and the kindest ones are pinned.
+     A place for ASTECAA alumni to share memories, celebrate old friendships, reflect on their
+  journey, and leave a message for the generations coming after them.
     </p>
   </div>
 </section>
@@ -12,44 +12,58 @@
 <section class="section">
   <div class="container">
     <!-- Leave a message -->
-    <div class="post-card paper" appReveal>
-      <div class="post-head">
-        <span class="eyebrow">Pin a note</span>
-        <span class="type post-moderation">Messages are reviewed before they appear</span>
-      </div>
-      <form (ngSubmit)="submit()">
-        <div class="post-row">
-          <input
-            type="text"
-            name="author"
-            placeholder="Your name"
-            [(ngModel)]="form.author"
+    @if (auth.isAuthenticated()) {
+      <div class="post-card paper" appReveal>
+        <div class="post-head">
+          <span class="eyebrow">Pin a note</span>
+          <span class="type post-moderation">Messages are reviewed before they appear</span>
+        </div>
+        <form (ngSubmit)="submit()">
+          <div class="post-row">
+            <input
+              type="text"
+              name="author"
+              placeholder="Your name"
+              [(ngModel)]="form.author"
+              required
+              aria-label="Your name"
+            />
+            <input
+              type="text"
+              name="location"
+              placeholder="Where you're writing from"
+              [(ngModel)]="form.location"
+              aria-label="Your location"
+            />
+          </div>
+          <textarea
+            name="message"
+            placeholder="Leave a memory, a note, or a word for the community…"
+            [(ngModel)]="form.message"
             required
-            aria-label="Your name"
-          />
-          <input
-            type="text"
-            name="location"
-            placeholder="Where you're writing from"
-            [(ngModel)]="form.location"
-            aria-label="Your location"
-          />
+            aria-label="Your message"
+          ></textarea>
+          <div class="post-foot">
+            <span class="type post-count">{{ form.message.length }} / 400 characters</span>
+            <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit()">
+              Post to the wall
+            </button>
+          </div>
+        </form>
+      </div>
+    } @else {
+      <div class="post-card paper post-locked" appReveal>
+        <div class="post-locked-inner">
+          <span class="eyebrow">Members only</span>
+          <h3>Sign in to pin a note</h3>
+          <p class="post-locked-desc">You need an account to post on the community wall.</p>
+          <div class="post-locked-actions">
+            <a routerLink="/login" class="btn btn-outline btn-sm">Sign in</a>
+            <a routerLink="/register" class="btn btn-gold btn-sm">Register</a>
+          </div>
         </div>
-        <textarea
-          name="message"
-          placeholder="Leave a memory, a note, or a word for the community…"
-          [(ngModel)]="form.message"
-          required
-          aria-label="Your message"
-        ></textarea>
-        <div class="post-foot">
-          <span class="type post-count">{{ form.message.length }} / 400 characters</span>
-          <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit()">
-            Post to the wall
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+    }
 
     <!-- Filter -->
     <div class="wall-controls" appReveal>

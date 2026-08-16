@@ -1,0 +1,280 @@
+@if (selectedElection()) {
+  <!-- Election detail view -->
+  <div class="adm-toolbar">
+    <div>
+      <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="backToList()">← All elections</button>
+      <div class="adm-section-title" style="margin-top: 4px">{{ selectedElection()!.title }}</div>
+      <div class="adm-section-sub">{{ formatDate(selectedElection()!.start_date) }} — {{ formatDate(selectedElection()!.end_date) }}</div>
+    </div>
+    <div style="margin-left: auto; display: flex; gap: 10px">
+      <button class="adm-btn adm-btn-outline" (click)="openCreatePosition()">+ Add Position</button>
+    </div>
+  </div>
+
+  @if (positions().length === 0) {
+    <div class="adm-card adm-card-pad" style="text-align: center; padding: 40px">
+      <p style="color: var(--ad-muted)">No positions yet. Add a position (e.g. President, Secretary) to start adding candidates.</p>
+    </div>
+  }
+
+  @for (pos of positions(); track pos.id) {
+    <div class="adm-card" style="margin-bottom: 20px">
+      <div class="adm-card-head" style="border-bottom: 1px solid var(--ad-border)">
+        <div>
+          <div class="adm-card-title">{{ pos.title }}</div>
+          @if (pos.description) {
+            <div class="adm-card-sub">{{ pos.description }}</div>
+          }
+        </div>
+        <div class="adm-table-actions">
+          <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="openCreateCandidate(pos.id)">+ Candidate</button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditPosition(pos)" title="Edit">✎</button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeletePosition(pos)" title="Delete">🗑</button>
+        </div>
+      </div>
+      @if ((candidatesByPosition()[pos.id] ?? []).length === 0) {
+        <div style="padding: 20px; text-align: center; color: var(--ad-muted)">No candidates yet for this position.</div>
+      } @else {
+        <div class="adm-table-wrap">
+          <table class="adm-table">
+            <thead>
+              <tr>
+                <th>Candidate</th>
+                <th>Biography</th>
+                <th>Manifesto</th>
+                <th>Photo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of candidatesByPosition()[pos.id] ?? []; track c.id) {
+                <tr>
+                  <td>
+                    <div class="adm-cell-user-name">{{ c.full_name }}</div>
+                  </td>
+                  <td>
+                    <div style="max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ad-muted)">{{ c.biography || '—' }}</div>
+                  </td>
+                  <td>
+                    <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ad-muted)">{{ c.manifesto || '—' }}</div>
+                  </td>
+                  <td>
+                    @if (c.photo_url) {
+                      <img [src]="c.photo_url" [alt]="c.full_name" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover" />
+                    } @else {
+                      <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--ad-surface-2); display: flex; align-items: center; justify-content: center; color: var(--ad-muted); font-size: 0.8rem">{{ c.full_name.charAt(0) }}</div>
+                    }
+                  </td>
+                  <td>
+                    <div class="adm-table-actions">
+                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditCandidate(c, pos.id)" title="Edit">✎</button>
+                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteCandidate(c)" title="Delete">🗑</button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+} @else {
+  <!-- Election list view -->
+  <div class="adm-toolbar">
+    <div>
+      <div class="adm-section-title">Voting & Elections</div>
+      <div class="adm-section-sub">Create elections, manage positions and candidates, control voting.</div>
+    </div>
+    <div style="margin-left: auto; display: flex; gap: 10px">
+      <button class="adm-btn adm-btn-primary" (click)="openCreateElection()">+ New Election</button>
+    </div>
+  </div>
+
+  <div class="adm-card adm-card-pad" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end">
+    <div class="adm-field" style="margin: 0; flex: 1; min-width: 200px">
+      <label class="adm-field-label">Search</label>
+      <input class="adm-input" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Search elections…" />
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="adm-card adm-card-pad" style="text-align: center; padding: 40px">
+      <p style="color: var(--ad-muted)">Loading elections…</p>
+    </div>
+  } @else if (filtered().length === 0) {
+    <div class="adm-card adm-card-pad" style="text-align: center; padding: 40px">
+      <p style="color: var(--ad-muted)">No elections yet. Click "New Election" to create one.</p>
+    </div>
+  } @else {
+    <div class="adm-card">
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th>Election</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Voting</th>
+              <th>Results</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of filtered(); track e.id) {
+              <tr>
+                <td>
+                  <div class="adm-cell-user-name">{{ e.title }}</div>
+                  @if (e.description) {
+                    <div class="adm-cell-user-sub" style="max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ e.description }}</div>
+                  }
+                </td>
+                <td>{{ formatDate(e.start_date) }}</td>
+                <td>{{ formatDate(e.end_date) }}</td>
+                <td>
+                  <span class="adm-badge" [class.adm-badge-success]="electionStatus(e) === 'Active'" [class.adm-badge-warning]="electionStatus(e) === 'Scheduled'" [class.adm-badge-muted]="electionStatus(e) === 'Inactive' || electionStatus(e) === 'Closed'">{{ electionStatus(e) }}</span>
+                </td>
+                <td>
+                  <label class="adm-switch">
+                    <input type="checkbox" [checked]="e.is_active" (change)="toggleActive(e)" />
+                    <span class="adm-switch-slider"></span>
+                  </label>
+                </td>
+                <td>
+                  <label class="adm-switch">
+                    <input type="checkbox" [checked]="e.results_published" (change)="toggleResults(e)" />
+                    <span class="adm-switch-slider"></span>
+                  </label>
+                </td>
+                <td>
+                  <div class="adm-table-actions">
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selectElection(e)" title="Manage positions & candidates">→</button>
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditElection(e)" title="Edit">✎</button>
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteElection(e)" title="Delete">🗑</button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="adm-card-head" style="border-top: 1px solid var(--ad-border); border-bottom: none">
+        <span class="adm-card-sub">{{ filtered().length }} elections</span>
+      </div>
+    </div>
+  }
+}
+
+<!-- Election modal -->
+@if (showElectionModal()) {
+  <app-adm-modal [title]="editingElection() ? 'Edit Election' : 'Create New Election'" size="lg" (close)="showElectionModal.set(false)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Election Title</label>
+        <input class="adm-input" [(ngModel)]="electionForm.title" placeholder="e.g. 2026 Alumni Association Election" />
+      </div>
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Description</label>
+        <textarea class="adm-textarea" [(ngModel)]="electionForm.description" placeholder="Describe this election…"></textarea>
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Start Date & Time</label>
+        <input class="adm-input" type="datetime-local" [(ngModel)]="electionForm.start_date" />
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">End Date & Time</label>
+        <input class="adm-input" type="datetime-local" [(ngModel)]="electionForm.end_date" />
+      </div>
+    </div>
+    <div foot>
+      <button class="adm-btn adm-btn-outline" (click)="showElectionModal.set(false)">Cancel</button>
+      <button class="adm-btn adm-btn-primary" (click)="saveElection()">{{ editingElection() ? 'Save changes' : 'Create election' }}</button>
+    </div>
+  </app-adm-modal>
+}
+
+<!-- Position modal -->
+@if (showPositionModal()) {
+  <app-adm-modal [title]="editingPosition() ? 'Edit Position' : 'Add Position'" (close)="showPositionModal.set(false)">
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <div class="adm-field">
+        <label class="adm-field-label">Position Title</label>
+        <input class="adm-input" [(ngModel)]="positionForm.title" placeholder="e.g. President, Secretary" />
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Description (optional)</label>
+        <textarea class="adm-textarea" [(ngModel)]="positionForm.description" placeholder="What does this role involve?"></textarea>
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Sort Order</label>
+        <input class="adm-input" type="number" [(ngModel)]="positionForm.sort_order" />
+      </div>
+    </div>
+    <div foot>
+      <button class="adm-btn adm-btn-outline" (click)="showPositionModal.set(false)">Cancel</button>
+      <button class="adm-btn adm-btn-primary" (click)="savePosition()">{{ editingPosition() ? 'Save changes' : 'Add position' }}</button>
+    </div>
+  </app-adm-modal>
+}
+
+<!-- Candidate modal -->
+@if (showCandidateModal()) {
+  <app-adm-modal [title]="editingCandidate() ? 'Edit Candidate' : 'Add Candidate'" size="lg" (close)="showCandidateModal.set(false)">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px">
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Full Name</label>
+        <input class="adm-input" [(ngModel)]="candidateForm.full_name" placeholder="Candidate's full name" />
+      </div>
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Photo URL</label>
+        <input class="adm-input" [(ngModel)]="candidateForm.photo_url" placeholder="https://… or /images/…" />
+      </div>
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Biography</label>
+        <textarea class="adm-textarea" [(ngModel)]="candidateForm.biography" placeholder="Background and qualifications…"></textarea>
+      </div>
+      <div class="adm-field" style="grid-column: 1 / -1">
+        <label class="adm-field-label">Manifesto</label>
+        <textarea class="adm-textarea" [(ngModel)]="candidateForm.manifesto" placeholder="Campaign promises and vision…"></textarea>
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Sort Order</label>
+        <input class="adm-input" type="number" [(ngModel)]="candidateForm.sort_order" />
+      </div>
+    </div>
+    <div foot>
+      <button class="adm-btn adm-btn-outline" (click)="showCandidateModal.set(false)">Cancel</button>
+      <button class="adm-btn adm-btn-primary" (click)="saveCandidate()">{{ editingCandidate() ? 'Save changes' : 'Add candidate' }}</button>
+    </div>
+  </app-adm-modal>
+}
+
+<!-- Confirm dialogs -->
+@if (deleteTarget()) {
+  <app-adm-confirm
+    [message]="'Delete election ' + deleteTarget()!.title + '? All positions, candidates, and votes will be lost.'"
+    confirmLabel="Delete"
+    (confirm)="confirmDeleteElection()"
+    (cancel)="deleteTarget.set(null)"
+  ></app-adm-confirm>
+}
+
+@if (deletePositionTarget()) {
+  <app-adm-confirm
+    [message]="'Delete position ' + deletePositionTarget()!.title + '? All candidates for this position will also be deleted.'"
+    confirmLabel="Delete"
+    (confirm)="confirmDeletePosition()"
+    (cancel)="deletePositionTarget.set(null)"
+  ></app-adm-confirm>
+}
+
+@if (deleteCandidateTarget()) {
+  <app-adm-confirm
+    [message]="'Delete candidate ' + deleteCandidateTarget()!.full_name + '?'"
+    confirmLabel="Delete"
+    (confirm)="confirmDeleteCandidate()"
+    (cancel)="deleteCandidateTarget.set(null)"
+  ></app-adm-confirm>
+}

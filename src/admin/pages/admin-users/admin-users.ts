@@ -24,7 +24,9 @@ export class AdminUsers {
   editTarget = signal<AdminUser | null>(null);
   editRole: Role = 'Editor';
 
-  roles: Role[] = ['Super Administrator', 'Content Manager', 'Event Manager', 'Community Moderator', 'Gallery Manager', 'Editor'];
+
+  
+  roles: Role[] = ['Super Administrator', 'Content Manager', 'Event Manager', 'Community Moderator', 'Gallery Manager', 'Editor', 'Membership Manager'];
 
   filtered = computed(() => {
     const q = this.query().toLowerCase();

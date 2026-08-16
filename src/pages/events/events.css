@@ -18,7 +18,7 @@
   max-width: 60ch;
   margin: 0 auto;
 }
-
+/* 
 .controls {
   display: flex;
   gap: 20px;
@@ -86,7 +86,7 @@
   margin-bottom: 28px;
   font-size: 0.82rem;
   color: var(--c-muted);
-}
+} */
 
 .events-grid {
   display: grid;
@@ -220,5 +220,232 @@
   }
   .filters {
     flex-direction: column;
+  }
+}
+
+
+
+/* =========================================
+   EVENT CONTROLS
+   ========================================= */
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto;
+  gap: 20px;
+
+  align-items: end;
+
+  margin-bottom: 30px;
+  padding: 18px;
+
+  background: #fdfaf32b;
+  border: 1px solid rgba(92, 64, 51, 0.1);
+  border-radius: 18px;
+
+  box-shadow:
+    0 4px 14px rgba(55, 35, 25, 0.04),
+    0 12px 30px rgba(55, 35, 25, 0.05);
+}
+
+
+/* -----------------------------------------
+   SEARCH
+   ----------------------------------------- */
+
+.search {
+  position: relative;
+  min-width: 0;
+}
+
+.search::before {
+  content: 'Search events';
+  display: block;
+
+  margin: 0 0 7px 4px;
+
+  font-family: var(--font-cinzel);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: var(--c-brown-500);
+}
+
+.search-ico {
+  position: absolute;
+  z-index: 2;
+
+  left: 17px;
+  top: calc(50% + 12px);
+
+  transform: translateY(-50%);
+
+  color: var(--c-burgundy-600);
+  font-size: 1.15rem;
+
+  pointer-events: none;
+}
+
+.search input {
+  width: 100%;
+  height: 48px;
+
+  padding: 0 18px 0 45px;
+
+  color: var(--c-brown-700);
+  background: var(--c-paper-100);
+
+  border: 1px solid rgba(92, 64, 51, 0.14);
+  border-radius: 12px;
+
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.search input::placeholder {
+  color: rgba(92, 64, 51, 0.45);
+}
+
+.search input:hover {
+  border-color: rgba(92, 64, 51, 0.25);
+}
+
+.search input:focus {
+  outline: none;
+  background: var(--c-paper-100);
+
+  border-color: var(--c-gold-500);
+
+  box-shadow:
+    0 0 0 3px rgba(196, 154, 69, 0.12),
+    0 4px 12px rgba(55, 35, 25, 0.04);
+}
+
+
+/* -----------------------------------------
+   FILTERS
+   ----------------------------------------- */
+
+.filters {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.filter-group label {
+  padding-left: 3px;
+
+  font-family: var(--font-cinzel);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  color: var(--c-brown-500);
+  font-weight: 700;
+}
+
+.filter-group select {
+  height: 48px;
+  min-width: 170px;
+
+  padding: 0 38px 0 14px;
+
+  color: var(--c-brown-700);
+  background-color: var(--c-paper-100);
+
+  border: 1px solid rgba(92, 64, 51, 0.14);
+  border-radius: 12px;
+
+  font-family: var(--font-body);
+  font-size: 0.86rem;
+
+  cursor: pointer;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.filter-group select:hover {
+  border-color: rgba(92, 64, 51, 0.25);
+}
+
+.filter-group select:focus {
+  outline: none;
+
+  border-color: var(--c-gold-500);
+
+  box-shadow:
+    0 0 0 3px rgba(196, 154, 69, 0.12);
+}
+
+
+/* -----------------------------------------
+   RESULT COUNT
+   ----------------------------------------- */
+
+.result-count {
+  margin: 0 0 22px 4px;
+
+  color: var(--c-muted);
+
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.result-count strong {
+  color: var(--c-brown-700);
+  font-weight: 700;
+}
+
+
+/* -----------------------------------------
+   MOBILE
+   ----------------------------------------- */
+
+@media (max-width: 800px) {
+  .controls {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filter-group select {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 540px) {
+  .controls {
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .search input,
+  .filter-group select {
+    height: 46px;
   }
 }
