@@ -30,7 +30,7 @@
           >{{ item.label }}</a
         >
       }
-      @if (auth.loading()) {
+      <!-- @if (auth.loading()) {
         <span class="nav-auth-placeholder"></span>
       } @else if (auth.isAuthenticated()) {
         <span class="nav-greeting">Hi, {{ auth.displayName().split(' ')[0] }}</span>
@@ -38,7 +38,7 @@
       } @else {
         <a routerLink="/login" (click)="close()" class="nav-signin">Sign in</a>
         <a routerLink="/register" (click)="close()" class="btn btn-gold btn-sm nav-cta">Register</a>
-      }
+      } -->
     </nav>
   
   </div>

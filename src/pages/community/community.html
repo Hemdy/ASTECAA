@@ -12,28 +12,46 @@
 <section class="section">
   <div class="container">
     <!-- Leave a message -->
-    @if (auth.isAuthenticated()) {
-      <div class="post-card paper" appReveal>
+    <div class="post-card paper" appReveal>
         <div class="post-head">
           <span class="eyebrow">Pin a note</span>
-          <span class="type post-moderation">Messages are reviewed before they appear</span>
+          <span class="type post-moderation">Enter your member details to post</span>
         </div>
         <form (ngSubmit)="submit()">
           <div class="post-row">
             <input
               type="text"
-              name="author"
+              name="name"
               placeholder="Your name"
-              [(ngModel)]="form.author"
+              [(ngModel)]="form.name"
               required
               aria-label="Your name"
             />
             <input
-              type="text"
-              name="location"
-              placeholder="Where you're writing from"
-              [(ngModel)]="form.location"
-              aria-label="Your location"
+              type="email"
+              name="email"
+              placeholder="Your email"
+              [(ngModel)]="form.email"
+              required
+              aria-label="Your email"
+            />
+            <input
+              type="tel"
+              name="phone"
+              placeholder="Your phone number"
+              [(ngModel)]="form.phone"
+              required
+              aria-label="Your phone number"
+            />
+            <input
+              type="number"
+              name="graduationYear"
+              placeholder="Graduation year"
+              [(ngModel)]="form.graduationYear"
+              required
+              min="1900"
+              [max]="currentYear"
+              aria-label="Graduation year"
             />
           </div>
           <textarea
@@ -50,20 +68,7 @@
             </button>
           </div>
         </form>
-      </div>
-    } @else {
-      <div class="post-card paper post-locked" appReveal>
-        <div class="post-locked-inner">
-          <span class="eyebrow">Members only</span>
-          <h3>Sign in to pin a note</h3>
-          <p class="post-locked-desc">You need an account to post on the community wall.</p>
-          <div class="post-locked-actions">
-            <a routerLink="/login" class="btn btn-outline btn-sm">Sign in</a>
-            <a routerLink="/register" class="btn btn-gold btn-sm">Register</a>
-          </div>
-        </div>
-      </div>
-    }
+    </div>
 
     <!-- Filter -->
     <div class="wall-controls" appReveal>

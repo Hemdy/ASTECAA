@@ -30,7 +30,6 @@ import { AdminVoting } from './admin/pages/admin-voting/admin-voting';
 import { AdminVotingResults } from './admin/pages/admin-voting-results/admin-voting-results';
 import { Vote } from './pages/vote/vote';
 import { adminGuard } from './admin/admin.guard';
-import { memberGuard } from './services/member.guard';
 
 bootstrapApplication(App, {
   providers: [
@@ -44,7 +43,7 @@ bootstrapApplication(App, {
         { path: 'gallery', component: Gallery },
         { path: 'community', component: Community },
         { path: 'contact', component: Contact },
-        { path: 'vote', component: Vote, canActivate: [memberGuard] },
+        { path: 'vote', component: Vote },
         { path: 'register', component: Register },
         { path: 'login', component: Login },
         {

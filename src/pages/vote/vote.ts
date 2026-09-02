@@ -1,20 +1,16 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { RevealDirective } from '../../reveal.directive';
-import { MemberAuthService } from '../../services/member-auth';
-import { VotingService, Election, ElectionWithDetails } from '../../services/voting.service';
+import { VotingService, Election, ElectionWithDetails, VoterDetails } from '../../services/voting.service';
 import { ToastService } from '../../ui-state';
 
 @Component({
   selector: 'app-vote',
   standalone: true,
-  imports: [FormsModule, RouterLink, RevealDirective],
+  imports: [FormsModule],
   templateUrl: './vote.html',
   styleUrl: './vote.css',
 })
 export class Vote {
-  auth = inject(MemberAuthService);
   private voting = inject(VotingService);
   private toast = inject(ToastService);
 
@@ -25,6 +21,16 @@ export class Vote {
   hasVoted = signal(false);
   selections = signal<Record<string, string>>({});
   showReview = signal(false);
+  verificationStep = signal<'details' | 'otp' | 'verified'>('details');
+  verificationOpen = signal(false);
+  otp = '';
+  otpLoading = signal(false);
+  voter: VoterDetails = { name: '', email: '', phone: '', graduationYear: '' };
+  maskedPhone = '';
+  closedElection = computed(() => {
+    const election = this.selectedElection();
+    return !!election && new Date(election.end_date) < new Date();
+  });
 
   constructor() {
     this.loadActiveElections();
@@ -35,10 +41,7 @@ export class Vote {
     try {
       const elections = await this.voting.getActiveElections();
       const now = new Date();
-      const open = elections.filter(
-        (e) => new Date(e.start_date) <= now && new Date(e.end_date) >= now
-      );
-      this.activeElections.set(open);
+      this.activeElections.set(elections);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load elections');
     }
@@ -48,12 +51,12 @@ export class Vote {
   async openElection(e: Election) {
     this.loading.set(true);
     try {
-      const userId = (await supabase.auth.getUser()).data.user?.id;
-      const details = await this.voting.getElectionDetails(e.id, userId);
+      const details = await this.voting.getElectionDetails(e.id);
       this.selectedElection.set(details);
       this.hasVoted.set(details?.has_voted ?? false);
       this.selections.set({});
       this.showReview.set(false);
+      this.verificationOpen.set(false);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load election');
     }
@@ -64,6 +67,7 @@ export class Vote {
     this.selectedElection.set(null);
     this.selections.set({});
     this.showReview.set(false);
+    this.verificationOpen.set(false);
   }
 
   selectCandidate(positionId: string, candidateId: string) {
@@ -77,7 +81,34 @@ export class Vote {
   }
 
   reviewVotes() {
+    this.verificationOpen.set(true);
+    this.verificationStep.set('details');
+  }
+
+  async requestOtp() {
+    this.otpLoading.set(true);
+    const result = await this.voting.requestOtp(this.voter);
+    this.otpLoading.set(false);
+    if (!result.success) return;
+    this.maskedPhone = result.maskedPhone;
+    this.verificationStep.set('otp');
+  }
+
+  async verifyOtp() {
+    this.otpLoading.set(true);
+    const result = await this.voting.verifyOtp(this.voter, this.otp);
+    this.otpLoading.set(false);
+    if (!result.success) {
+      this.toast.show(result.error ?? 'Verification failed.');
+      return;
+    }
+    this.verificationStep.set('verified');
     this.showReview.set(true);
+  }
+
+  closeVerification() {
+    this.verificationOpen.set(false);
+    this.otp = '';
   }
 
   candidateName(positionId: string): string {
@@ -91,7 +122,7 @@ export class Vote {
 
   async submitVotes() {
     const details = this.selectedElection();
-    if (!details || !this.allPositionsSelected()) return;
+    if (!details || !this.allPositionsSelected() || this.verificationStep() !== 'verified') return;
     this.submitting.set(true);
     let allOk = true;
     let errMsg = '';
@@ -105,6 +136,7 @@ export class Vote {
     }
     this.submitting.set(false);
     if (allOk) {
+      await this.voting.finalizeVote(details.id);
       this.hasVoted.set(true);
       this.showReview.set(false);
       this.toast.show('Your vote has been submitted successfully!');
@@ -121,6 +153,13 @@ export class Vote {
     });
   }
 
+  statusLabel(election: Election): string {
+    const now = new Date();
+    if (new Date(election.end_date) < now) return 'Closed';
+    if (new Date(election.start_date) > now) return 'Upcoming';
+    return 'Open';
+  }
+
   trackPosition(_: number, p: { id: string }): string {
     return p.id;
   }
@@ -131,5 +170,3 @@ export class Vote {
     return c.id;
   }
 }
-
-import { supabase } from '../../supabase';

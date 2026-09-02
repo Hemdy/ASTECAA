@@ -346,6 +346,52 @@
   text-align: right;
 }
 
+.registration-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(58, 42, 32, 0.65);
+}
+.registration-modal {
+  position: relative;
+  width: min(100%, 520px);
+  padding: 32px;
+  box-shadow: var(--shadow-lg);
+}
+.registration-modal h2 {
+  margin: 10px 0;
+}
+.registration-modal > p {
+  color: var(--c-ink-soft);
+  margin-bottom: 20px;
+}
+.registration-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 1.8rem;
+  color: var(--c-brown-600);
+}
+.registration-form {
+  display: grid;
+  gap: 12px;
+}
+.registration-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid rgba(92, 64, 51, 0.25);
+  border-radius: var(--r-sm);
+  background: var(--surface-raised);
+}
+.registration-form input:focus {
+  outline: none;
+  border-color: var(--c-gold-500);
+  box-shadow: 0 0 0 3px rgba(196, 154, 69, 0.18);
+}
+
 .organizer-card {
   padding: 22px;
   text-align: center;

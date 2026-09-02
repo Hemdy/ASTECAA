@@ -1,12 +1,10 @@
 import { Component, signal, computed, inject } from '@angular/core';
-import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
 import { ToastService } from '../../../ui-state';
 import { VotingService, ElectionWithDetails } from '../../../services/voting.service';
 
 @Component({
   selector: 'app-admin-voting-results',
   standalone: true,
-  imports: [AdmConfirm],
   templateUrl: './admin-voting-results.html',
 })
 

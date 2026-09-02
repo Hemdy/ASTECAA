@@ -32,7 +32,7 @@
           <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeletePosition(pos)" title="Delete">🗑</button>
         </div>
       </div>
-      @if ((candidatesByPosition()[pos.id] ?? []).length === 0) {
+      @if (candidatesByPosition()[pos.id].length === 0) {
         <div style="padding: 20px; text-align: center; color: var(--ad-muted)">No candidates yet for this position.</div>
       } @else {
         <div class="adm-table-wrap">
@@ -47,7 +47,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (c of candidatesByPosition()[pos.id] ?? []; track c.id) {
+              @for (c of candidatesByPosition()[pos.id]; track c.id) {
                 <tr>
                   <td>
                     <div class="adm-cell-user-name">{{ c.full_name }}</div>
@@ -230,6 +230,14 @@
       <div class="adm-field" style="grid-column: 1 / -1">
         <label class="adm-field-label">Photo URL</label>
         <input class="adm-input" [(ngModel)]="candidateForm.photo_url" placeholder="https://… or /images/…" />
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Graduation Year</label>
+        <input class="adm-input" type="number" [(ngModel)]="candidateForm.graduation_year" placeholder="2012" />
+      </div>
+      <div class="adm-field">
+        <label class="adm-field-label">Department / Programme</label>
+        <input class="adm-input" [(ngModel)]="candidateForm.department" placeholder="Business Administration" />
       </div>
       <div class="adm-field" style="grid-column: 1 / -1">
         <label class="adm-field-label">Biography</label>

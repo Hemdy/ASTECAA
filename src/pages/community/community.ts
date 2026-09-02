@@ -1,25 +1,23 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../reveal.directive';
 import { MESSAGES, CommunityMessage } from '../../data';
 import { ToastService } from '../../ui-state';
-import { MemberAuthService } from '../../services/member-auth';
 
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [FormsModule, RevealDirective, RouterLink],
+  imports: [FormsModule, RevealDirective],
   templateUrl: './community.html',
   styleUrl: './community.css',
 })
 export class Community {
   private toast = inject(ToastService);
-  auth = inject(MemberAuthService);
   filter = signal<'all' | 'pinned'>('all');
   messages = signal<CommunityMessage[]>(MESSAGES);
+  currentYear = new Date().getFullYear();
 
-  form = { author: '', location: '', message: '' };
+  form = { name: '', email: '', phone: '', graduationYear: '', message: '' };
   rotations = [-1.5, 2, -2, 1.5, -1, 2.5, -2.5, 1.2, -1.8, 2.2, -1.2, 1.8];
   rot(i: number) {
     return this.rotations[i % this.rotations.length];
@@ -33,22 +31,29 @@ export class Community {
   };
 
   canSubmit() {
-    return this.form.author.trim() && this.form.message.trim() && this.form.message.length <= 400;
+    return (
+      this.form.name.trim() &&
+      this.form.email.trim() &&
+      this.form.phone.trim() &&
+      this.form.graduationYear.trim() &&
+      this.form.message.trim() &&
+      this.form.message.length <= 400
+    );
   }
 
   submit() {
     if (!this.canSubmit()) return;
     const newMsg: CommunityMessage = {
       id: `local-${Date.now()}`,
-      author: this.form.author.trim(),
-      location: this.form.location.trim() || 'Somewhere near',
+      author: this.form.name.trim(),
+      location: `Class of ${this.form.graduationYear.trim()}`,
       avatar: '/images/reading-room.jpg',
       message: this.form.message.trim(),
       date: new Date().toISOString(),
       likes: 0,
     };
     this.messages.update((m) => [newMsg, ...m]);
-    this.form = { author: '', location: '', message: '' };
+    this.form = { name: '', email: '', phone: '', graduationYear: '', message: '' };
     this.toast.show('Thank you — your note has been sent for review.');
   }
 

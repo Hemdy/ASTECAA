@@ -266,3 +266,21 @@
     <a routerLink="/events" class="btn btn-primary">Back to all gatherings</a>
   </section>
 }
+
+@if (registrationOpen()) {
+  <div class="registration-backdrop" (click)="registrationOpen.set(false)">
+    <div class="registration-modal paper" (click)="$event.stopPropagation()">
+      <button type="button" class="registration-close" (click)="registrationOpen.set(false)" aria-label="Close registration form">×</button>
+      <span class="eyebrow">Event registration</span>
+      <h2>Join the gathering</h2>
+      <p>Register with your member details. No account or password is required.</p>
+      <form (ngSubmit)="submitRegistration()" class="registration-form">
+        <input type="text" name="registrationName" [(ngModel)]="registration.name" placeholder="Your name" required autocomplete="name" />
+        <input type="email" name="registrationEmail" [(ngModel)]="registration.email" placeholder="Your email" required autocomplete="email" />
+        <input type="tel" name="registrationPhone" [(ngModel)]="registration.phone" placeholder="Your phone number" required autocomplete="tel" />
+        <input type="number" name="registrationGraduationYear" [(ngModel)]="registration.graduationYear" placeholder="Graduation year" required min="1900" [max]="currentYear" />
+        <button type="submit" class="btn btn-gold" [disabled]="!canRegister()">Confirm attendance</button>
+      </form>
+    </div>
+  </div>
+}

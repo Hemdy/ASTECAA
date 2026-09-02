@@ -20,17 +20,35 @@ export class EventDetails {
   ui = new UiState();
 
   id = signal('');
+  currentYear = new Date().getFullYear();
   ev = computed(() => EVENTS.find((e) => e.id === this.id()));
   related = computed(() => EVENTS.filter((e) => e.id !== this.id()).slice(0, 3));
 
   comments = signal(MESSAGES.slice(0, 3));
   commentText = '';
+  registrationOpen = signal(false);
+  registration = { name: '', email: '', phone: '', graduationYear: '' };
 
   constructor() {
     this.route.paramMap.subscribe((p) => this.id.set(p.get('id') ?? ''));
   }
 
   register() {
+    this.registrationOpen.set(true);
+  }
+
+  canRegister(): boolean {
+    return (
+      this.registration.name.trim().length > 0 &&
+      this.registration.email.trim().length > 0 &&
+      this.registration.phone.trim().length > 0 &&
+      this.registration.graduationYear.trim().length > 0
+    );
+  }
+
+  submitRegistration() {
+    if (!this.canRegister()) return;
+    this.registrationOpen.set(false);
     this.toast.show('Your place is reserved. We will write to you closer to the day.');
   }
 
