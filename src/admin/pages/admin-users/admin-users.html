@@ -62,7 +62,7 @@
             <td><input type="checkbox" class="adm-cb" [checked]="selected().includes(u.id)" (change)="toggleSelect(u.id)" /></td>
             <td>
               <div class="adm-cell-user">
-                <img class="adm-avatar" [src]="u.avatar" [alt]="u.name" />
+                <img class="adm-avatar" [src]="u.avatar" [alt]="u.name" (error)="onAvatarImageError($event)"/>
                 <div>
                   <div class="adm-cell-user-name">{{ u.name }}</div>
                   <div class="adm-cell-user-sub">{{ u.email }}</div>
@@ -142,7 +142,7 @@
 @if (editTarget()) {
   <app-adm-modal title="Edit User Role" (close)="editTarget.set(null)">
     <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 16px">
-      <img class="adm-avatar adm-avatar-lg" [src]="editTarget()!.avatar" [alt]="editTarget()!.name" />
+      <img class="adm-avatar adm-avatar-lg" [src]="editTarget()!.avatar" [alt]="editTarget()!.name" (error)="onAvatarImageError($event)" />
       <div>
         <strong style="font-size: 1.05rem">{{ editTarget()!.name }}</strong>
         <div class="adm-cell-user-sub">{{ editTarget()!.email }}</div>

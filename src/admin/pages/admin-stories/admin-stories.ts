@@ -117,4 +117,14 @@ export class AdminStories {
     }
     this.deleteTarget.set(null);
   }
+
+  onImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/image-fallback.jpg';
+}
+
+      onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
 }

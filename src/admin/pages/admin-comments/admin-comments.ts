@@ -74,4 +74,9 @@ export class AdminComments {
     this.replyTarget.set(null);
     this.replyText = '';
   }
+
+    onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
 }

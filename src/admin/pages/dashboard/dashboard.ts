@@ -65,4 +65,9 @@ export class AdminDashboard {
   reject(id: string) {
     this.toast.show('Comment rejected.');
   }
+
+      onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
 }

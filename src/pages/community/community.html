@@ -90,7 +90,7 @@
           }
           <p class="note-body">"{{ msg.message }}"</p>
           <div class="note-foot">
-            <img [src]="msg.avatar" [alt]="msg.author" class="note-avatar" />
+            <img [src]="msg.avatar" [alt]="msg.author" class="note-avatar" (error)="onAvatarImageError($event)"  />
             <div class="note-author">
               <strong>{{ msg.author }}</strong>
               <span class="type note-loc">{{ msg.location }}</span>

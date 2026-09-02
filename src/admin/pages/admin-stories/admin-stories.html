@@ -47,7 +47,7 @@
           <tr>
             <td>
               <div class="adm-cell-user">
-                <img class="adm-thumb" [src]="s.cover" [alt]="s.title" style="width: 56px; height: 36px" />
+                <img class="adm-thumb" [src]="s.cover" [alt]="s.title" style="width: 56px; height: 36px" (error)="onImageError($event)"  />
                 <div>
                   <div class="adm-cell-user-name">{{ s.title }}</div>
                   <div class="adm-cell-user-sub">{{ truncate(s.excerpt) }}</div>
@@ -56,7 +56,7 @@
             </td>
             <td>
               <div class="adm-cell-user">
-                <img class="adm-avatar adm-avatar-sm" [src]="s.authorAvatar" [alt]="s.author" />
+                <img class="adm-avatar adm-avatar-sm" [src]="s.authorAvatar" [alt]="s.author" (error)="onAvatarImageError($event)"  />
                 <span>{{ s.author }}</span>
               </div>
             </td>

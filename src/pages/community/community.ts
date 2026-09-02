@@ -57,4 +57,9 @@ export class Community {
       list.map((m) => (m.id === id ? { ...m, likes: m.likes + 1, liked: true } : m))
     );
   }
+
+    onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
 }

@@ -60,4 +60,10 @@ export class EventDetails {
       list.map((c) => (c.id === id ? { ...c, likes: c.likes + 1 } : c))
     );
   }
+
+    onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
+
 }

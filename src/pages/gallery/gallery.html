@@ -22,13 +22,13 @@
         >
           Scrapbook
         </button>
-        <button
+        <!-- <button
           class="style-btn"
           [class.active]="style() === 'filmstrip'"
           (click)="style.set('filmstrip')"
         >
           Film strip
-        </button>
+        </button> -->
         <button
           class="style-btn"
           [class.active]="style() === 'polaroid'"
@@ -79,7 +79,7 @@
     }
 
     <!-- Film strip style -->
-    @if (style() === 'filmstrip') {
+    <!-- @if (style() === 'filmstrip') {
       <div class="filmstrip-wrap" appReveal>
         <div class="filmstrip-big">
           <div class="fs-track">
@@ -92,7 +92,7 @@
           </div>
         </div>
       </div>
-    }
+    } -->
 
     <!-- Polaroid wall style -->
     @if (style() === 'polaroid') {

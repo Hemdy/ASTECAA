@@ -484,6 +484,10 @@ img {
   margin-top: 2px;
 }
 
+app-countdown span.d-num{
+  color: red !important;
+}
+
 
 /* =========================================================
    CTA

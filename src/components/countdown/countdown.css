@@ -3,6 +3,8 @@
   align-items: flex-start;
   gap: 10px;
   font-family: var(--font-cinzel);
+
+
 }
 .cd-unit {
   display: flex;
@@ -10,14 +12,15 @@
   align-items: center;
   min-width: 56px;
   padding: 10px 12px;
-  background: rgba(92, 64, 51, 0.08);
+  background: #e0d8d4ef;
   border: 1px solid rgba(92, 64, 51, 0.18);
   border-radius: var(--r-sm);
+
 }
 .cd-num {
   font-size: 1.6rem;
   font-weight: 700;
-  color: wheat;
+  color: rgb(37, 26, 4);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }

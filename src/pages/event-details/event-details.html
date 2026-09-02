@@ -99,7 +99,7 @@
           <div class="comment-list">
             @for (c of comments(); track c.id) {
               <article class="comment">
-                <img [src]="c.avatar" [alt]="c.author" class="comment-avatar" />
+                <img [src]="c.avatar" [alt]="c.author" class="comment-avatar" (error)="onAvatarImageError($event)" />
                 <div class="comment-body">
                   <div class="comment-head">
                     <strong>{{ c.author }}</strong>
@@ -189,6 +189,7 @@
       [src]="e.organizerPhoto"
       [alt]="e.organizer"
       class="organizer-photo"
+      (error)="onAvatarImageError($event)" 
     />
 
     <h4>{{ e.organizer }}</h4>

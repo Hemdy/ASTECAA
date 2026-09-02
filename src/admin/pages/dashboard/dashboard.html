@@ -175,7 +175,7 @@
       <div class="adm-feed">
         @for (c of pendingComments; track c.id) {
           <div class="adm-feed-item">
-            <img class="adm-avatar adm-avatar-sm" [src]="c.avatar" [alt]="c.author" />
+            <img class="adm-avatar adm-avatar-sm" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
             <div style="flex: 1">
               <div class="adm-feed-text">
                 <strong>{{ c.author }}</strong> on {{ c.page }}
@@ -234,7 +234,7 @@
             <tr>
               <td>
                 <div class="adm-cell-user">
-                  <img class="adm-avatar adm-avatar-sm" [src]="u.avatar" [alt]="u.name" />
+                  <img class="adm-avatar adm-avatar-sm" [src]="u.avatar" [alt]="u.name" (error)="onAvatarImageError($event)" />
                   <div>
                     <div class="adm-cell-user-name">{{ u.name }}</div>
                     <div class="adm-cell-user-sub">{{ u.email }}</div>

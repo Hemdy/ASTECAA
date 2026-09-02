@@ -31,7 +31,7 @@
 <!-- Comments list -->
 <div style="display: flex; flex-direction: column; gap: 12px">
   @for (c of filtered(); track c.id) {
-    <div class="adm-card adm-card-pad" style="display: flex; gap: 16px; align-items: flex-start">          <img class="adm-avatar" [src]="c.avatar" [alt]="c.author" />
+    <div class="adm-card adm-card-pad" style="display: flex; gap: 16px; align-items: flex-start">          <img class="adm-avatar" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
       <div style="flex: 1; min-width: 0">
         <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
           <strong>{{ c.author }}</strong>

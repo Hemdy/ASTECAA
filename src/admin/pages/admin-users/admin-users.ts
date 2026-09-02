@@ -96,4 +96,9 @@ export class AdminUsers {
   exportCsv() {
     this.toast.show('User list exported as CSV.');
   }
+
+    onAvatarImageError(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  img.src = 'images/empty/avatar-fallback.jpg';
+}
 }
