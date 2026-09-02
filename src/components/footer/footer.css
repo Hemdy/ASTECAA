@@ -3,7 +3,7 @@
   background-image: linear-gradient(180deg, var(--c-brown-600), var(--c-brown-700));
   color: var(--c-paper-300);
   padding-top: clamp(56px, 8vw, 88px);
-  margin-top: clamp(56px, 8vw, 96px);
+  /* margin-top: clamp(56px, 8vw, 96px); */
 }
 .newsletter {
   padding: clamp(32px, 5vw, 56px);
@@ -33,7 +33,7 @@
 .news-form input {
   background: var(--surface-raised);
   border: 1px solid rgba(92, 64, 51, 0.25);
-  border-radius: var(--r-sm);
+  border-radius: var(--r-pill);
   padding: 14px 16px;
   color: var(--c-ink);
 }

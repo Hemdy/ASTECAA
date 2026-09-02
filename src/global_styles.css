@@ -351,30 +351,543 @@ p {
   box-shadow: var(--shadow-md);
 }
 
-/* Polaroid-style photo frame */
+/* =========================================================
+   MODERN MEMORY / POLAROID CARD
+   ========================================================= */
+
 .polaroid {
-  background: #fdfaf3;
-  padding: 14px 14px 56px;
-  border: 1px solid rgba(92, 64, 51, 0.18);
-  box-shadow: var(--shadow-paper);
   position: relative;
-  display: inline-block;
+
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+
+  padding: 10px 10px 14px;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fffdf8,
+      #f8f1e5
+    );
+
+  border:
+    1px solid
+    rgba(92, 64, 51, 0.10);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 3px 8px rgba(55, 35, 25, 0.04),
+    0 12px 28px rgba(55, 35, 25, 0.08);
+
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    border-color 0.35s ease;
+
+  cursor: pointer;
+
+  /* prevents the old inline rotation
+     from looking too aggressive */
+  transform-origin: center;
 }
+
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
 .polaroid img {
+  display: block;
+
   width: 100%;
   height: auto;
-  display: block;
-  filter: sepia(0.18) saturate(0.92) contrast(0.97);
+
+  aspect-ratio: 1 / 1;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+
+  background:
+    var(--c-paper-200);
+
+  filter:
+    sepia(0.10)
+    saturate(0.94)
+    contrast(0.98);
+
+  transition:
+    transform 0.55s var(--ease),
+    filter 0.35s ease;
 }
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.polaroid:hover {
+  transform:
+    rotate(0deg)
+    translateY(-7px)
+    scale(1.025) !important;
+
+  border-color:
+    rgba(126, 36, 58, 0.14);
+
+  box-shadow:
+    0 8px 18px rgba(55, 35, 25, 0.06),
+    0 22px 45px rgba(55, 35, 25, 0.12);
+
+  z-index: 5;
+}
+
+.polaroid:hover img {
+  transform: scale(1.025);
+
+  filter:
+    sepia(0.05)
+    saturate(1.02)
+    contrast(1);
+}
+
+
+/* =========================================================
+   CAPTION
+   ========================================================= */
+
 .polaroid .caption {
-  position: absolute;
-  bottom: 1px;
-  left: 0;
-  right: 0;
+  position: static;
+
+  display: block;
+
+  width: 100%;
+
+  margin: 11px 2px 1px;
+
+  padding: 0;
+
+  color:
+    var(--c-brown-700);
+
+  font-family:
+    var(--font-display);
+
+  font-size: 0.82rem;
+
+  font-weight: 600;
+
+  line-height: 1.35;
+
   text-align: center;
-  font-family: var(--font-type);
-  font-size: 0.85rem;
-  color: var(--c-brown-500);
+
+  text-wrap: balance;
+}
+
+
+/* =========================================================
+   MEMORY YEAR
+   ========================================================= */
+
+.polaroid .mem-year {
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+
+  padding:
+    4px
+    9px;
+
+  color:
+    var(--c-gold-200);
+
+  background:
+    rgba(126, 36, 58, 0.94);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.25);
+
+  border-radius:
+    var(--r-pill);
+
+  box-shadow:
+    0 4px 12px
+    rgba(35, 20, 12, 0.16);
+
+  font-family:
+    var(--font-cinzel);
+
+  font-size: 0.61rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  line-height: 1;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .polaroid {
+    padding: 8px 8px 12px;
+
+    border-radius: 12px;
+  }
+
+  .polaroid img {
+    border-radius: 8px;
+  }
+
+  .polaroid .caption {
+    margin-top: 9px;
+
+    font-size: 0.76rem;
+  }
+
+  .polaroid .mem-year {
+    top: 8px;
+    right: 8px;
+
+    min-height: 23px;
+
+    padding:
+      4px
+      7px;
+
+    font-size: 0.56rem;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .polaroid,
+  .polaroid img {
+    transition: none;
+  }
+
+  .polaroid:hover {
+    transform: none !important;
+  }
+
+  .polaroid:hover img {
+    transform: none;
+  }
+}
+
+
+/* =========================================================
+   MODERN MEMORY CARD / SCRAPBOOK ITEM
+   ========================================================= */
+
+.sb-item {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+  min-width: 0;
+
+  margin: 0;
+
+  padding: 10px 10px 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fffdf9 0%,
+      #f8f1e6 100%
+    );
+
+  border: 1px solid rgba(92, 64, 51, 0.10);
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 3px 8px rgba(55, 35, 25, 0.04),
+    0 12px 28px rgba(55, 35, 25, 0.08);
+
+  overflow: hidden;
+
+  cursor: pointer;
+
+  transform-origin: center;
+
+  transition:
+    transform 0.35s var(--ease),
+    box-shadow 0.35s var(--ease),
+    border-color 0.35s ease;
+}
+
+
+/* =========================================================
+   IMAGE
+   ========================================================= */
+
+.sb-item img {
+  display: block;
+
+  width: 100%;
+  aspect-ratio: 1 / 1;
+
+  object-fit: cover;
+
+  border-radius: 9px;
+
+  background: var(--c-paper-200);
+
+  filter:
+    sepia(0.10)
+    saturate(0.94)
+    contrast(0.98);
+
+  transition:
+    transform 0.55s var(--ease),
+    filter 0.35s ease;
+}
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.sb-item:hover {
+  transform:
+    rotate(0deg)
+    translateY(-7px)
+    scale(1.025) !important;
+
+  border-color:
+    rgba(126, 36, 58, 0.16);
+
+  box-shadow:
+    0 8px 18px rgba(55, 35, 25, 0.06),
+    0 22px 45px rgba(55, 35, 25, 0.12);
+
+  z-index: 5;
+}
+
+.sb-item:hover img {
+  transform: scale(1.025);
+
+  filter:
+    sepia(0.04)
+    saturate(1.02)
+    contrast(1);
+}
+
+
+/* =========================================================
+   CAPTION
+   ========================================================= */
+
+.sb-item .caption {
+  display: block;
+
+  margin: 11px 2px 1px;
+
+  color: var(--c-brown-700);
+
+  font-family: var(--font-display);
+
+  font-size: 0.82rem;
+
+  font-weight: 600;
+
+  line-height: 1.35;
+
+  text-align: center;
+
+  text-wrap: balance;
+}
+
+
+/* =========================================================
+   YEAR BADGE
+   ========================================================= */
+
+.sb-year {
+  position: absolute;
+
+  top: 10px;
+  right: 10px;
+
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 25px;
+
+  padding: 4px 9px;
+
+  color: var(--c-gold-200);
+
+  background: rgba(126, 36, 58, 0.94);
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+
+  border-radius: var(--r-pill);
+
+  box-shadow:
+    0 4px 12px rgba(35, 20, 12, 0.16);
+
+  font-family: var(--font-cinzel);
+
+  font-size: 0.61rem;
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  line-height: 1;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  z-index: 2;
+}
+
+
+/* =========================================================
+   VIDEO INDICATOR
+   ========================================================= */
+
+.sb-video {
+  position: absolute;
+
+  left: 18px;
+  bottom: 52px;
+
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+
+  background:
+    rgba(42, 32, 24, 0.82);
+
+  border:
+    1px solid rgba(255, 255, 255, 0.22);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 5px 14px rgba(0, 0, 0, 0.22);
+
+  font-size: 0.75rem;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  z-index: 3;
+
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease;
+}
+
+.sb-item:hover .sb-video {
+  transform: scale(1.08);
+
+  background:
+    var(--c-burgundy-600);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+  .sb-item {
+    padding: 8px 8px 12px;
+
+    border-radius: 12px;
+  }
+
+  .sb-item img {
+    border-radius: 8px;
+  }
+
+  .sb-item .caption {
+    margin-top: 9px;
+
+    font-size: 0.76rem;
+  }
+
+  .sb-year {
+    top: 8px;
+    right: 8px;
+
+    min-height: 23px;
+
+    padding: 4px 7px;
+
+    font-size: 0.56rem;
+  }
+
+  .sb-video {
+    left: 15px;
+    bottom: 47px;
+
+    width: 32px;
+    height: 32px;
+
+    font-size: 0.68rem;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .sb-item,
+  .sb-item img,
+  .sb-video {
+    transition: none;
+  }
+
+  .sb-item:hover {
+    transform: none !important;
+  }
+
+  .sb-item:hover img {
+    transform: none;
+  }
 }
 
 /* ============================================================
@@ -471,7 +984,18 @@ p {
   color: var(--c-brown-500);
   font-weight: 600;
 }
-.field input,
+.field input{
+    background: var(--surface-raised);
+  border: 1px solid rgba(92, 64, 51, 0.25);
+
+  border-radius:  var(--r-pill);
+    padding: 12px 14px;
+  color: var(--c-ink);
+  transition:
+    border-color 0.25s var(--ease),
+    box-shadow 0.25s var(--ease);
+  width: 100%;
+}
 .field textarea,
 .field select {
   background: var(--surface-raised);

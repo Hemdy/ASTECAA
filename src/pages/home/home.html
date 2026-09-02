@@ -1,7 +1,7 @@
 <!-- ============ HERO ============ -->
 <section class="hero">
   <div class="hero-bg" aria-hidden="true">
-    <img [src]="featured.banner" alt="" class="hero-img" />
+    <img [src]="featured.banner" alt="" class="hero-img" (error)="onImageError($event)"/>
     <div class="hero-veil"></div>
     <div class="hero-grain"></div>
   </div>
@@ -22,28 +22,47 @@
         <a routerLink="/timeline" class="btn btn-outline hero-outline">Walk the Timeline</a>
       </div>
     </div>
+<div class="hero-card" appReveal>
+  <div class="hero-card-head">
+    <span class="tag tag-burgundy">
+      Featured · {{ featured.category }}
+    </span>
 
-    <div class="hero-card" appReveal>
-      <div class="hero-card-head">
-        <span class="tag tag-burgundy">Featured · {{ featured.category }}</span>
-        <span class="type hero-card-date">{{ ui.shortDate(featured.date) }}</span>
-      </div>
-      <img [src]="featured.poster" alt="" class="hero-card-img" />
-      <div class="hero-card-body">
-        <h3>{{ featured.title }}</h3>
-        <p class="hero-card-sub">{{ featured.subtitle }}</p>
-        <div class="hero-card-meta">
-          <span>📍 {{ featured.venue }}</span>
-          <span>🕕 {{ featured.time }}</span>
-        </div>
-        <app-countdown [target]="featured.date" />
-        <a
-          [routerLink]="['/events', featured.id]"
-          class="btn btn-primary btn-sm hero-card-cta"
-          >View gathering →</a
-        >
-      </div>
+    <span class="type hero-card-date">
+      {{ ui.shortDate(featured.date) }}
+    </span>
+  </div>
+
+  <img
+    [src]="featured.poster"
+    [alt]="featured.title"
+    class="hero-card-img"
+    (error)="onImageError($event)"
+  />
+
+  <div class="hero-card-body">
+    <h3>{{ featured.title }}</h3>
+
+    <p class="hero-card-sub">
+      {{ featured.subtitle }}
+    </p>
+
+    <div class="hero-card-meta">
+      <span>📍 {{ featured.venue }}</span>
+      <span>🕕 {{ featured.time }}</span>
     </div>
+
+    <app-countdown [target]="featured.date" />
+
+    <a
+      [routerLink]="['/events', featured.id]"
+      class="hero-card-cta"
+    >
+      View gathering →
+    </a>
+  </div>
+</div>
+
   </div>
 
   <div class="hero-scroll type" aria-hidden="true">scroll ↓ to wander</div>
@@ -93,22 +112,34 @@
       <h2>Latest memories</h2>
       <p>A few pages from the scrapbook — recently added to the digital archive.</p>
     </div>
+<div class="mem-grid">
+  @for (m of latestMemories; track m.id) {
+    <figure class="mem-card" appReveal>
+      <div class="mem-media">
+        <img
+          [src]="m.image"
+          [alt]="m.caption"
+          (error)="onImageError($event)"
+        />
 
-    <div class="mem-grid">
-      @for (m of latestMemories; track m.id; let i = $index) {
-        <figure
-          class="polaroid mem-card"
-          appReveal
-          [attr.style]="'--r:' + (rotations[i % rotations.length]) + 'deg'"
-          [style.transform]="'rotate(' + rotations[i % rotations.length] + 'deg)'"
-        >
-          <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
-          <figcaption class="caption">{{ m.caption }}</figcaption>
-          <span class="mem-year">{{ m.year }}</span>
-        </figure>
-      }
-    </div>
+        <div class="mem-overlay"></div>
 
+        <span class="mem-year">
+          {{ m.year }}
+        </span>
+
+        <figcaption class="mem-content">
+          <span class="mem-label">Memory</span>
+          <span class="mem-caption">{{ m.caption }}</span>
+        </figcaption>
+
+        <span class="mem-arrow" aria-hidden="true">
+          ↗
+        </span>
+      </div>
+    </figure>
+  }
+</div>
     <div class="text-center" style="margin-top: 40px" appReveal>
       <a routerLink="/gallery" class="btn btn-outline">Open the full gallery →</a>
     </div>
@@ -268,7 +299,9 @@
           <p class="msg-body">"{{ msg.message }}"</p>
 
           <div class="msg-foot">
-            <img [src]="msg.avatar" [alt]="msg.author" class="msg-avatar" />
+            <img [src]="msg.avatar" [alt]="msg.author" class="msg-avatar" 
+            (error)="onAvatarImageError($event)"
+            />
 
             <div>
               <div class="msg-author">{{ msg.author }}</div>
@@ -303,7 +336,7 @@
       @for (o of organizers; track o.id) {
         <article class="org-card" appReveal>
           <div class="org-photo">
-            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" />
+            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" (error)="onAvatarImageError($event)" />
           </div>
 
           <h4>{{ o.name }}</h4>

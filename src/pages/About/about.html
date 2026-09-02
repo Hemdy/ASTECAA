@@ -14,7 +14,7 @@
 <section class="section">
   <div class="container origin">
     <div class="origin-media" appReveal>
-      <img [src]="heritagePhoto" alt="" class="photo-vintage" />
+      <img [src]="heritagePhoto" alt="" class="photo-vintage" (error)="onImageError($event)" />
       <div class="tape tape-tl"></div>
       <div class="seal origin-seal">Since<br />1998</div>
     </div>
@@ -141,7 +141,7 @@
       @for (o of organizers; track o.id) {
         <article class="org-card" appReveal>
           <div class="org-photo">
-            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" />
+            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" (error)="onAvatarImageError($event)" />
           </div>
           <h4>{{ o.name }}</h4>
           <span class="tag tag-forest">{{ o.role }}</span>

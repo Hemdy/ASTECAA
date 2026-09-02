@@ -67,7 +67,7 @@
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
           >
-            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
+            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" (error)="onImageError($event)" />
             <figcaption class="caption">{{ m.caption }}</figcaption>
             <span class="sb-year">{{ m.year }}</span>
             @if (m.format === 'video') {
