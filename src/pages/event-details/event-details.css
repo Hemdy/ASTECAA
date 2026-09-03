@@ -209,6 +209,15 @@
   gap: 12px;
   margin-bottom: 28px;
 }
+
+.comment-form input {
+background: var(--surface-raised);
+    border: 1px solid rgba(92, 64, 51, 0.25);
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    width: 100%;
+} 
+
 .comment-form textarea {
   background: var(--surface-raised);
   border: 1px solid rgba(92, 64, 51, 0.25);

@@ -84,17 +84,52 @@
           <span class="eyebrow">Voices</span>
           <h2 style="margin: 12px 0 22px">Comments</h2>
 
-          <form class="comment-form" (ngSubmit)="addComment()">
-            <textarea
-              name="comment"
-              placeholder="Leave a note about this gathering…"
-              [(ngModel)]="commentText"
-              required
-            ></textarea>
-            <button type="submit" class="btn btn-primary btn-sm" [disabled]="!commentText.trim()">
-              Post note
-            </button>
-          </form>
+<form class="comment-form" (ngSubmit)="addComment()">
+  <input
+    type="text"
+    name="firstName"
+    placeholder="Your first name"
+    [(ngModel)]="commentFName"
+    required
+  />
+  <input
+    type="text"
+    name="lastName"
+    placeholder="Your last name"
+    [(ngModel)]="commentLName"
+    required
+  />
+
+  <input
+    type="email"
+    name="email"
+    placeholder="Your email"
+    [(ngModel)]="commentEmail"
+    required
+  />
+
+  <textarea
+    name="comment"
+    placeholder="Leave a note about this gathering…"
+    [(ngModel)]="commentText"
+    required
+  ></textarea>
+
+  <button
+    type="submit"
+    class="btn btn-primary btn-sm"
+    [disabled]="
+      !commentFName.trim() ||
+      !commentLName.trim() ||
+      !commentEmail.trim() ||
+      !commentText.trim()
+    "
+  >
+    Post note
+  </button>
+</form>
+
+
 
           <div class="comment-list">
             @for (c of comments(); track c.id) {
@@ -239,7 +274,7 @@
       </div>
       <div class="related-grid">
         @for (r of related(); track r.id) {
-          <article class="card event-card" appReveal>
+          <article class="card event-card" appReveal [routerLink]="['/events', r.id]">
             <div class="event-card-media">
               <img [src]="r.poster" alt="" class="photo-vintage" />
               <div class="event-date-chip">
