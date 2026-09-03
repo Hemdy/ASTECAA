@@ -34,6 +34,7 @@
   padding: 5px;
   border-radius: var(--r-pill);
   border: 1px solid rgba(92, 64, 51, 0.18);
+  width: fit-content
 }
 .style-btn {
   font-family: var(--font-cinzel);

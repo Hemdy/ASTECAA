@@ -172,7 +172,7 @@
 
     <div class="events-grid">
       @for (ev of upcoming; track ev.id) {
-      <article class="card event-card" appReveal>
+      <article class="card event-card" appReveal [routerLink]="['/events', ev.id]">
         <div class="event-card-media">
           <img [src]="ev.poster" [alt]="ev.title" />
 
@@ -232,7 +232,7 @@
 
     <div class="tl-preview" appReveal>
       @for (m of timelinePreview; track m.id; let i = $index) {
-      <div class="tl-prev-item" [class.right]="i % 2 === 1">
+      <div class="tl-prev-item" [class.right]="i % 2 === 1" routerLink="/timeline">
         <div class="tl-prev-year">{{ m.year }}</div>
         <div class="tl-prev-dot"></div>
         <div class="tl-prev-card">
