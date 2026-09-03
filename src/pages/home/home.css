@@ -1129,8 +1129,9 @@ app-countdown span.d-num{
 @media (max-width: 700px) {
 
   .mem-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    /* grid-template-columns:
+      repeat(2, minmax(0, 1fr)); */
+    grid-template-columns: 1fr !important;
 
     gap: 14px;
   }
@@ -1813,7 +1814,7 @@ app-countdown span.d-num{
   display: grid;
 
   grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+    repeat(4, minmax(0, 1fr,));
 
   gap: clamp(16px, 2.5vw, 28px);
 }
@@ -2367,7 +2368,7 @@ app-countdown span.d-num{
   /* ---------------- LEADERSHIP ---------------- */
 
   .org-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
 
     gap: 10px;
   }

@@ -51,7 +51,7 @@
     @if (filtered().length > 0) {
       <div class="events-grid">
         @for (ev of filtered(); track ev.id) {
-          <article class="card event-card" appReveal>
+          <article class="card event-card" appReveal [routerLink]="['/events', ev.id]">
             <div class="event-card-media">
               <img [src]="ev.poster" alt="" class="photo-vintage" />
               <div class="event-date-chip">
