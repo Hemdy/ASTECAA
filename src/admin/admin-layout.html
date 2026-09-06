@@ -9,7 +9,14 @@
         <div class="adm-brand-name">ASTECAA</div>
         <div class="adm-brand-sub">Admin Console</div>
       </div>
-      <button class="adm-collapse-btn" (click)="state.toggleCollapsed()" aria-label="Collapse sidebar">«</button>
+      <button
+        class="adm-collapse-btn"
+        (click)="state.toggleCollapsed()"
+        [attr.aria-label]="state.collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+        [attr.aria-expanded]="!state.collapsed()"
+      >
+        {{ state.collapsed() ? '»' : '«' }}
+      </button>
     </div>
 
     <nav class="adm-nav">
@@ -48,8 +55,8 @@
   <!-- Main -->
   <div class="adm-main">
     <header class="adm-topbar">
-      <button class="adm-icon-btn" (click)="state.toggleMobile()" aria-label="Menu" style="display: none" [style.display.px]="mobileMenuBtn">
-        ☰
+      <button class="adm-icon-btn adm-menu-btn" (click)="state.toggleMobile()" [attr.aria-label]="state.mobileOpen() ? 'Close navigation menu' : 'Open navigation menu'" [attr.aria-expanded]="state.mobileOpen()">
+        {{ state.mobileOpen() ? '×' : '☰' }}
       </button>
       <div class="adm-breadcrumb">
         @for (crumb of crumbs(); track crumb; let last = $last) {

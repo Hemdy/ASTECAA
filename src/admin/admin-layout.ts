@@ -1,4 +1,4 @@
-import { Component, inject, computed, HostListener } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdminState } from './admin-state';
@@ -18,8 +18,6 @@ export class AdminLayout {
   nav = ADMIN_NAV;
   user = ADMIN_USER;
   notifications = ADMIN_NOTIFICATIONS;
-  mobileMenuBtn = 0;
-
   unreadCount = computed(() => this.notifications.filter((n) => n.unread).length);
 
   crumbs = computed(() => {
@@ -62,14 +60,7 @@ export class AdminLayout {
     this.auth.signOut();
   }
 
-  @HostListener('window:resize')
-  onResize() {
-    this.mobileMenuBtn = window.innerWidth <= 768 ? 1 : 0;
-    if (window.innerWidth > 768) this.state.mobileOpen.set(false);
-  }
-
   constructor() {
-    this.onResize();
     this.router.events.subscribe(() => this.state.closeNotif());
   }
 }

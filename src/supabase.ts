@@ -1,6 +1,3 @@
-console.log(environment);
-console.log(environment.supabaseUrl);
-console.log(environment.supabaseAnonKey);
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { environment } from './environments/environment';

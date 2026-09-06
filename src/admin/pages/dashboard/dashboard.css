@@ -14,3 +14,17 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .dash-grid,
+  .dash-grid-2 {
+    gap: 12px;
+  }
+
+  .dash-grid .adm-card-pad > div[style*='display: flex'],
+  .dash-grid-2 .adm-card-pad > div[style*='display: flex'] {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+}
