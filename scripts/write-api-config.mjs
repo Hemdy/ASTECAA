@@ -1,7 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
-const value = process.env.ASTECAA_API_URL?.trim();
+const value =
+  process.env.ASTECAA_API_URL?.trim() ||
+  (process.env.NODE_ENV !== 'production' ? 'http://localhost:8000' : undefined);
+
 if (!value) {
   throw new Error('ASTECAA_API_URL must be set to the deployed ASTECAA API origin.');
 }
