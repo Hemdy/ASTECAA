@@ -85,7 +85,16 @@
             }
           },
           "options": {
-            "assets": [],
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "apps/admin/public"
+              },
+              {
+                "glob": "**/*",
+                "input": "apps/website/public"
+              }
+            ],
             "baseHref": "/",
             "browser": "apps/admin/src/main.ts",
             "deleteOutputPath": false,

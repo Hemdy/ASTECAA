@@ -52,7 +52,10 @@ const config = {
 };
 
 const targetDirectories = [
+  resolve('apps/website/public'),
+  resolve('apps/admin/public'),
   resolve('dist/astecaa/browser'),
+  resolve('dist/astecaa/browser/admin'),
   resolve('dist/astecaa'),
 ];
 

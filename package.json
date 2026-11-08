@@ -3,6 +3,9 @@
   "private": true,
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/write-api-config.mjs",
+    "prestart:website": "node scripts/write-api-config.mjs",
+    "prestart:admin": "node scripts/write-api-config.mjs",
     "start": "ng serve website",
     "start:website": "ng serve website",
     "start:admin": "ng serve admin",

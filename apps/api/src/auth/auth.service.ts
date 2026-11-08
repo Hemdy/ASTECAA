@@ -20,13 +20,9 @@ export class AuthService implements OnModuleDestroy {
     const baseOrigin = new URL(this.baseUrl).origin;
     this.allowedOrigins = new Set(config.allowedOrigins);
 
-    let secret = process.env.BETTER_AUTH_SECRET;
+    const secret = process.env.BETTER_AUTH_SECRET;
     if (!secret || secret.length < 32) {
-      if (this.appEnv === 'development') {
-        secret = 'astecaa-development-secret-key-at-least-32-characters';
-      } else {
-        throw new Error('BETTER_AUTH_SECRET must be at least 32 characters in production.');
-      }
+      throw new Error('BETTER_AUTH_SECRET must be at least 32 characters.');
     }
 
     this.auth = betterAuth({
