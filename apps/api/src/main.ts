@@ -1,4 +1,22 @@
 import 'reflect-metadata';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+// Automatically load .env from workspace root or current directory
+for (const envPath of [
+  resolve(process.cwd(), '.env'),
+  resolve(process.cwd(), '../../.env'),
+  resolve(import.meta.dirname, '../../../.env'),
+  resolve(import.meta.dirname, '../../.env'),
+]) {
+  if (existsSync(envPath)) {
+    try {
+      process.loadEnvFile(envPath);
+      break;
+    } catch {}
+  }
+}
+
 import { randomUUID } from 'node:crypto';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';

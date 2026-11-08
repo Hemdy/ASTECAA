@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "start:dev": "tsx watch src/main.ts",
+    "start:dev": "tsc && node --watch dist/main.js",
     "test": "node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs test/api-smoke.ts"
   },
   "dependencies": {

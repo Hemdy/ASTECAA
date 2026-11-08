@@ -36,3 +36,4 @@ export class DashboardApiService {
     return (await response.json()) as T;
   }
 }
+
