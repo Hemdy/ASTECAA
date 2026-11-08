@@ -13,7 +13,8 @@
     "build": "pnpm run build:website && pnpm run build:admin && node scripts/write-api-config.mjs",
     "db:generate": "pnpm --filter @astec/database db:generate",
     "db:migrate": "pnpm --filter @astec/database db:migrate",
-    "db:check": "pnpm --filter @astec/database db:check"
+    "db:check": "pnpm --filter @astec/database db:check",
+    "db:push": "pnpm --filter @astec/database db:push"
   },
   "dependencies": {
     "@angular/common": "^21.2.26",

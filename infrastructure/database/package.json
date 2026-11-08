@@ -16,7 +16,7 @@
     "db:migrate": "pnpm run db:generate && pnpm run db:migrate:apply",
     "db:migrate:apply": "node --env-file=../../.env ./node_modules/drizzle-kit/bin.cjs migrate --config=drizzle.config.ts",
     "db:check": "drizzle-kit check --config=drizzle.config.ts",
-    "db:push": "node -e \"console.error('Forbidden: never use Drizzle db push. Generate, review, and migrate SQL instead.'); process.exit(1)\""
+    "db:push": "node -e \"console.error('CRITICAL: NEVER use drizzle-kit push or db:push with Neon. Always generate deterministic, version-controlled SQL migrations with db:generate and apply with db:migrate.'); process.exit(1)\""
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.2.0",

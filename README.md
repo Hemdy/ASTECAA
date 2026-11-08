@@ -58,8 +58,12 @@ pnpm run build:api
 The website output is written to `dist/astecaa/browser`; the admin app is written under its `/admin` subdirectory.
 The API output is compiled to `apps/api/dist`.
 
-## Database Management
+## Database Management (Neon & Drizzle ORM)
 
-Schema definitions and migrations are managed via Drizzle Kit in `infrastructure/database`:
-- Generate migrations: `pnpm run db:generate`
-- Apply migrations: `pnpm run db:migrate`
+Schema definitions and migrations live in `infrastructure/database`.
+
+> **CRITICAL RULE**: **NEVER USE `push` / `db:push` WITH NEON.** Always use version-controlled migrations to prevent schema drift and protect Neon database branches.
+
+- **Generate migrations**: `pnpm run db:generate` (creates versioned `.sql` under `migrations/versions/`)
+- **Review schema integrity**: `pnpm run db:check`
+- **Apply migrations**: `pnpm run db:migrate` (applies pending migrations to Neon using `MIGRATION_DATABASE_URL`)
