@@ -21,7 +21,7 @@ import {
   user,
   userRelations,
   verification,
-} from './auth-schema.ts';
+} from './auth-schema.js';
 
 const appTimestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

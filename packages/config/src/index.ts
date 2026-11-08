@@ -1,1 +1,1 @@
-export { getAstecApiUrl } from './api-url';
+export { getAstecApiUrl } from './api-url.js';

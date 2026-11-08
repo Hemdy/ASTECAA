@@ -1,28 +1,32 @@
 {
   "name": "@astec/api",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.nest.json",
-    "start": "node .nest-build/apps/api/src/main.js",
+    "build": "tsc",
+    "start": "node dist/main.js",
     "start:dev": "tsx watch src/main.ts",
-    "test:nest": "tsx --test src/nest/**/*.spec.ts"
+    "test": "node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs test/api-smoke.ts"
   },
   "dependencies": {
+    "@astec/database": "workspace:*",
+    "@astec/types": "workspace:*",
+    "@astec/validation": "workspace:*",
+    "@better-auth/drizzle-adapter": "^1.7.15",
+    "@neondatabase/serverless": "^1.2.0",
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
-    "@better-auth/drizzle-adapter": "1.7.15",
-    "@neondatabase/serverless": "1.2.0",
-    "better-auth": "1.7.15",
-    "drizzle-orm": "0.45.4",
+    "better-auth": "^1.7.15",
+    "drizzle-orm": "^0.45.4",
     "express": "^5.2.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",
-    "@types/node": "^26.1.2",
+    "@types/node": "^22.13.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }

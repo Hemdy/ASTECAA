@@ -1,5 +1,5 @@
 import type { EventInput, EventScheduleItem, EventStatus } from '@astec/types';
-import { isRecord, type ValidationResult } from './common.ts';
+import { isRecord, type ValidationResult } from './common.js';
 
 const eventStatuses: readonly EventStatus[] = [
   'draft',

@@ -1,14 +1,18 @@
 {
-  "name": "angular-starter",
+  "name": "astecaa-monorepo",
   "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve website",
     "start:website": "ng serve website",
     "start:admin": "ng serve admin",
+    "start:api": "pnpm --filter @astec/api start:dev",
     "build:website": "ng build website",
     "build:admin": "ng build admin",
-    "build": "npm run build:website && npm run build:admin && node scripts/write-api-config.mjs"
+    "build:api": "pnpm --filter @astec/api build",
+    "build": "npm run build:website && npm run build:admin && node scripts/write-api-config.mjs",
+    "db:generate": "pnpm --filter @astec/database db:generate",
+    "db:migrate": "pnpm --filter @astec/database db:migrate"
   },
   "dependencies": {
     "@angular/common": "^21.2.26",

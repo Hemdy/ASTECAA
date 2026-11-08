@@ -1,2 +1,2 @@
-export { Toast } from './toast/toast';
-export { ToastService } from './toast/toast.service';
+export { Toast } from './toast/toast.js';
+export { ToastService } from './toast/toast.service.js';
