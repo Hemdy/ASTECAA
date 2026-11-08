@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 import { appUsers, authIdentities, roles, userRoles } from '@astec/database';
+import { getAstecApiUrl } from '@astec/config';
 import { DatabaseService } from '../database/database.service.js';
 
 export interface ActiveIdentity {
@@ -21,7 +22,7 @@ export class UsersService {
     email: string,
     name: string,
   ): Promise<ActiveIdentity | null> {
-    const baseUrl = process.env.BETTER_AUTH_URL?.trim() ?? 'http://localhost:8000';
+    const baseUrl = getAstecApiUrl();
     let issuer: string;
     try {
       issuer = new URL(baseUrl).origin;
@@ -73,3 +74,4 @@ export class UsersService {
     };
   }
 }
+

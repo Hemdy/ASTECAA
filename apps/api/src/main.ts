@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
 import { NestFactory } from '@nestjs/core';
+import { LOCAL_PORTS } from '@astec/config';
 import { AppModule } from './app.module.js';
 import { AuthService } from './auth/auth.service.js';
 import { ApiExceptionFilter } from './core/api-exception.filter.js';
@@ -95,7 +96,7 @@ async function bootstrap(): Promise<void> {
 
   app.useGlobalFilters(new ApiExceptionFilter());
 
-  const port = Number(process.env.ASTEC_API_PORT ?? process.env.PORT ?? '8000');
+  const port = Number(process.env.ASTEC_API_PORT ?? process.env.PORT ?? LOCAL_PORTS.api);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('Port must be an integer between 1 and 65535.');
   }

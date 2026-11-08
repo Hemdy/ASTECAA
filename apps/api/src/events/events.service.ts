@@ -198,3 +198,4 @@ function mapDatabaseError(error: unknown): unknown {
   }
   return error;
 }
+

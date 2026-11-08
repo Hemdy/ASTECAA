@@ -19,3 +19,4 @@ export class EventsController {
     return this.events.getPublic(slug);
   }
 }
+

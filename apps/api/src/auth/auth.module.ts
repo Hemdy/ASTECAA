@@ -10,3 +10,4 @@ import { UsersModule } from '../users/users.module.js';
   exports: [AuthService, AdminGuard],
 })
 export class AuthModule {}
+

@@ -10,7 +10,7 @@
     "build:website": "ng build website",
     "build:admin": "ng build admin",
     "build:api": "pnpm --filter @astec/api build",
-    "build": "npm run build:website && npm run build:admin && node scripts/write-api-config.mjs",
+    "build": "pnpm run build:website && pnpm run build:admin && node scripts/write-api-config.mjs",
     "db:generate": "pnpm --filter @astec/database db:generate",
     "db:migrate": "pnpm --filter @astec/database db:migrate",
     "db:check": "pnpm --filter @astec/database db:check"

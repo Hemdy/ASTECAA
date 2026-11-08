@@ -3,6 +3,7 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { fromNodeHeaders } from 'better-auth/node';
 import { appUsers, astecSchema, authIdentities } from '@astec/database';
+import { getAppConfig } from '@astec/config';
 import { DatabaseService } from '../database/database.service.js';
 
 @Injectable()
@@ -13,28 +14,20 @@ export class AuthService implements OnModuleDestroy {
   readonly appEnv: string;
 
   constructor(private readonly database: DatabaseService) {
-    this.appEnv = process.env.APP_ENV ?? 'development';
-    const secret = process.env.BETTER_AUTH_SECRET;
+    const config = getAppConfig();
+    this.appEnv = config.env;
+    this.baseUrl = config.services.api;
+    const baseOrigin = new URL(this.baseUrl).origin;
+    this.allowedOrigins = new Set(config.allowedOrigins);
+
+    let secret = process.env.BETTER_AUTH_SECRET;
     if (!secret || secret.length < 32) {
-      throw new Error('BETTER_AUTH_SECRET must be at least 32 characters.');
+      if (this.appEnv === 'development') {
+        secret = 'astecaa-development-secret-key-at-least-32-characters';
+      } else {
+        throw new Error('BETTER_AUTH_SECRET must be at least 32 characters in production.');
+      }
     }
-
-    const rawBaseUrl = process.env.BETTER_AUTH_URL?.trim();
-    if (!rawBaseUrl) {
-      throw new Error('BETTER_AUTH_URL is required.');
-    }
-    const baseOrigin = parseHttpOrigin(rawBaseUrl, 'BETTER_AUTH_URL');
-    this.baseUrl = rawBaseUrl;
-
-    const configuredOrigins = [
-      baseOrigin,
-      ...(process.env.ALLOWED_ORIGINS ?? '')
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter(Boolean)
-        .map((origin) => parseHttpOrigin(origin, 'ALLOWED_ORIGINS')),
-    ];
-    this.allowedOrigins = new Set(configuredOrigins);
 
     this.auth = betterAuth({
       appName: 'ASTECAA',
@@ -108,30 +101,4 @@ export class AuthService implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     // Database connection cleanup is handled by DatabaseService
   }
-}
-
-function parseHttpOrigin(value: string, name: string): string {
-  let url: URL;
-  try {
-    url = new URL(value);
-  } catch {
-    throw new Error(`${name} must be a valid HTTP(S) URL.`);
-  }
-
-  if (
-    (url.protocol !== 'https:' && url.protocol !== 'http:') ||
-    url.username ||
-    url.password ||
-    url.pathname !== '/' ||
-    url.search ||
-    url.hash
-  ) {
-    throw new Error(`${name} must be an HTTP(S) origin without credentials or path.`);
-  }
-
-  if (url.protocol === 'http:' && url.hostname !== 'localhost' && url.hostname !== '127.0.0.1') {
-    throw new Error(`${name} must use HTTPS outside localhost.`);
-  }
-
-  return url.origin;
 }

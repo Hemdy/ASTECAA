@@ -45,6 +45,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4200
+          },
           "configurations": {
             "development": {
               "buildTarget": "website:build:development"
@@ -103,6 +106,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "port": 4300
+          },
           "configurations": {
             "development": {
               "buildTarget": "admin:build:development"

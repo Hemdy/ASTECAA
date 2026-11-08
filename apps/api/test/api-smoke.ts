@@ -13,7 +13,7 @@ async function runSmokeTests() {
   process.env.BETTER_AUTH_SECRET =
     process.env.BETTER_AUTH_SECRET ?? 'smoke-test-secret-that-is-at-least-32-characters-long!';
   process.env.BETTER_AUTH_URL = process.env.BETTER_AUTH_URL ?? 'http://localhost:8000';
-  process.env.ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ?? 'http://localhost:4200';
+  process.env.ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ?? 'http://localhost:4200,http://localhost:4300';
 
   const app = await NestFactory.create(AppModule, { bodyParser: false, logger: false });
   const auth = app.get(AuthService);

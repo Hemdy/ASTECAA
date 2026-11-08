@@ -9,3 +9,4 @@ import { EventsService } from './events.service.js';
   exports: [EventsService],
 })
 export class EventsModule {}
+

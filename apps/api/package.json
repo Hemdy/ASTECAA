@@ -10,6 +10,7 @@
     "test": "node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs test/api-smoke.ts"
   },
   "dependencies": {
+    "@astec/config": "workspace:*",
     "@astec/database": "workspace:*",
     "@astec/types": "workspace:*",
     "@astec/validation": "workspace:*",

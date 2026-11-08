@@ -39,3 +39,4 @@ export class AdminEventsController {
     await this.events.delete(id);
   }
 }
+

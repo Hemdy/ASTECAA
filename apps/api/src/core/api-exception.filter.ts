@@ -91,3 +91,4 @@ function describeError(error: unknown): {
     message: 'An unexpected error occurred.',
   };
 }
+
