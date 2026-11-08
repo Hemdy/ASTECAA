@@ -3,9 +3,9 @@
   "cli": {
     "analytics": "1e1de97b-a744-405a-8b5a-0397bb3d01ce"
   },
-  "newProjectRoot": "projects",
+  "newProjectRoot": "apps",
   "projects": {
-    "demo": {
+    "website": {
       "architect": {
         "build": {
           "builder": "@angular/build:application",
@@ -28,26 +28,29 @@
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "apps/website/public"
               }
             ],
-            "index": "src/index.html",
-            "browser": "src/main.ts",
-            "outputPath": "dist/demo",
+            "index": "apps/website/src/index.html",
+            "browser": "apps/website/src/main.ts",
+            "outputPath": {
+              "base": "dist/astecaa",
+              "browser": "browser"
+            },
             "polyfills": [],
             "scripts": [],
-            "styles": ["src/global_styles.css", "src/admin/admin.css"],
-            "tsConfig": "tsconfig.app.json"
+            "styles": ["apps/website/src/global_styles.css"],
+            "tsConfig": "apps/website/tsconfig.app.json"
           }
         },
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
             "development": {
-              "buildTarget": "demo:build:development"
+              "buildTarget": "website:build:development"
             },
             "production": {
-              "buildTarget": "demo:build:production"
+              "buildTarget": "website:build:production"
             }
           },
           "defaultConfiguration": "development"
@@ -55,9 +58,67 @@
       },
       "prefix": "app",
       "projectType": "application",
-      "root": "",
+      "root": "apps/website",
       "schematics": {},
-      "sourceRoot": "src"
+      "sourceRoot": "apps/website/src"
+    },
+    "admin": {
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "configurations": {
+            "development": {
+              "extractLicenses": false,
+              "namedChunks": true,
+              "optimization": false,
+              "sourceMap": true
+            },
+            "production": {
+              "extractLicenses": true,
+              "namedChunks": false,
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false
+            }
+          },
+          "options": {
+            "assets": [],
+            "baseHref": "/",
+            "browser": "apps/admin/src/main.ts",
+            "deleteOutputPath": false,
+            "deployUrl": "/admin/",
+            "index": "apps/admin/src/index.html",
+            "outputPath": {
+              "base": "dist/astecaa/browser",
+              "browser": "admin"
+            },
+            "polyfills": [],
+            "scripts": [],
+            "styles": [
+              "apps/website/src/global_styles.css",
+              "apps/admin/src/admin.css"
+            ],
+            "tsConfig": "apps/admin/tsconfig.app.json"
+          }
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "development": {
+              "buildTarget": "admin:build:development"
+            },
+            "production": {
+              "buildTarget": "admin:build:production"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      },
+      "prefix": "admin",
+      "projectType": "application",
+      "root": "apps/admin",
+      "schematics": {},
+      "sourceRoot": "apps/admin/src"
     }
   },
   "version": 1

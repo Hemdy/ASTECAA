@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793803115983,
+      "tag": "0000_third_moonstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793806987039,
+      "tag": "0001_clumsy_micromacro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793809692374,
+      "tag": "0002_many_king_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793823115729,
+      "tag": "0003_loose_shinko_yamashiro",
+      "breakpoints": true
+    }
+  ]
+}

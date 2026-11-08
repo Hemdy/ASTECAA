@@ -1,0 +1,78 @@
+<div class="adm-login-page">
+  <div class="adm-login-card">
+    <div class="adm-login-brand">
+      <span class="adm-brand-mark">A</span>
+      <div>
+        <div class="adm-login-name">ASTECAA</div>
+        <div class="adm-login-sub">Admin Console</div>
+      </div>
+    </div>
+
+    <h1 class="adm-login-title">Welcome back</h1>
+      <p class="adm-login-desc">Sign in to manage the ASTECAA community platform.</p>
+
+      <form (ngSubmit)="submitLogin($event)">
+        <div class="adm-field">
+          <label class="adm-field-label" for="admin-email">Email address</label>
+          <input
+            class="adm-input"
+            id="admin-email"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="admin@ASTECAA.example"
+            required
+            autocomplete="email"
+          />
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label" for="admin-password">Password</label>
+          <div class="adm-pw-wrap">
+            <input
+              class="adm-input"
+              id="admin-password"
+              [type]="showPw() ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="adm-pw-toggle"
+              [attr.aria-label]="showPw() ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="showPw()"
+              (click)="showPw.set(!showPw())"
+            >
+              {{ showPw() ? '🙈' : '👁' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="adm-login-row">
+          <label class="adm-remember">
+            <input type="checkbox" [(ngModel)]="remember" name="remember" />
+            <span>Remember me</span>
+          </label>
+          <span class="adm-forgot-link" title="Contact your system administrator for assistance">
+            Password recovery unavailable
+          </span>
+        </div>
+
+        @if (auth.authError()) {
+          <div class="adm-login-error">{{ auth.authError() }}</div>
+        }
+
+        <button class="adm-btn adm-btn-primary adm-login-submit" type="submit" [disabled]="submitting()">
+          {{ submitting() ? 'Signing in…' : 'Sign in' }}
+        </button>
+      </form>
+
+      <div class="adm-login-foot">
+        <a routerLink="/" class="adm-back-link">← Back to ASTECAA website</a>
+      </div>
+  </div>
+
+  <p class="adm-login-secure">🔒 Secured by ASTECAA authentication · Administrative access only</p>
+</div>

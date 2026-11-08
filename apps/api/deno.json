@@ -1,0 +1,39 @@
+{
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true
+  },
+  "imports": {
+    "@astec/types": "../../packages/types/src/deno.ts",
+    "@astec/validation": "../../packages/validation/src/deno.ts",
+    "@better-auth/drizzle-adapter": "npm:@better-auth/drizzle-adapter@1.7.15",
+    "@neondatabase/serverless": "npm:@neondatabase/serverless@1.2.0",
+    "better-auth": "npm:better-auth@1.7.15",
+    "drizzle-orm": "npm:drizzle-orm@0.45.4",
+    "drizzle-orm/neon-serverless": "npm:drizzle-orm@0.45.4/neon-serverless",
+    "drizzle-orm/pg-core": "npm:drizzle-orm@0.45.4/pg-core",
+    "drizzle-orm/relations": "npm:drizzle-orm@0.45.4/relations"
+  },
+  "tasks": {
+    "check": "deno check --config=deno.json src/server.ts",
+    "check:db": "deno check --config=deno.json src/db/database.ts src/db/database_test.ts scripts/database-smoke.ts",
+    "check:auth": "deno check --config=deno.json src/auth/auth.ts src/auth/handler.ts src/auth/auth_test.ts src/modules/events/events.handler.ts src/validation/parse-json.ts src/validation/parse-json_test.ts scripts/auth-smoke.ts src/server.ts",
+    "check:events": "deno check --config=deno.json src/modules/events/events.handler.ts src/modules/events/events.validation_test.ts scripts/cms-migration-preflight.ts src/server.ts",
+    "check:cms": "deno check --config=deno.json src/modules/events/events.handler.ts scripts/cms-api-smoke.ts scripts/cms-migration-preflight.ts src/server.ts",
+    "cms:api:smoke": "deno run --config=deno.json --env-file=.env --allow-env=APP_ENV,DATABASE_URL,MIGRATION_DATABASE_URL,BETTER_AUTH_SECRET,BETTER_AUTH_SECRETS,BETTER_AUTH_URL,BETTER_AUTH_TRUSTED_ORIGINS,ALLOWED_ORIGINS,FORCE_COLOR,NODE_ENV,TEST,BETTER_AUTH_TELEMETRY,BETTER_AUTH_TELEMETRY_ID,BETTER_AUTH_TELEMETRY_ENDPOINT,BETTER_AUTH_TELEMETRY_DEBUG,PACKAGE_VERSION,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* --allow-net scripts/cms-api-smoke.ts",
+    "cms:migration:preflight": "deno run --config=deno.json --env-file=.env --allow-env=APP_ENV,DATABASE_URL,MIGRATION_DATABASE_URL,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* --allow-net scripts/cms-migration-preflight.ts absent",
+    "cms:migration:verify": "deno run --config=deno.json --env-file=.env --allow-env=APP_ENV,DATABASE_URL,MIGRATION_DATABASE_URL,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* --allow-net scripts/cms-migration-preflight.ts present",
+    "db:smoke": "deno run --config=deno.json --env-file=.env --allow-env=DATABASE_URL,USERNAME,NODE_PG_FORCE_NATIVE --allow-net scripts/database-smoke.ts",
+    "test:db": "deno test --config=deno.json --allow-env=USERNAME,NODE_PG_FORCE_NATIVE src/db/database_test.ts",
+    "test:auth": "deno test --config=deno.json --allow-env=FORCE_COLOR,NODE_ENV,TEST,BETTER_AUTH_SECRET,BETTER_AUTH_SECRETS,BETTER_AUTH_URL,BETTER_AUTH_TRUSTED_ORIGINS,BETTER_AUTH_TELEMETRY,BETTER_AUTH_TELEMETRY_ID,BETTER_AUTH_TELEMETRY_ENDPOINT,BETTER_AUTH_TELEMETRY_DEBUG,PACKAGE_VERSION,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* src/auth/auth_test.ts",
+    "test:events": "deno test --config=deno.json src/modules/events/events.validation_test.ts",
+    "test:api": "deno test --config=deno.json --allow-env=FORCE_COLOR,NODE_ENV,TEST,BETTER_AUTH_SECRET,BETTER_AUTH_SECRETS,BETTER_AUTH_URL,BETTER_AUTH_TRUSTED_ORIGINS,BETTER_AUTH_TELEMETRY,BETTER_AUTH_TELEMETRY_ID,BETTER_AUTH_TELEMETRY_ENDPOINT,BETTER_AUTH_TELEMETRY_DEBUG,PACKAGE_VERSION,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* src/auth/auth_test.ts src/modules/events/events.validation_test.ts src/db/database_test.ts src/validation/parse-json_test.ts",
+    "auth:smoke": "deno run --config=deno.json --env-file=.env --allow-env=APP_ENV,DATABASE_URL,BETTER_AUTH_SECRET,BETTER_AUTH_SECRETS,BETTER_AUTH_URL,BETTER_AUTH_TRUSTED_ORIGINS,ALLOWED_ORIGINS,FORCE_COLOR,NODE_ENV,TEST,BETTER_AUTH_TELEMETRY,BETTER_AUTH_TELEMETRY_ID,BETTER_AUTH_TELEMETRY_ENDPOINT,BETTER_AUTH_TELEMETRY_DEBUG,PACKAGE_VERSION,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* --allow-net scripts/auth-smoke.ts",
+    "serve:api": "deno run --config=deno.json --env-file=.env --allow-env=APP_ENV,DATABASE_URL,BETTER_AUTH_SECRET,BETTER_AUTH_SECRETS,BETTER_AUTH_URL,BETTER_AUTH_TRUSTED_ORIGINS,ALLOWED_ORIGINS,ASTEC_API_HOST,ASTEC_API_PORT,FORCE_COLOR,NODE_ENV,TEST,BETTER_AUTH_TELEMETRY,BETTER_AUTH_TELEMETRY_ID,BETTER_AUTH_TELEMETRY_ENDPOINT,BETTER_AUTH_TELEMETRY_DEBUG,PACKAGE_VERSION,USER,USERNAME,NODE_PG_FORCE_NATIVE,PG* --allow-net src/server.ts",
+    "serve": "deno task serve:api"
+  }
+}
+
+

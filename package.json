@@ -3,24 +3,27 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build"
+    "start": "ng serve website",
+    "start:website": "ng serve website",
+    "start:admin": "ng serve admin",
+    "build:website": "ng build website",
+    "build:admin": "ng build admin",
+    "build": "npm run build:website && npm run build:admin && node scripts/write-api-config.mjs"
   },
   "dependencies": {
-    "@angular/common": "^21.1.0",
-    "@angular/compiler": "^21.1.0",
-    "@angular/core": "^21.1.0",
-    "@angular/forms": "^21.1.0",
-    "@angular/platform-browser": "^21.1.0",
-    "@angular/router": "^21.1.0",
-    "@supabase/supabase-js": "^2.110.9",
+    "@angular/common": "^21.2.26",
+    "@angular/compiler": "^21.2.26",
+    "@angular/core": "^21.2.26",
+    "@angular/forms": "^21.2.26",
+    "@angular/platform-browser": "^21.2.26",
+    "@angular/router": "^21.2.26",
     "rxjs": "^7.8.1",
     "tslib": "^2.5.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.1.0",
-    "@angular/cli": "^21.0.4",
-    "@angular/compiler-cli": "^21.1.0",
+    "@angular/build": "^21.2.29",
+    "@angular/cli": "^21.2.29",
+    "@angular/compiler-cli": "^21.2.26",
     "@types/node": "^26.1.2",
     "typescript": "^5.9.3"
   }

@@ -2,6 +2,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": ".",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -14,6 +15,13 @@
     "declaration": false,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
+    "paths": {
+      "@astec/api-client": ["packages/api-client/src/index.ts"],
+      "@astec/config": ["packages/config/src/index.ts"],
+      "@astec/types": ["packages/types/src/index.ts"],
+      "@astec/ui": ["packages/ui/src/index.ts"],
+      "@astec/validation": ["packages/validation/src/index.ts"]
+    },
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",

@@ -1,0 +1,22 @@
+{
+  "name": "@astec/database",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "npm run db:generate && npm run db:migrate:apply",
+    "db:migrate:apply": "node --env-file=../../apps/api/.env ./node_modules/drizzle-kit/bin.cjs migrate --config=drizzle.config.ts",
+    "db:check": "drizzle-kit check --config=drizzle.config.ts",
+    "db:push": "node -e \"console.error('Forbidden: never use Drizzle db push. Generate, review, and migrate SQL instead.'); process.exit(1)\""
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "1.2.0",
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.11"
+  },
+  "overrides": {
+    "esbuild": "0.25.12"
+  }
+}
