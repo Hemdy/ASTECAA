@@ -1,47 +1,57 @@
 # Deployment
 
-The root `netlify.toml` is intentionally retained because Netlify discovers it
-at the repository root. It builds both Angular applications and publishes the
-website bundle, with the admin bundle under `/admin`.
+ASTECAA is deployed as two artifacts:
+1. Static Angular frontend bundle (`apps/website` and `apps/admin`).
+2. Node.js API service (`apps/api`) running on Neon PostgreSQL with Drizzle ORM and Better Auth.
 
-The API is an independent Deno service and is deployed separately from the
-Angular applications. Configure `DATABASE_URL`, `BETTER_AUTH_URL`,
-`BETTER_AUTH_SECRET`, and an explicit comma-separated `ALLOWED_ORIGINS` value
-through the deployment platform's secret manager. The deployment target and
-production rollout remain to be selected and validated.
+## Static Frontend Deployment
 
-The API container is built from the repository root with
-`docker build -f apps/api/Dockerfile -t asteccaa-api .`. The image uses the
-repository's Deno lockfile in frozen mode. Configure its required secrets and
-environment variables through the container host; do not pass a local `.env`
-file into the build. Route liveness checks to `/health` and readiness checks
-to `/ready` on port `8000`.
+Run `pnpm run build` to build both Angular applications and write the runtime configuration:
+- The website application is output to `dist/astecaa/browser`.
+- The admin dashboard application is output under `/admin` (`dist/astecaa/browser/admin`).
 
-The static website/admin deployment requires the non-secret `ASTECAA_API_URL`
-build variable. The root `npm run build` validates it and writes
-`api-config.js` into the published directory; the script sets the API origin
-for both Angular applications. Production URLs must use HTTPS. Configure the
-API and frontend on the same site (for example `api.example.org` and
-`www.example.org`) so browser session cookies can be used reliably. Do not
-deploy with a localhost API URL.
+Before building for production, set the non-secret `ASTECAA_API_URL` environment variable to the API's HTTPS origin:
+```bash
+export ASTECAA_API_URL="https://api.astecaa.org"
+pnpm run build
+```
+The build process invokes `scripts/write-api-config.mjs`, which generates `api-config.js` in the output bundle and configures `globalThis.__ASTECAA_API_URL__`.
 
-Before deploying, run the reviewed migration workflow against the intended
-Neon production branch, provision and verify the initial administrator through
-an approved secure procedure (not yet implemented), and verify `/health`,
-`/ready`, admin login,
-event CRUD, browser CORS, and cookie behavior on the actual production
-hostnames. Do not promote the current deployment while those checks or the
-account/data migration remain incomplete.
+Configure your static web host (such as Cloudflare Pages, Vercel, AWS S3/CloudFront) with standard single-page app (SPA) rewrite rules:
+- `/admin/*` -> `/admin/index.html`
+- `/*` -> `/index.html`
 
-The root `.env` was removed from Git tracking, with the local copy preserved.
-Rotate any credentials that may have appeared in its Git history, and complete
-approved history remediation before treating the repository as secret-clean.
+## API Deployment
 
-The API host must bind to the container's public interface in production (the
-default is `0.0.0.0` when `APP_ENV=production`). Store all credentials in the
-host's secret manager. Never expose database URLs or Better Auth secrets to
-the frontend build environment.
+The API is a standard Node.js application built with TypeScript and NestJS. It can be hosted on any Node 22+ runtime (such as Railway, Fly.io, AWS ECS, or Google Cloud Run).
 
-The former Supabase Edge Function scaffold is no longer an application runtime.
-Do not delete or decommission the external Supabase project until data and
-account migration has been verified and accepted.
+### Build & Run
+
+```bash
+pnpm --filter @astec/api build
+pnpm --filter @astec/api start
+```
+
+### Required Environment Variables
+
+Set the following secrets in your hosting provider's environment/secret manager:
+- `DATABASE_URL`: Neon pooled PostgreSQL connection string (with `sslmode=require`).
+- `BETTER_AUTH_SECRET`: Random secret of at least 32 characters for session signing.
+- `BETTER_AUTH_URL`: Canonical public URL of the API (e.g. `https://api.astecaa.org`).
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed frontend origins (e.g. `https://astecaa.org,https://www.astecaa.org`).
+- `APP_ENV`: Set to `production`.
+- `ASTEC_API_PORT` or `PORT`: HTTP port to bind (default: `8000`).
+- `ASTEC_API_HOST`: Network interface to bind (default: `0.0.0.0` in production).
+
+### Health & Readiness Probes
+
+- Liveness probe: `GET /health` (returns `{ status: "ok" }`).
+- Readiness probe: `GET /ready` (executes `SELECT 1` on Neon PostgreSQL; returns `{ status: "ready" }`).
+
+## Database Migrations
+
+Drizzle schema definitions and migrations live in `infrastructure/database`. Run migrations against the target Neon database branch using `MIGRATION_DATABASE_URL`:
+```bash
+pnpm --filter @astec/database db:migrate
+```
+Migrations are never executed on API process startup.

@@ -1,33 +1,65 @@
 # ASTECAA
 
-ASTECAA is organized as a monorepo with independent Angular website and admin
-applications, a Deno API using Neon PostgreSQL, and shared TypeScript packages.
+ASTECAA is organized as a pnpm monorepo with independent Angular website and admin
+applications, a clean Node.js API using Neon PostgreSQL and Drizzle ORM, and shared TypeScript packages.
 
 ## Applications
 
-- `apps/website` — public website (`npm run start:website`)
-- `apps/admin` — admin dashboard (`npm run start:admin`; browse to `/admin`)
-- `apps/api` — independent Deno API with Better Auth and Neon; see its README
+- `apps/website` — public website (`pnpm run start:website`)
+- `apps/admin` — admin dashboard (`pnpm run start:admin`; browse to `/admin`)
+- `apps/api` — Node.js REST API with Better Auth and Neon PostgreSQL (`pnpm run start:api`)
 
-## Shared packages and infrastructure
+## Shared Packages and Infrastructure
 
 - `packages/ui` — Angular UI shared by applications
 - `packages/api-client` — shared browser-side data access
 - `packages/types` — shared domain types
 - `packages/validation` — shared validation primitives
 - `packages/config` — shared API URL configuration
-- `infrastructure/database` — database migration/configuration location
-- `infrastructure/deployment` — deployment notes; root `netlify.toml` is used by Netlify
-- `docs` — architecture notes and decisions
+- `infrastructure/database` — Drizzle ORM schema and migrations for Neon PostgreSQL
+- `infrastructure/deployment` — deployment guides and operational documentation
+- `docs` — architecture notes and technical decisions
 
-Run `npm run build` to build both Angular apps for the combined static
-deployment. Set the non-secret `ASTECAA_API_URL` environment variable to the
-API's HTTPS origin before building the deployment bundle. Local development
-continues to use `http://localhost:8000` automatically.
-The website output is written to `dist/astecaa/browser`; the admin app is written
-under its `/admin` subdirectory.
+## Local Development
 
-Events are the first Neon-backed CMS slice. Most other CMS data and the election
-service still contain local demo state. Authentication account migration,
-registration, password recovery, media storage, and production cutover are
-incomplete; do not treat the repository as a completed Supabase migration.
+1. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+2. Configure `.env` from `.env.example`:
+   ```bash
+   cp .env.example .env
+   # Add your Neon connection strings and auth secrets
+   ```
+3. Run the development servers:
+   ```bash
+   # In terminal 1: Start API
+   pnpm run start:api
+
+   # In terminal 2: Start Website
+   pnpm run start:website
+
+   # In terminal 3: Start Admin (optional)
+   pnpm run start:admin
+   ```
+
+## Building for Production
+
+Build all packages, applications, and API:
+```bash
+# Set production API URL for the frontend bundle:
+export ASTECAA_API_URL="https://api.astecaa.org"
+
+# Build frontends and API:
+pnpm run build
+pnpm run build:api
+```
+
+The website output is written to `dist/astecaa/browser`; the admin app is written under its `/admin` subdirectory.
+The API output is compiled to `apps/api/dist`.
+
+## Database Management
+
+Schema definitions and migrations are managed via Drizzle Kit in `infrastructure/database`:
+- Generate migrations: `pnpm run db:generate`
+- Apply migrations: `pnpm run db:migrate`
