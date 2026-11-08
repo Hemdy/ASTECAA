@@ -16,9 +16,17 @@ export class AdminLayout {
   auth = inject(AdminAuthService);
   router = inject(Router);
   nav = ADMIN_NAV;
-  user = ADMIN_USER;
   notifications = ADMIN_NOTIFICATIONS;
   unreadCount = computed(() => this.notifications.filter((n) => n.unread).length);
+
+  get user() {
+    const p = this.auth.profile();
+    return {
+      name: p?.full_name || ADMIN_USER.name,
+      role: p?.role === 'super_admin' ? 'Super Administrator' : (p?.role === 'admin' ? 'Administrator' : ADMIN_USER.role),
+      avatar: p?.avatar_url || ADMIN_USER.avatar,
+    };
+  }
 
   crumbs = computed(() => {
     const url = this.router.url;

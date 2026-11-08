@@ -2,7 +2,8 @@ import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { fromNodeHeaders } from 'better-auth/node';
-import { appUsers, astecSchema, authIdentities } from '@astec/database';
+import { eq } from 'drizzle-orm';
+import { appUsers, astecSchema, authIdentities, invitations, roles, userRoles } from '@astec/database';
 import { getAppConfig } from '@astec/config';
 import { DatabaseService } from '../database/database.service.js';
 
@@ -45,6 +46,7 @@ export class AuthService implements OnModuleDestroy {
         user: {
           create: {
             after: async (authUser) => {
+              const normalizedEmail = authUser.email.trim().toLowerCase();
               const existing = await this.database.db.query.authIdentities.findFirst({
                 where: (identity, { and, eq: equals }) =>
                   and(
@@ -61,18 +63,57 @@ export class AuthService implements OnModuleDestroy {
                   .insert(appUsers)
                   .values({
                     email: authUser.email,
-                    emailNormalized: authUser.email.trim().toLowerCase(),
+                    emailNormalized: normalizedEmail,
                     fullName: authUser.name,
-                    status: authUser.emailVerified ? 'active' : 'pending',
+                    status: 'active',
+                  })
+                  .onConflictDoUpdate({
+                    target: appUsers.emailNormalized,
+                    set: { fullName: authUser.name, status: 'active' },
                   })
                   .returning({ id: appUsers.id });
 
-                await tx.insert(authIdentities).values({
-                  userId: principal.id,
-                  issuer: baseOrigin,
-                  subject: authUser.id,
-                  emailVerified: authUser.emailVerified,
+                await tx
+                  .insert(authIdentities)
+                  .values({
+                    userId: principal.id,
+                    issuer: baseOrigin,
+                    subject: authUser.id,
+                    emailVerified: true,
+                  })
+                  .onConflictDoNothing();
+
+                // Check for a pending invitation for this email
+                const invitation = await tx.query.invitations.findFirst({
+                  where: (inv, { and, eq: equals }) =>
+                    and(
+                      equals(inv.emailNormalized, normalizedEmail),
+                      equals(inv.status, 'pending'),
+                    ),
                 });
+
+                let assignedRoleCode = 'alumni';
+                if (invitation) {
+                  assignedRoleCode = invitation.roleCode;
+                  await tx
+                    .update(invitations)
+                    .set({ status: 'accepted', acceptedAt: new Date() })
+                    .where(eq(invitations.id, invitation.id));
+                }
+
+                const targetRole = await tx.query.roles.findFirst({
+                  where: (r, { eq: equals }) => equals(r.code, assignedRoleCode),
+                });
+
+                if (targetRole) {
+                  await tx
+                    .insert(userRoles)
+                    .values({
+                      userId: principal.id,
+                      roleId: targetRole.id,
+                    })
+                    .onConflictDoNothing();
+                }
               });
             },
           },
@@ -80,8 +121,8 @@ export class AuthService implements OnModuleDestroy {
       },
       emailAndPassword: {
         enabled: true,
-        requireEmailVerification: true,
-        disableSignUp: true,
+        requireEmailVerification: false,
+        disableSignUp: false,
       },
     });
   }

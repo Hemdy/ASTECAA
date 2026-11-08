@@ -3,16 +3,111 @@
     <a routerLink="/" class="auth-back">← Back to Home</a>
     <div class="auth-header">
       <span class="eyebrow">Join the ASTECAA Community</span>
-      <h1>Member registration is unavailable</h1>
+      <h1>Alumni Registration</h1>
       <p class="lede">
-        The new member account system is not ready yet. No registration details
-        will be collected on this page.
+        Create your alumni account to connect with classmates, participate in elections, and stay engaged with ASTECAA.
       </p>
     </div>
 
-    <div class="auth-error" role="status" aria-live="polite">
-      Please check back later. If you already have a migrated account, you can
-      <a routerLink="/login">try signing in</a>.
+    <form (ngSubmit)="submit($event)" class="auth-form">
+      <div class="field">
+        <label>Full Name</label>
+        <input
+          type="text"
+          name="fullName"
+          [(ngModel)]="fullName"
+          placeholder="e.g. Chukwuma Obi"
+          required
+          autocomplete="name"
+        />
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          placeholder="name@domain.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="field">
+        <label>Graduation Set / Year <span class="auth-optional">(e.g. Class of 2005)</span></label>
+        <input
+          type="text"
+          name="graduationSet"
+          [(ngModel)]="graduationSet"
+          placeholder="e.g. 2005 or Class of 2005"
+        />
+      </div>
+
+      <div class="field">
+        <label>Phone Number <span class="auth-optional">(optional)</span></label>
+        <input
+          type="tel"
+          name="phone"
+          [(ngModel)]="phone"
+          placeholder="+234 800 000 0000"
+          autocomplete="tel"
+        />
+      </div>
+
+      <div class="field">
+        <label>Password <span class="auth-optional">(min 8 characters)</span></label>
+        <div class="auth-pw-wrap">
+          <input
+            [type]="showPw() ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Create a password"
+            required
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="auth-pw-toggle"
+            (click)="showPw.set(!showPw())"
+          >
+            {{ showPw() ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Confirm Password</label>
+        <div class="auth-pw-wrap">
+          <input
+            [type]="showPw() ? 'text' : 'password'"
+            name="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            placeholder="Confirm your password"
+            required
+            autocomplete="new-password"
+          />
+        </div>
+      </div>
+
+      @if (localError() || auth.authError()) {
+        <div class="auth-error">{{ localError() || auth.authError() }}</div>
+      }
+
+      <button
+        type="submit"
+        class="btn btn-gold auth-submit"
+        [disabled]="submitting() || !canSubmit()"
+      >
+        {{ submitting() ? 'Creating account...' : 'Complete Registration' }}
+      </button>
+    </form>
+
+    <div class="auth-foot">
+      <p>
+        Already have an alumni account?
+        <a routerLink="/login">Sign in here</a>
+      </p>
     </div>
   </div>
 </section>

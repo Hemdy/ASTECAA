@@ -12,8 +12,14 @@ export interface ApplicationIdentity {
   email: string;
   full_name: string;
   role: 'alumni' | 'admin' | 'super_admin';
+  roles?: string[];
+  permissions?: string[];
   is_active: boolean;
   phone: string | null;
+  graduation_year?: string | null;
+  department?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,6 +39,13 @@ export class AuthApiService {
     await this.request('/api/auth/sign-in/email', {
       method: 'POST',
       body: JSON.stringify({ email, password, rememberMe }),
+    });
+  }
+
+  async signUp(email: string, password: string, name: string): Promise<void> {
+    await this.request('/api/auth/sign-up/email', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name }),
     });
   }
 

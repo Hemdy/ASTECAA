@@ -40,6 +40,25 @@ export class EventsApiService {
     );
   }
 
+  async register(
+    id: string,
+    data: { name: string; email: string; phone?: string; graduationYear?: string; userId?: string },
+  ): Promise<{ success: boolean; message: string; eventId: string }> {
+    return this.request(
+      `/api/v1/events/${encodeURIComponent(id)}/register`,
+      { method: 'POST', body: JSON.stringify(data) },
+      true
+    );
+  }
+
+  async getAttendees(id: string): Promise<any[]> {
+    return this.request(
+      `/api/admin/v1/events/${encodeURIComponent(id)}/attendees`,
+      {},
+      true
+    );
+  }
+
   private async request<T>(
     path: string,
     init: RequestInit = {},

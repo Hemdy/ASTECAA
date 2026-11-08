@@ -1,9 +1,9 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
-import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
-import { ADMIN_USERS, AdminUser, Role } from '../../admin-data';
+import { UsersApiService } from '@astec/api-client';
 import { ToastService } from '@astec/ui';
+import type { AdminUser, Role } from '../../admin-data';
 
 @Component({
   selector: 'app-admin-users',
@@ -13,7 +13,10 @@ import { ToastService } from '@astec/ui';
 })
 export class AdminUsers {
   private toast = inject(ToastService);
-  users = signal<AdminUser[]>(ADMIN_USERS);
+  private usersApi = inject(UsersApiService);
+
+  users = signal<AdminUser[]>([]);
+  loading = signal(true);
   query = signal('');
   roleFilter = signal('');
   statusFilter = signal('');
@@ -24,9 +27,15 @@ export class AdminUsers {
   editTarget = signal<AdminUser | null>(null);
   editRole: Role = 'Editor';
 
-
-  
-  roles: Role[] = ['Super Administrator', 'Content Manager', 'Event Manager', 'Community Moderator', 'Gallery Manager', 'Editor', 'Membership Manager'];
+  roles: Role[] = [
+    'Super Administrator',
+    'Content Manager',
+    'Event Manager',
+    'Community Moderator',
+    'Gallery Manager',
+    'Editor',
+    'Membership Manager',
+  ];
 
   filtered = computed(() => {
     const q = this.query().toLowerCase();
@@ -39,6 +48,22 @@ export class AdminUsers {
       return mq && mr && ms;
     });
   });
+
+  constructor() {
+    this.loadUsers();
+  }
+
+  async loadUsers() {
+    this.loading.set(true);
+    try {
+      const list = await this.usersApi.listUsers();
+      this.users.set(list as unknown as AdminUser[]);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to load users from database.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
 
   countStatus(s: string): number {
     return this.users().filter((u) => u.status === s).length;
@@ -57,16 +82,27 @@ export class AdminUsers {
     this.selected.update((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   }
 
-  approve(u: AdminUser) {
-    this.users.update((list) => list.map((x) => (x.id === u.id ? { ...x, status: 'active' } : x)));
-    this.toast.show(`${u.name} approved.`);
+  async approve(u: AdminUser) {
+    try {
+      await this.usersApi.updateUserStatus(u.id, 'active');
+      this.users.update((list) => list.map((x) => (x.id === u.id ? { ...x, status: 'active' } : x)));
+      this.toast.show(`${u.name} approved.`);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to approve user.');
+    }
   }
 
-  toggleSuspend(u: AdminUser) {
-    this.users.update((list) =>
-      list.map((x) => (x.id === u.id ? { ...x, status: x.status === 'suspended' ? 'active' : 'suspended' } : x))
-    );
-    this.toast.show(u.status === 'suspended' ? `${u.name} reactivated.` : `${u.name} suspended.`);
+  async toggleSuspend(u: AdminUser) {
+    const nextStatus = u.status === 'suspended' ? 'active' : 'suspended';
+    try {
+      await this.usersApi.updateUserStatus(u.id, nextStatus);
+      this.users.update((list) =>
+        list.map((x) => (x.id === u.id ? { ...x, status: nextStatus } : x))
+      );
+      this.toast.show(u.status === 'suspended' ? `${u.name} reactivated.` : `${u.name} suspended.`);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to change status.');
+    }
   }
 
   openEdit(u: AdminUser) {
@@ -74,31 +110,53 @@ export class AdminUsers {
     this.editRole = u.role;
   }
 
-  saveRole() {
+  async saveRole() {
     const t = this.editTarget();
     if (t) {
-      this.users.update((list) => list.map((u) => (u.id === t.id ? { ...u, role: this.editRole } : u)));
-      this.toast.show('Role updated.');
+      try {
+        await this.usersApi.updateUserRole(t.id, this.editRole);
+        this.users.update((list) => list.map((u) => (u.id === t.id ? { ...u, role: this.editRole } : u)));
+        this.toast.show('Role updated successfully.');
+      } catch (err: any) {
+        this.toast.show(err.message || 'Failed to update role.');
+      }
     }
     this.editTarget.set(null);
   }
 
-  sendInvite() {
+  async sendInvite() {
     if (!this.inviteEmail.trim()) {
       this.toast.show('Please enter an email address.');
       return;
     }
-    this.toast.show(`Invitation sent to ${this.inviteEmail}.`);
-    this.inviteModal.set(false);
-    this.inviteEmail = '';
+    try {
+      await this.usersApi.createInvitation(this.inviteEmail.trim(), this.inviteRole);
+      this.toast.show(`Invitation sent to ${this.inviteEmail}.`);
+      this.inviteModal.set(false);
+      this.inviteEmail = '';
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to send invitation.');
+    }
   }
 
   exportCsv() {
+    const header = ['ID', 'Name', 'Email', 'Role', 'Status', 'Joined'];
+    const rows = this.filtered().map((u) => [u.id, u.name, u.email, u.role, u.status, u.joined]);
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [header.join(','), ...rows.map((r) => r.map((c) => `"${c}"`).join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'astecaa-members.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     this.toast.show('User list exported as CSV.');
   }
 
-    onAvatarImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/avatar-fallback.jpg';
-}
+  onAvatarImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/ASTECAA.jpg';
+  }
 }

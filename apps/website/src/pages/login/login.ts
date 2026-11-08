@@ -1,6 +1,6 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MemberAuthService } from '../../services/member-auth';
 import { ToastService } from '@astec/ui';
 
@@ -14,6 +14,7 @@ import { ToastService } from '@astec/ui';
 export class Login {
   auth = inject(MemberAuthService);
   router = inject(Router);
+  route = inject(ActivatedRoute);
   toast = inject(ToastService);
 
   email = '';
@@ -42,7 +43,8 @@ export class Login {
     this.submitting.set(false);
     if (ok) {
       this.toast.show(`Welcome back, ${this.auth.displayName().split(' ')[0]}!`);
-      this.router.navigate(['/']);
+      const redirect = this.route.snapshot.queryParamMap.get('redirect') || '/';
+      this.router.navigateByUrl(redirect);
     }
   }
 }

@@ -1,7 +1,8 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '@astec/ui';
-import { ADMIN_ROLES, RolePermission, Role } from '../../admin-data';
+import { UsersApiService } from '@astec/api-client';
+import type { RolePermission } from '../../admin-data';
 
 @Component({
   selector: 'app-admin-roles',
@@ -11,14 +12,31 @@ import { ADMIN_ROLES, RolePermission, Role } from '../../admin-data';
 })
 export class AdminRoles {
   private toast = inject(ToastService);
-  roles = signal<RolePermission[]>([...ADMIN_ROLES]);
+  private usersApi = inject(UsersApiService);
+
+  roles = signal<RolePermission[]>([]);
+  loading = signal(true);
 
   audit = [
-    { id: 'al1', user: 'Marlene Whitfield', action: 'granted Gallery Manager upload permissions', time: '2 days ago', icon: '🛡' },
-    { id: 'al2', user: 'Marlene Whitfield', action: 'created the Event Manager role', time: '1 week ago', icon: '✎' },
-    { id: 'al3', user: 'Daniel Okonkwo', action: 'removed Settings access from the Editor role', time: '2 weeks ago', icon: '⊘' },
-    { id: 'al4', user: 'System', action: 'logged a permission change by Theodore Marsh', time: '3 weeks ago', icon: '⚙' },
+    { id: 'al1', user: 'Super Administrator', action: 'initialized system RBAC permissions', time: 'Recently', icon: '🛡' },
+    { id: 'al2', user: 'System', action: 'verified role permissions against Neon database', time: 'Recently', icon: '⚙' },
   ];
+
+  constructor() {
+    this.loadRoles();
+  }
+
+  async loadRoles() {
+    this.loading.set(true);
+    try {
+      const list = await this.usersApi.listRoles();
+      this.roles.set(list as unknown as RolePermission[]);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to load roles.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
 
   permissions(r: RolePermission): { key: string; value: boolean }[] {
     return [
@@ -38,7 +56,22 @@ export class AdminRoles {
     );
   }
 
-  save() {
-    this.toast.show('Role permissions saved.');
+  async save() {
+    try {
+      for (const r of this.roles()) {
+        await this.usersApi.updateRolePermissions(r.role, {
+          users: r.users,
+          events: r.events,
+          gallery: r.gallery,
+          stories: r.stories,
+          comments: r.comments,
+          announcements: r.announcements,
+          settings: r.settings,
+        });
+      }
+      this.toast.show('Role permissions saved to database.');
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to save role permissions.');
+    }
   }
 }

@@ -36,6 +36,10 @@ export const appUsers = pgTable(
     emailNormalized: text('email_normalized').notNull(),
     fullName: text('full_name'),
     phone: text('phone'),
+    graduationYear: text('graduation_year'),
+    department: text('department'),
+    avatarUrl: text('avatar_url'),
+    bio: text('bio'),
     status: text('status').notNull().default('active'),
     ...appTimestamps,
   },
@@ -177,6 +181,168 @@ export const events = pgTable(
   ]
 );
 
+export const invitations = pgTable(
+  'invitations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    email: text('email').notNull(),
+    emailNormalized: text('email_normalized').notNull(),
+    roleCode: text('role_code').notNull().default('alumni'),
+    token: text('token').notNull(),
+    status: text('status').notNull().default('pending'),
+    invitedBy: uuid('invited_by').references(() => appUsers.id, { onDelete: 'set null' }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('invitations_token_uidx').on(table.token),
+    index('invitations_email_normalized_idx').on(table.emailNormalized),
+    check('invitations_status_check', sql`${table.status} in ('pending', 'accepted', 'revoked', 'expired')`),
+  ]
+);
+
+export const elections = pgTable(
+  'elections',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: text('title').notNull(),
+    description: text('description'),
+    startDate: timestamp('start_date', { withTimezone: true }).notNull(),
+    endDate: timestamp('end_date', { withTimezone: true }).notNull(),
+    isActive: boolean('is_active').notNull().default(false),
+    resultsPublished: boolean('results_published').notNull().default(false),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('elections_active_dates_idx').on(table.isActive, table.startDate, table.endDate),
+    check('elections_dates_check', sql`${table.endDate} >= ${table.startDate}`),
+  ]
+);
+
+export const positions = pgTable(
+  'positions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('positions_election_id_sort_order_idx').on(table.electionId, table.sortOrder),
+  ]
+);
+
+export const candidates = pgTable(
+  'candidates',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    positionId: uuid('position_id')
+      .notNull()
+      .references(() => positions.id, { onDelete: 'cascade' }),
+    fullName: text('full_name').notNull(),
+    graduationYear: integer('graduation_year'),
+    department: text('department'),
+    biography: text('biography'),
+    manifesto: text('manifesto'),
+    photoUrl: text('photo_url'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('candidates_position_id_sort_order_idx').on(table.positionId, table.sortOrder),
+  ]
+);
+
+export const votes = pgTable(
+  'votes',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id, { onDelete: 'cascade' }),
+    positionId: uuid('position_id')
+      .notNull()
+      .references(() => positions.id, { onDelete: 'cascade' }),
+    candidateId: uuid('candidate_id')
+      .notNull()
+      .references(() => candidates.id, { onDelete: 'cascade' }),
+    voterHash: text('voter_hash').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('votes_election_position_voter_uidx').on(
+      table.electionId,
+      table.positionId,
+      table.voterHash
+    ),
+    index('votes_candidate_id_idx').on(table.candidateId),
+  ]
+);
+
+export const electionVoters = pgTable(
+  'election_voters',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id, { onDelete: 'cascade' }),
+    voterHash: text('voter_hash').notNull(),
+    voterEmailNormalized: text('voter_email_normalized'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('election_voters_election_voter_uidx').on(table.electionId, table.voterHash),
+  ]
+);
+
+export const voterOtpRequests = pgTable(
+  'voter_otp_requests',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    electionId: uuid('election_id')
+      .notNull()
+      .references(() => elections.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    emailNormalized: text('email_normalized').notNull(),
+    phone: text('phone').notNull(),
+    graduationYear: text('graduation_year').notNull(),
+    otpHash: text('otp_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    verified: boolean('verified').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('voter_otp_requests_election_email_idx').on(table.electionId, table.emailNormalized),
+  ]
+);
+
+export const eventRegistrations = pgTable(
+  'event_registrations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    eventId: uuid('event_id')
+      .notNull()
+      .references(() => events.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => appUsers.id, { onDelete: 'set null' }),
+    name: text('name').notNull(),
+    emailNormalized: text('email_normalized').notNull(),
+    phone: text('phone'),
+    graduationYear: text('graduation_year'),
+    status: text('status').notNull().default('confirmed'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('event_registrations_event_email_uidx').on(table.eventId, table.emailNormalized),
+    index('event_registrations_event_id_idx').on(table.eventId),
+    index('event_registrations_user_id_idx').on(table.userId),
+  ]
+);
+
 export const astecSchema = {
   appUsers,
   authIdentities,
@@ -185,6 +351,14 @@ export const astecSchema = {
   userRoles,
   rolePermissions,
   events,
+  invitations,
+  elections,
+  positions,
+  candidates,
+  votes,
+  electionVoters,
+  voterOtpRequests,
+  eventRegistrations,
   user,
   session,
   account,

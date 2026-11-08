@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { and, asc, eq } from 'drizzle-orm';
-import { events } from '@astec/database';
+import { and, asc, desc, eq, or, sql } from 'drizzle-orm';
+import { eventRegistrations, events } from '@astec/database';
 import { validateEventInput } from '@astec/validation';
 import type { CmsEvent, EventInput, EventStatus, PublicEvent } from '@astec/types';
 import { AppError } from '../core/app-error.js';
@@ -88,6 +88,85 @@ export class EventsService {
     if (!deleted) {
       throw new AppError(404, 'Event was not found.', 'EVENT_NOT_FOUND');
     }
+  }
+
+  async register(
+    eventIdOrSlug: string,
+    data: { name: string; email: string; phone?: string; graduationYear?: string; userId?: string },
+  ) {
+    const db = this.database.db;
+    const emailNormalized = data.email.trim().toLowerCase();
+
+    const [event] = await db
+      .select()
+      .from(events)
+      .where(or(eq(events.id, eventIdOrSlug), eq(events.slug, eventIdOrSlug)))
+      .limit(1);
+
+    if (!event) {
+      throw new AppError(404, 'Event was not found.', 'EVENT_NOT_FOUND');
+    }
+
+    if (event.registered >= event.capacity) {
+      throw new AppError(400, 'This event is currently at full capacity.', 'EVENT_FULL');
+    }
+
+    const [existing] = await db
+      .select({ id: eventRegistrations.id })
+      .from(eventRegistrations)
+      .where(
+        and(
+          eq(eventRegistrations.eventId, event.id),
+          eq(eventRegistrations.emailNormalized, emailNormalized),
+        ),
+      )
+      .limit(1);
+
+    if (existing) {
+      throw new AppError(400, 'You are already registered for this event.', 'ALREADY_REGISTERED');
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.insert(eventRegistrations).values({
+        eventId: event.id,
+        userId: data.userId || null,
+        name: data.name.trim(),
+        emailNormalized,
+        phone: data.phone?.trim() || null,
+        graduationYear: data.graduationYear?.trim() || null,
+        status: 'confirmed',
+      });
+
+      await tx
+        .update(events)
+        .set({ registered: sql`${events.registered} + 1` })
+        .where(eq(events.id, event.id));
+    });
+
+    return {
+      success: true,
+      message: `Registration confirmed for ${event.title}!`,
+      eventId: event.id,
+    };
+  }
+
+  async getAttendees(eventIdOrSlug: string) {
+    const db = this.database.db;
+    const [event] = await db
+      .select({ id: events.id })
+      .from(events)
+      .where(or(eq(events.id, eventIdOrSlug), eq(events.slug, eventIdOrSlug)))
+      .limit(1);
+
+    if (!event) {
+      throw new AppError(404, 'Event not found.', 'EVENT_NOT_FOUND');
+    }
+
+    return db
+      .select()
+      .from(eventRegistrations)
+      .where(eq(eventRegistrations.eventId, event.id))
+      .orderBy(desc(eventRegistrations.createdAt));
   }
 }
 

@@ -1,5 +1,5 @@
 <div class="adm-section-title">Dashboard</div>
-<div class="adm-section-sub">A real-time overview of the ASTECAA platform — welcome back, Marlene.</div>
+<div class="adm-section-sub">A real-time overview of the ASTECAA platform — welcome back, {{ adminName() }}.</div>
 
 <!-- Stat cards -->
 <div class="adm-grid-stats">
@@ -7,44 +7,44 @@
     <div class="adm-stat-top">
       <div>
         <div class="adm-stat-label">Total Users</div>
-        <div class="adm-stat-value">2,380</div>
+        <div class="adm-stat-value">{{ stats().totalUsers }}</div>
       </div>
       <div class="adm-stat-ico">👥</div>
     </div>
-    <span class="adm-stat-delta up">↑ 12.4% this month</span>
+    <span class="adm-stat-delta up">Live database records</span>
   </div>
 
   <div class="adm-stat forest">
     <div class="adm-stat-top">
       <div>
         <div class="adm-stat-label">Upcoming Events</div>
-        <div class="adm-stat-value">6</div>
+        <div class="adm-stat-value">{{ stats().upcomingEvents }}</div>
       </div>
       <div class="adm-stat-ico">📅</div>
     </div>
-    <span class="adm-stat-delta up">↑ 2 new this week</span>
+    <span class="adm-stat-delta up">Published & scheduled</span>
   </div>
 
   <div class="adm-stat burgundy">
     <div class="adm-stat-top">
       <div>
         <div class="adm-stat-label">Pending Approvals</div>
-        <div class="adm-stat-value">8</div>
+        <div class="adm-stat-value">{{ stats().pendingApprovals }}</div>
       </div>
       <div class="adm-stat-ico">⏳</div>
     </div>
-    <span class="adm-stat-delta down">3 comments, 2 users, 3 gallery</span>
+    <span class="adm-stat-delta down">Pending members</span>
   </div>
 
   <div class="adm-stat info">
     <div class="adm-stat-top">
       <div>
-        <div class="adm-stat-label">Newsletter Subscribers</div>
-        <div class="adm-stat-value">1,427</div>
+        <div class="adm-stat-label">Active Elections</div>
+        <div class="adm-stat-value">{{ stats().activeElections }}</div>
       </div>
-      <div class="adm-stat-ico">✉</div>
+      <div class="adm-stat-ico">🗳</div>
     </div>
-    <span class="adm-stat-delta up">↑ 86 new this week</span>
+    <span class="adm-stat-delta up">{{ stats().totalVotes }} ballots cast</span>
   </div>
 </div>
 
@@ -62,7 +62,7 @@
       </select>
     </div>
     <div class="adm-card-pad">
-      <app-adm-bars [data]="growthData" />
+      <app-adm-bars [data]="growthData()" />
     </div>
   </div>
 
@@ -206,7 +206,7 @@
           <tr><th>Event</th><th>Date</th><th>Registered</th><th>Status</th></tr>
         </thead>
         <tbody>
-          @for (e of upcomingEvents; track e.id) {
+          @for (e of upcomingEvents(); track e.id) {
             <tr>
               <td class="row-title">{{ e.title }}</td>
               <td>{{ shortDate(e.date) }}</td>
@@ -230,7 +230,7 @@
           <tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th></tr>
         </thead>
         <tbody>
-          @for (u of newUsers; track u.id) {
+          @for (u of newUsers(); track u.id) {
             <tr>
               <td>
                 <div class="adm-cell-user">

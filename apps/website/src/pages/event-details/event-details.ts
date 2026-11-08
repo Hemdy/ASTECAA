@@ -9,6 +9,7 @@ import { MESSAGES } from '../../data';
 import { ToastService } from '@astec/ui';
 import { UiState } from '../../ui-state';
 import { EventsApiService } from '@astec/api-client';
+import { MemberAuthService } from '../../services/member-auth';
 import type { PublicEvent } from '@astec/types';
 
 @Component({
@@ -28,6 +29,7 @@ export class EventDetails {
   private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
   private eventsApi = inject(EventsApiService);
+  private auth = inject(MemberAuthService);
 
   ui = new UiState();
 
@@ -87,6 +89,15 @@ export class EventDetails {
   }
 
   register() {
+    const profile = this.auth.profile();
+    if (profile) {
+      if (!this.registration.name && profile.full_name) this.registration.name = profile.full_name;
+      if (!this.registration.email && profile.email) this.registration.email = profile.email;
+      if (!this.registration.phone && profile.phone) this.registration.phone = profile.phone;
+      if (!this.registration.graduationYear && profile.graduation_set) {
+        this.registration.graduationYear = profile.graduation_set;
+      }
+    }
     this.registrationOpen.set(true);
   }
 
@@ -99,14 +110,33 @@ export class EventDetails {
     );
   }
 
-  submitRegistration() {
+  async submitRegistration() {
     if (!this.canRegister()) return;
+    const event = this.ev();
+    if (!event) return;
 
-    this.registrationOpen.set(false);
+    try {
+      await this.eventsApi.register(event.id, {
+        name: this.registration.name.trim(),
+        email: this.registration.email.trim(),
+        phone: this.registration.phone.trim(),
+        graduationYear: this.registration.graduationYear.trim(),
+        userId: this.auth.profile()?.id,
+      });
 
-    this.toast.show(
-      'Your place is reserved. We will write to you closer to the day.'
-    );
+      this.registrationOpen.set(false);
+      this.toast.show(
+        'Your place is reserved. We will write to you closer to the day.'
+      );
+      this.registration = {
+        name: '',
+        email: '',
+        phone: '',
+        graduationYear: '',
+      };
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to submit registration.');
+    }
   }
 
   share() {

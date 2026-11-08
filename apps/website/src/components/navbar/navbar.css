@@ -95,6 +95,22 @@
 .nav-cta {
   margin-left: 10px;
 }
+.nav-greeting {
+  font-family: var(--font-cinzel);
+  font-size: 0.76rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--c-burgundy-700);
+  font-weight: 700;
+  padding: 8px 12px;
+}
+.nav-signout {
+  margin-left: 6px;
+  cursor: pointer;
+}
+.nav-signin {
+  margin-left: 6px;
+}
 .nav-toggle {
   display: none;
   flex-direction: column;

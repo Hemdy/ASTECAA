@@ -3,6 +3,8 @@ import { DatabaseModule } from './database/database.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { EventsModule } from './events/events.module.js';
+import { VotingModule } from './voting/voting.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 import { HealthModule } from './health/health.module.js';
 
 @Module({
@@ -11,6 +13,8 @@ import { HealthModule } from './health/health.module.js';
     AuthModule,
     UsersModule,
     EventsModule,
+    VotingModule,
+    DashboardModule,
     HealthModule,
   ],
 })
