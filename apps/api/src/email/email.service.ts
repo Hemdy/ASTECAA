@@ -182,3 +182,4 @@ Text snippet: ${text ? text.slice(0, 150) : '(HTML email)'}`);
     return this.sendEmail(to, subject, html);
   }
 }
+

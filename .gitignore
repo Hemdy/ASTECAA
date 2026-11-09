@@ -5,3 +5,4 @@ out-tsc/
 .env
 .env.*
 !.env.example
+.wrangler

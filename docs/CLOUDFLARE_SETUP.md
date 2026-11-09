@@ -175,3 +175,4 @@ The `_redirects` file automatically handles both applications:
 - [ ] **Community Wall:** Sign in as an alumnus, visit `/community`, observe that member fields are automatically populated, post a note, and test adding reactions (❤️, 👏, 🎉, 🔥) and replies.
 - [ ] **Alumni Dashboard:** Visit `/dashboard` — verify your registered events, active elections, and community notes appear with live counts.
 - [ ] **Media Uploads:** In Admin Gallery/Media, upload a photo — verify it stores in Cloudflare R2 and serves via `media.astecaa.org` or `/media/*`.
+

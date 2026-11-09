@@ -132,3 +132,4 @@ export class Dashboard implements OnInit {
     void this.auth.signOut();
   }
 }
+

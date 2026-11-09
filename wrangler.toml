@@ -2,6 +2,7 @@ name = "astecaa-edge"
 main = "infrastructure/cloudflare/worker.ts"
 compatibility_date = "2026-11-01"
 compatibility_flags = ["nodejs_compat"]
+account_id = "2f635babd2c5b42f67b21b526e509d63"
 
 [vars]
 ENVIRONMENT = "production"
@@ -11,8 +12,8 @@ BACKEND_API_URL = "https://api-origin.astecaa.org"
 # Cloudflare R2 Bucket Binding for Media & Uploads
 [[r2_buckets]]
 binding = "MEDIA_BUCKET"
-bucket_name = "astecaa-media"
-preview_bucket_name = "astecaa-media-preview"
+bucket_name = "astecaa"
+preview_bucket_name = "astecaa"
 
 # Optional Cloudflare Pages / Static Assets integration
 # [assets]
@@ -23,3 +24,4 @@ preview_bucket_name = "astecaa-media-preview"
 # routes = [
 #   { pattern = "api.astecaa.org/*", zone_name = "astecaa.org" }
 # ]
+
