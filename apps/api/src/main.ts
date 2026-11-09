@@ -18,7 +18,8 @@ for (const envPath of [
 }
 
 import { randomUUID } from 'node:crypto';
-import express, { type NextFunction, type Request, type Response } from 'express';
+import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import { toNodeHandler } from 'better-auth/node';
 import { NestFactory } from '@nestjs/core';
 import { LOCAL_PORTS } from '@astec/config';
@@ -26,12 +27,34 @@ import { AppModule } from './app.module.js';
 import { AuthService } from './auth/auth.service.js';
 import { ApiExceptionFilter } from './core/api-exception.filter.js';
 
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+function isOriginAllowed(origin: string, allowedOrigins: ReadonlySet<string>): boolean {
+  if (allowedOrigins.has(origin)) return true;
+  try {
+    const url = new URL(origin);
+    if (url.hostname === 'astecaa.vercel.app' || url.hostname.endsWith('.astecaa.vercel.app')) return true;
+    if (url.hostname === 'astecaa-admin.vercel.app' || url.hostname.endsWith('.astecaa-admin.vercel.app')) return true;
+    if (url.hostname === 'astecaa-api.vercel.app') return true;
+    if (url.hostname.endsWith('.vercel.app')) return true;
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
+    if (url.hostname === 'astecaa.org' || url.hostname.endsWith('.astecaa.org')) return true;
+  } catch {}
+  return false;
+}
+
+let cachedExpress: Express | null = null;
+
+export async function bootstrapApp(): Promise<Express> {
+  if (cachedExpress) {
+    return cachedExpress;
+  }
+
+  const expressApp = express();
+  const adapter = new ExpressAdapter(expressApp);
+  const app = await NestFactory.create(AppModule, adapter, { bodyParser: false });
   const auth = app.get(AuthService);
 
   // Security, CORS, and Request ID middleware
-  app.use((request: Request, response: Response, next: NextFunction) => {
+  expressApp.use((request: Request, response: Response, next: NextFunction) => {
     const requestId = randomUUID();
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('X-Content-Type-Options', 'nosniff');
@@ -41,7 +64,25 @@ async function bootstrap(): Promise<void> {
     response.setHeader('Vary', 'Origin');
 
     const origin = request.get('Origin');
-    if (origin && !auth.allowedOrigins.has(origin)) {
+    const allowed = origin ? isOriginAllowed(origin, auth.allowedOrigins) : false;
+
+    if (origin && allowed) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+
+    if (request.method === 'OPTIONS') {
+      response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+      response.setHeader(
+        'Access-Control-Allow-Headers',
+        'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Origin, Cookie',
+      );
+      response.setHeader('Access-Control-Max-Age', '86400');
+      response.status(204).end();
+      return;
+    }
+
+    if (origin && !allowed) {
       return writeError(response, 403, 'ORIGIN_NOT_ALLOWED', 'Origin is not allowed.', requestId);
     }
 
@@ -59,28 +100,12 @@ async function bootstrap(): Promise<void> {
       );
     }
 
-    if (origin) {
-      response.setHeader('Access-Control-Allow-Origin', origin);
-      response.setHeader('Access-Control-Allow-Credentials', 'true');
-    }
-
-    if (request.method === 'OPTIONS') {
-      response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
-      response.setHeader(
-        'Access-Control-Allow-Headers',
-        'Authorization, Content-Type, X-CSRF-Token, X-Requested-With',
-      );
-      response.setHeader('Access-Control-Max-Age', '600');
-      response.status(204).end();
-      return;
-    }
-
     next();
   });
 
   // Better Auth handler for /api/auth/* routes
   const betterAuthHandler = toNodeHandler(auth.handler);
-  app.use((request: Request, response: Response, next: NextFunction) => {
+  expressApp.use((request: Request, response: Response, next: NextFunction) => {
     if (request.path.startsWith('/api/auth/')) {
       void betterAuthHandler(request, response);
       return;
@@ -89,12 +114,13 @@ async function bootstrap(): Promise<void> {
   });
 
   // Static uploads directory
-  app.use('/uploads', express.static(resolve(process.cwd(), 'uploads')));
+  const uploadsDir = process.env.VERCEL ? '/tmp/uploads' : resolve(process.cwd(), 'uploads');
+  expressApp.use('/uploads', express.static(uploadsDir));
 
   // JSON Body Parser with limit and error handling
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use((error: unknown, _request: Request, response: Response, next: NextFunction) => {
+  expressApp.use(express.json({ limit: '10mb' }));
+  expressApp.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  expressApp.use((error: unknown, _request: Request, response: Response, next: NextFunction) => {
     if (response.headersSent) {
       next(error);
       return;
@@ -118,19 +144,40 @@ async function bootstrap(): Promise<void> {
 
   app.useGlobalFilters(new ApiExceptionFilter());
 
-  const port = Number(process.env.ASTEC_API_PORT ?? process.env.PORT ?? LOCAL_PORTS.api);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error('Port must be an integer between 1 and 65535.');
-  }
-  const host = process.env.ASTEC_API_HOST?.trim();
+  await app.init();
+  cachedExpress = expressApp;
 
-  if (host && host !== '0.0.0.0' && host !== '127.0.0.1') {
+  // Standalone server mode (local dev, Docker, VM)
+  if (!process.env.VERCEL) {
+    const port = Number(process.env.ASTEC_API_PORT ?? process.env.PORT ?? LOCAL_PORTS.api);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      throw new Error('Port must be an integer between 1 and 65535.');
+    }
+    const host = process.env.ASTEC_API_HOST?.trim() || '0.0.0.0';
     await app.listen(port, host);
     console.info(`ASTECAA API listening on ${host}:${port}.`);
-  } else {
-    // Listen on dual-stack '::' so localhost resolves seamlessly for both IPv6 (::1) and IPv4 (127.0.0.1)
-    await app.listen(port, '::');
-    console.info(`ASTECAA API listening on port ${port} (dual-stack IPv4/IPv6).`);
+  }
+
+  return cachedExpress;
+}
+
+export default async function handler(request: Request, response: Response) {
+  try {
+    const server = await bootstrapApp();
+    return server(request, response);
+  } catch (error: any) {
+    console.error('Fatal API initialization error:', error);
+    const origin = request.headers.origin;
+    if (origin) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    response.status(500).json({
+      error: {
+        code: 'API_BOOTSTRAP_FAILED',
+        message: error?.message || 'API failed to initialize.',
+      },
+    });
   }
 }
 
@@ -152,4 +199,10 @@ function writeError(
   response.status(status).json({ error: { code, message, requestId } });
 }
 
-void bootstrap();
+// Automatically start when executed directly in non-Vercel environment
+if (!process.env.VERCEL) {
+  void bootstrapApp().catch((error) => {
+    console.error('Fatal startup error in ASTECAA API:', error);
+    process.exit(1);
+  });
+}

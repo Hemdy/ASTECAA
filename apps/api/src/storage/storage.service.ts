@@ -29,9 +29,15 @@ export class StorageService {
     this.bucketName = process.env.R2_BUCKET_NAME || 'astecaa-media';
     this.publicUrl = process.env.R2_PUBLIC_URL?.replace(/\/$/, '') || '';
 
-    this.localStorageDir = resolve(process.cwd(), 'uploads');
-    if (!existsSync(this.localStorageDir)) {
-      mkdirSync(this.localStorageDir, { recursive: true });
+    this.localStorageDir = process.env.VERCEL
+      ? '/tmp/uploads'
+      : resolve(process.cwd(), 'uploads');
+    try {
+      if (!existsSync(this.localStorageDir)) {
+        mkdirSync(this.localStorageDir, { recursive: true });
+      }
+    } catch (err) {
+      this.logger.warn(`Could not create local storage directory: ${err}`);
     }
 
     if (accountId && accessKeyId && secretAccessKey) {
@@ -79,10 +85,14 @@ export class StorageService {
     } else {
       const targetPath = resolve(this.localStorageDir, uniqueKey);
       const targetDir = resolve(targetPath, '..');
-      if (!existsSync(targetDir)) {
-        mkdirSync(targetDir, { recursive: true });
+      try {
+        if (!existsSync(targetDir)) {
+          mkdirSync(targetDir, { recursive: true });
+        }
+        writeFileSync(targetPath, buffer);
+      } catch (err) {
+        this.logger.warn(`Could not save file locally to ${targetPath}: ${err}`);
       }
-      writeFileSync(targetPath, buffer);
       url = `/uploads/${uniqueKey}`;
       this.logger.log(`Stored locally: ${targetPath}`);
     }
