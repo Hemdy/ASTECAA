@@ -800,13 +800,19 @@ export const ABOUT_MILESTONES: Milestone[] = [
   }
 ];
 
-export const NAV_ITEMS = [
-  { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-  { label: 'Events', path: '/events' },
-  { label: 'Timeline', path: '/timeline' },
-  { label: 'Gallery', path: '/gallery' },
-  { label: 'Community', path: '/community' },
-  { label: 'Elections', path: '/vote' },
-  { label: 'Contact', path: '/contact' },
+export interface NavItem {
+  label: string;
+  path: string;
+  icon: string;
+}
+
+export const NAV_ITEMS: NavItem[] = [
+  { label: 'Home', path: '/', icon: 'ri-home-5-line' },
+  { label: 'About', path: '/about', icon: 'ri-information-line' },
+  { label: 'Events', path: '/events', icon: 'ri-calendar-event-line' },
+  { label: 'Timeline', path: '/timeline', icon: 'ri-time-line' },
+  { label: 'Gallery', path: '/gallery', icon: 'ri-gallery-line' },
+  { label: 'Community', path: '/community', icon: 'ri-chat-voice-line' },
+  { label: 'Elections', path: '/vote', icon: 'ri-government-line' },
+  { label: 'Contact', path: '/contact', icon: 'ri-mail-line' },
 ];

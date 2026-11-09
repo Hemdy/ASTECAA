@@ -146,6 +146,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+body.nav-drawer-active {
+  overflow: hidden;
+  touch-action: none;
+}
+
 img {
   max-width: 100%;
   display: block;

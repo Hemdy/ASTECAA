@@ -1,42 +1,55 @@
-<header class="nav" [class.scrolled]="scrolled()" [class.open]="open()">
+<header class="nav" [class.scrolled]="scrolled()" [class.is-open]="open()">
   <div class="nav-bar container">
+    <!-- Brand -->
     <a routerLink="/" class="brand" (click)="close()">
-      <!-- <span class="brand-mark"></span> -->
-     
-
-        <img src="/images/ASTECAA.jpg" alt="ASTECAA Logo" class="brand-mark">
+      <img src="/images/ASTECAA.jpg" alt="ASTECAA Logo" class="brand-mark" />
       <span class="brand-text">
         <span class="brand-name">ASTECAA</span>
         <span class="brand-sub">est. 1998</span>
       </span>
     </a>
 
-    <button
-      class="nav-toggle"
-      (click)="open.set(!open())"
-      [attr.aria-label]="open() ? 'Close menu' : 'Open menu'"
-      aria-controls="primary-nav"
-    >
-      <span [class.x]="open()"></span>
-      <span [class.x]="open()"></span>
-      <span [class.x]="open()"></span>
-    </button>
+    <!-- Desktop Navigation (Visible on desktop screens > 1080px) -->
+    <nav class="nav-desktop" aria-label="Main Navigation">
+      <div class="nav-links">
+        @for (item of items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+            >{{ item.label }}</a
+          >
+        }
+      </div>
 
+      <div class="nav-divider" aria-hidden="true"></div>
 
-    <nav class="nav-links" id="primary-nav" [class.show]="open()">
-      @for (item of items; track item.path) {
-        <a
-          [routerLink]="item.path"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{ exact: item.path === '/' }"
-          (click)="close()"
-          >{{ item.label }}</a
-        >
-      }
-      @if (auth.loading()) {
-        <span class="nav-auth-placeholder"></span>
-      } @else if (auth.isAuthenticated()) {
-        <a routerLink="/dashboard" (click)="close()" class="nav-user-chip" title="View your Alumni Dashboard">
+      <div class="nav-actions">
+        @if (auth.loading()) {
+          <span class="nav-auth-placeholder"></span>
+        } @else if (auth.isAuthenticated()) {
+          <a routerLink="/dashboard" class="nav-user-chip" title="View your Alumni Dashboard">
+            <img
+              [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
+              [alt]="auth.displayName()"
+              class="nav-user-avatar"
+              (error)="onAvatarError($event)"
+            />
+            <span class="nav-user-name">{{ auth.displayName().split(' ')[0] }}</span>
+            <i class="ri-dashboard-line nav-user-icon"></i>
+          </a>
+          <button class="btn btn-outline btn-sm nav-signout" (click)="signOut()">Sign out</button>
+        } @else {
+          <a routerLink="/login" class="nav-signin">Sign in</a>
+          <a routerLink="/register" class="btn btn-gold btn-sm nav-cta">Register</a>
+        }
+      </div>
+    </nav>
+
+    <!-- Mobile Header Controls (Visible <= 1080px) -->
+    <div class="nav-mobile-controls">
+      @if (auth.isAuthenticated()) {
+        <a routerLink="/dashboard" (click)="close()" class="nav-user-chip nav-user-chip-mobile" title="View Dashboard">
           <img
             [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
             [alt]="auth.displayName()"
@@ -45,12 +58,93 @@
           />
           <span class="nav-user-name">{{ auth.displayName().split(' ')[0] }}</span>
         </a>
-        <button class="btn btn-outline btn-sm nav-signout" (click)="signOut()">Sign out</button>
-      } @else {
-        <a routerLink="/login" (click)="close()" class="nav-signin">Sign in</a>
-        <a routerLink="/register" (click)="close()" class="btn btn-gold btn-sm nav-cta">Register</a>
       }
-    </nav>
-  
+
+      <button
+        class="nav-toggle"
+        (click)="toggle()"
+        [attr.aria-expanded]="open()"
+        [attr.aria-label]="open() ? 'Close menu' : 'Open menu'"
+        aria-controls="primary-mobile-nav"
+      >
+        <span [class.x]="open()"></span>
+        <span [class.x]="open()"></span>
+        <span [class.x]="open()"></span>
+      </button>
+    </div>
   </div>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div
+    class="nav-backdrop"
+    [class.show]="open()"
+    (click)="close()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Mobile Drawer Menu -->
+  <aside
+    class="nav-mobile-drawer"
+    id="primary-mobile-nav"
+    [class.show]="open()"
+    aria-label="Mobile Navigation"
+  >
+    <div class="drawer-inner">
+      <!-- Profile / Guest Banner in Drawer -->
+      @if (auth.isAuthenticated()) {
+        <div class="drawer-profile-card">
+          <img
+            [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
+            [alt]="auth.displayName()"
+            class="drawer-avatar"
+            (error)="onAvatarError($event)"
+          />
+          <div class="drawer-user-meta">
+            <div class="drawer-user-name">{{ auth.displayName() }}</div>
+            <div class="drawer-user-sub">
+              {{ auth.profile()?.graduation_set ? ('Class of ' + auth.profile()?.graduation_set) : 'ASTECAA Member' }}
+            </div>
+          </div>
+          <a routerLink="/dashboard" (click)="close()" class="drawer-dashboard-pill">
+            <i class="ri-dashboard-line"></i> Dashboard
+          </a>
+        </div>
+      } @else {
+        <div class="drawer-guest-card">
+          <div class="drawer-guest-headline">Welcome to ASTECAA</div>
+          <p class="drawer-guest-text">Connect with alumni, join gatherings, and shape the community.</p>
+          <div class="drawer-guest-buttons">
+            <a routerLink="/login" (click)="close()" class="btn btn-outline btn-sm">Sign in</a>
+            <a routerLink="/register" (click)="close()" class="btn btn-gold btn-sm">Register</a>
+          </div>
+        </div>
+      }
+
+      <!-- Navigation Links with Icons -->
+      <nav class="drawer-nav-list">
+        @for (item of items; track item.path) {
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+            (click)="close()"
+            class="drawer-nav-item"
+          >
+            <span class="drawer-nav-icon"><i [class]="item.icon"></i></span>
+            <span class="drawer-nav-label">{{ item.label }}</span>
+            <i class="ri-arrow-right-s-line drawer-nav-arrow"></i>
+          </a>
+        }
+      </nav>
+
+      <!-- Drawer Footer Actions -->
+      @if (auth.isAuthenticated()) {
+        <div class="drawer-footer">
+          <button class="btn btn-outline drawer-signout-btn" (click)="signOut()">
+            <i class="ri-logout-box-r-line"></i> Sign out
+          </button>
+        </div>
+      }
+    </div>
+  </aside>
 </header>
