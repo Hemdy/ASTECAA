@@ -542,9 +542,6 @@ p {
   letter-spacing: 0.08em;
 
   line-height: 1;
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 
@@ -770,9 +767,6 @@ p {
 
   line-height: 1;
 
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
   z-index: 2;
 }
 
@@ -797,8 +791,7 @@ p {
 
   color: #fff;
 
-  background:
-    rgba(42, 32, 24, 0.82);
+  background: #2a2018;
 
   border:
     1px solid rgba(255, 255, 255, 0.22);
@@ -809,9 +802,6 @@ p {
     0 5px 14px rgba(0, 0, 0, 0.22);
 
   font-size: 0.75rem;
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 
   z-index: 3;
 

@@ -74,10 +74,10 @@
       </div>
     </div>
     <div class="adm-card-pad" style="display: flex; flex-direction: column; align-items: center; gap: 16px">
-      <app-adm-donut [value]="68" label="engaged" />
+      <app-adm-donut [value]="engagementRate()" label="engaged" />
       <div style="display: flex; gap: 20px; font-size: 0.82rem">
-        <span><span class="adm-dot adm-dot-success"></span> Engaged: 1,618</span>
-        <span><span class="adm-dot adm-dot-muted"></span> Inactive: 762</span>
+        <span><span class="adm-dot adm-dot-success"></span> Engaged: {{ engagedCount() }}</span>
+        <span><span class="adm-dot adm-dot-muted"></span> Inactive: {{ inactiveCount() }}</span>
       </div>
     </div>
   </div>
@@ -94,7 +94,7 @@
       <span class="adm-badge adm-badge-success">↑ 31%</span>
     </div>
     <div class="adm-card-pad">
-      <app-adm-line [data]="trafficData" />
+      <app-adm-line [data]="trafficData()" />
     </div>
   </div>
 
@@ -107,7 +107,7 @@
       </div>
     </div>
     <div class="adm-card-pad">
-      <app-adm-bars [data]="engagementData" />
+      <app-adm-bars [data]="engagementData()" />
     </div>
   </div>
 </div>
@@ -149,7 +149,7 @@
     </div>
     <div class="adm-card-pad">
       <div class="adm-feed">
-        @for (a of activity; track a.id) {
+        @for (a of activity(); track a.id) {
           <div class="adm-feed-item">
             <div class="adm-feed-ico"><i [class]="a.icon"></i></div>
             <div style="flex: 1">
@@ -160,6 +160,10 @@
               <div class="adm-feed-time">{{ a.time }}</div>
             </div>
           </div>
+        } @empty {
+          <div style="text-align: center; color: var(--adm-text-sub); padding: 24px 0; font-size: 0.88rem">
+            No recent activity recorded yet.
+          </div>
         }
       </div>
     </div>
@@ -169,11 +173,11 @@
   <div class="adm-card">
     <div class="adm-card-head">
       <div class="adm-card-title">Pending Approvals</div>
-      <span class="adm-badge adm-badge-warning">8 waiting</span>
+      <span class="adm-badge adm-badge-warning">{{ pendingComments().length }} waiting</span>
     </div>
     <div class="adm-card-pad">
       <div class="adm-feed">
-        @for (c of pendingComments; track c.id) {
+        @for (c of pendingComments(); track c.id) {
           <div class="adm-feed-item">
             <img class="adm-avatar adm-avatar-sm" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
             <div style="flex: 1">
@@ -186,6 +190,10 @@
               <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(c.id)" title="Approve"><i class="ri-check-line"></i></button>
               <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="reject(c.id)" title="Reject"><i class="ri-close-line"></i></button>
             </div>
+          </div>
+        } @empty {
+          <div style="text-align: center; color: var(--adm-text-sub); padding: 24px 0; font-size: 0.88rem">
+            No pending community notes awaiting moderation.
           </div>
         }
       </div>

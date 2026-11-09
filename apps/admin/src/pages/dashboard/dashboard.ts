@@ -3,13 +3,11 @@ import { RouterLink } from '@angular/router';
 import { AdmBars, AdmDonut, AdmLine } from '../../components/adm-charts/adm-charts';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
-import { DashboardApiService } from '@astec/api-client';
+import { DashboardApiService, CmsApiService } from '@astec/api-client';
 import { AdminAuthService } from '../../auth.service';
 import type { DashboardStatsItem } from '@astec/types';
 import {
   ADMIN_ACTIVITY,
-  ADMIN_COMMENTS,
-  ADMIN_STORIES,
   ENGAGEMENT_DATA,
   TRAFFIC_DATA,
 } from '../../admin-data';
@@ -24,6 +22,7 @@ import {
 export class AdminDashboard {
   private toast = inject(ToastService);
   private dashboardApi = inject(DashboardApiService);
+  private cmsApi = inject(CmsApiService);
   private auth = inject(AdminAuthService);
 
   stats = signal<DashboardStatsItem>({
@@ -32,9 +31,14 @@ export class AdminDashboard {
     pendingApprovals: 0,
     activeElections: 0,
     totalVotes: 0,
+    engagementRate: 100,
+    engagedUsersCount: 0,
+    inactiveUsersCount: 0,
     growthData: [],
     recentUsers: [],
     upcomingEventsList: [],
+    recentActivity: [],
+    pendingApprovalsList: [],
   });
 
   adminName = computed(() => this.auth.profile()?.full_name || 'Administrator');
@@ -42,10 +46,29 @@ export class AdminDashboard {
   upcomingEvents = computed(() => this.stats().upcomingEventsList as any[]);
   newUsers = computed(() => this.stats().recentUsers as any[]);
 
-  engagementData = ENGAGEMENT_DATA;
-  trafficData = TRAFFIC_DATA;
-  activity = ADMIN_ACTIVITY;
-  pendingComments = ADMIN_COMMENTS.filter((c) => c.status === 'pending').slice(0, 4);
+  engagementRate = computed(() => this.stats().engagementRate ?? 85);
+  engagedCount = computed(() => this.stats().engagedUsersCount ?? Math.max(1, this.stats().totalUsers));
+  inactiveCount = computed(() => this.stats().inactiveUsersCount ?? 0);
+
+  engagementData = computed(() =>
+    this.stats().engagementData && this.stats().engagementData!.length > 0
+      ? this.stats().engagementData!
+      : ENGAGEMENT_DATA
+  );
+
+  trafficData = computed(() =>
+    this.stats().trafficData && this.stats().trafficData!.length > 0
+      ? this.stats().trafficData!
+      : TRAFFIC_DATA
+  );
+
+  activity = computed(() =>
+    this.stats().recentActivity && this.stats().recentActivity!.length > 0
+      ? this.stats().recentActivity!
+      : ADMIN_ACTIVITY
+  );
+
+  pendingComments = computed(() => this.stats().pendingApprovalsList || []);
 
   quickModal = signal('');
   quickModalTitle = signal('');
@@ -87,12 +110,24 @@ export class AdminDashboard {
     this.quickModal.set('');
   }
 
-  approve(id: string) {
-    this.toast.show('Comment approved and published to the wall.');
+  async approve(id: string) {
+    try {
+      await this.cmsApi.updateCommentStatus(id, 'approved');
+      this.toast.show('Note approved and published to the wall.');
+      await this.loadStats();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Could not approve note.');
+    }
   }
 
-  reject(id: string) {
-    this.toast.show('Comment rejected.');
+  async reject(id: string) {
+    try {
+      await this.cmsApi.updateCommentStatus(id, 'reported');
+      this.toast.show('Note rejected and removed.');
+      await this.loadStats();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Could not reject note.');
+    }
   }
 
   onAvatarImageError(event: Event): void {

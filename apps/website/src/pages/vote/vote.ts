@@ -87,23 +87,36 @@ export class Vote {
 
   async requestOtp() {
     this.otpLoading.set(true);
-    const result = await this.voting.requestOtp(this.voter);
-    this.otpLoading.set(false);
-    if (!result.success) return;
-    this.maskedPhone = result.maskedPhone;
-    this.verificationStep.set('otp');
+    try {
+      const result = await this.voting.requestOtp(this.voter, this.selectedElection()?.id);
+      this.otpLoading.set(false);
+      if (!result.success) {
+        this.toast.show('Could not send verification code.');
+        return;
+      }
+      this.maskedPhone = result.maskedPhone;
+      this.verificationStep.set('otp');
+    } catch (err: any) {
+      this.otpLoading.set(false);
+      this.toast.show(err.message || 'Could not send verification code.');
+    }
   }
 
   async verifyOtp() {
     this.otpLoading.set(true);
-    const result = await this.voting.verifyOtp(this.voter, this.otp);
-    this.otpLoading.set(false);
-    if (!result.success) {
-      this.toast.show(result.error ?? 'Verification failed.');
-      return;
+    try {
+      const result = await this.voting.verifyOtp(this.voter, this.otp, this.selectedElection()?.id);
+      this.otpLoading.set(false);
+      if (!result.success) {
+        this.toast.show(result.error ?? 'Verification failed.');
+        return;
+      }
+      this.verificationStep.set('verified');
+      this.showReview.set(true);
+    } catch (err: any) {
+      this.otpLoading.set(false);
+      this.toast.show(err.message || 'Verification failed.');
     }
-    this.verificationStep.set('verified');
-    this.showReview.set(true);
   }
 
   closeVerification() {

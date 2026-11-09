@@ -807,5 +807,6 @@ export const NAV_ITEMS = [
   { label: 'Timeline', path: '/timeline' },
   { label: 'Gallery', path: '/gallery' },
   { label: 'Community', path: '/community' },
+  { label: 'Elections', path: '/vote' },
   { label: 'Contact', path: '/contact' },
 ];

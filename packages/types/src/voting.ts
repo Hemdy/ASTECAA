@@ -9,6 +9,13 @@ export interface Election {
   is_active: boolean;
   results_published: boolean;
   created_at: string;
+  // Aliases for Drizzle camelCase compatibility
+  startDate?: string;
+  endDate?: string;
+  isActive?: boolean;
+  resultsPublished?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Position {
@@ -17,6 +24,8 @@ export interface Position {
   title: string;
   description: string | null;
   sort_order: number;
+  electionId?: string;
+  sortOrder?: number;
 }
 
 export interface Candidate {
@@ -29,6 +38,10 @@ export interface Candidate {
   manifesto: string | null;
   photo_url: string | null;
   sort_order: number;
+  positionId?: string;
+  fullName?: string;
+  photoUrl?: string | null;
+  sortOrder?: number;
 }
 
 export interface CandidateWithVotes extends Candidate {

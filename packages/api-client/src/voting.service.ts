@@ -21,6 +21,65 @@ export type {
   VoterDetails,
 } from '@astec/types';
 
+function normalizeElection(raw: any): Election {
+  if (!raw) return raw;
+  return {
+    ...raw,
+    start_date: raw.start_date || raw.startDate || '',
+    startDate: raw.startDate || raw.start_date || '',
+    end_date: raw.end_date || raw.endDate || '',
+    endDate: raw.endDate || raw.end_date || '',
+    is_active: raw.is_active !== undefined ? Boolean(raw.is_active) : Boolean(raw.isActive),
+    isActive: raw.isActive !== undefined ? Boolean(raw.isActive) : Boolean(raw.is_active),
+    results_published: raw.results_published !== undefined ? Boolean(raw.results_published) : Boolean(raw.resultsPublished),
+    resultsPublished: raw.resultsPublished !== undefined ? Boolean(raw.resultsPublished) : Boolean(raw.results_published),
+    created_at: raw.created_at || raw.createdAt || '',
+    createdAt: raw.createdAt || raw.created_at || '',
+  } as Election;
+}
+
+function normalizePosition(raw: any): Position {
+  if (!raw) return raw;
+  return {
+    ...raw,
+    election_id: raw.election_id || raw.electionId || '',
+    electionId: raw.electionId || raw.election_id || '',
+    sort_order: raw.sort_order ?? raw.sortOrder ?? 0,
+    sortOrder: raw.sortOrder ?? raw.sort_order ?? 0,
+  } as Position;
+}
+
+function normalizeCandidate(raw: any): Candidate {
+  if (!raw) return raw;
+  return {
+    ...raw,
+    position_id: raw.position_id || raw.positionId || '',
+    positionId: raw.positionId || raw.position_id || '',
+    full_name: raw.full_name || raw.fullName || raw.name || '',
+    fullName: raw.fullName || raw.full_name || raw.name || '',
+    photo_url: raw.photo_url || raw.photoUrl || null,
+    photoUrl: raw.photoUrl || raw.photo_url || null,
+    sort_order: raw.sort_order ?? raw.sortOrder ?? 0,
+    sortOrder: raw.sortOrder ?? raw.sort_order ?? 0,
+    vote_count: raw.vote_count ?? raw.voteCount ?? 0,
+    voteCount: raw.voteCount ?? raw.vote_count ?? 0,
+  } as Candidate;
+}
+
+function normalizeElectionWithDetails(raw: any): ElectionWithDetails {
+  if (!raw) return raw;
+  const norm = normalizeElection(raw) as ElectionWithDetails;
+  norm.positions = (raw.positions || []).map((p: any) => {
+    const normP = normalizePosition(p) as PositionWithCandidates;
+    normP.candidates = (p.candidates || []).map((c: any) => normalizeCandidate(c) as CandidateWithVotes);
+    normP.total_votes = p.total_votes ?? p.totalVotes ?? 0;
+    return normP;
+  });
+  norm.total_votes = raw.total_votes ?? raw.totalVotes ?? 0;
+  norm.has_voted = raw.has_voted ?? raw.hasVoted ?? false;
+  return norm;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VotingService {
   elections = signal<Election[]>([]);
@@ -34,10 +93,10 @@ export class VotingService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const list = await this.request<Election[]>('/api/admin/v1/elections').catch(
-        () => this.request<Election[]>('/api/v1/elections'),
+      const list = await this.request<any[]>('/api/admin/v1/elections').catch(
+        () => this.request<any[]>('/api/v1/elections'),
       );
-      this.elections.set(list || []);
+      this.elections.set((list || []).map(normalizeElection));
     } catch (err: any) {
       this.error.set(err.message || 'Failed to load elections.');
       throw err;
@@ -47,8 +106,9 @@ export class VotingService {
   }
 
   async getActiveElections(): Promise<Election[]> {
-    const list = await this.request<Election[]>('/api/v1/elections');
-    return (list || []).filter((e) => e.is_active);
+    const list = await this.request<any[]>('/api/v1/elections');
+    const normalized = (list || []).map(normalizeElection);
+    return normalized.filter((e) => e.is_active);
   }
 
   async getElectionsForMember(): Promise<Election[]> {
@@ -61,15 +121,16 @@ export class VotingService {
 
     // First try admin results endpoint, then public endpoint
     try {
-      const details = await this.request<ElectionWithDetails>(
+      const details = await this.request<any>(
         `/api/admin/v1/elections/${electionId}/results`,
       );
-      if (details) return details;
+      if (details) return normalizeElectionWithDetails(details);
     } catch {
       // Fallback to public election details
     }
 
-    return this.request<ElectionWithDetails>(`/api/v1/elections/${electionId}${query}`);
+    const res = await this.request<any>(`/api/v1/elections/${electionId}${query}`);
+    return normalizeElectionWithDetails(res);
   }
 
   async requestOtp(voter: VoterDetails, electionId?: string): Promise<{ success: boolean; maskedPhone: string }> {
@@ -183,7 +244,8 @@ export class VotingService {
   }
 
   async getPositions(electionId: string): Promise<Position[]> {
-    return this.request<Position[]>(`/api/admin/v1/elections/${electionId}/positions`);
+    const res = await this.request<any[]>(`/api/admin/v1/elections/${electionId}/positions`);
+    return (res || []).map(normalizePosition);
   }
 
   async createPosition(
@@ -210,7 +272,8 @@ export class VotingService {
   }
 
   async getCandidates(positionId: string): Promise<Candidate[]> {
-    return this.request<Candidate[]>(`/api/admin/v1/positions/${positionId}/candidates`);
+    const res = await this.request<any[]>(`/api/admin/v1/positions/${positionId}/candidates`);
+    return (res || []).map(normalizeCandidate);
   }
 
   async createCandidate(c: Partial<Candidate> & { position_id: string }): Promise<Candidate | null> {

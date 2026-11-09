@@ -30,7 +30,7 @@ export class VotingService {
   constructor(
     private readonly database: DatabaseService,
     private readonly email: EmailService,
-  ) {}
+  ) { }
 
   // --- Elections (Admin & Public) ---
 

@@ -3,8 +3,8 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RevealDirective } from '../../reveal.directive';
 import { UiState } from '../../ui-state';
-import { EventsApiService } from '@astec/api-client';
-import type { PublicEvent } from '@astec/types';
+import { EventsApiService, VotingService } from '@astec/api-client';
+import type { PublicEvent, Election } from '@astec/types';
 
 @Component({
   selector: 'app-events',
@@ -15,8 +15,11 @@ import type { PublicEvent } from '@astec/types';
 })
 export class Events {
   private eventsApi = inject(EventsApiService);
+  private votingService = inject(VotingService);
+
   ui = new UiState();
   all = signal<PublicEvent[]>([]);
+  elections = signal<Election[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   query = signal('');
@@ -53,12 +56,26 @@ export class Events {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      this.all.set(await this.eventsApi.listPublic());
+      const [eventsList, electionsList] = await Promise.all([
+        this.eventsApi.listPublic(),
+        this.votingService.getActiveElections().catch(() => []),
+      ]);
+      this.all.set(eventsList);
+      this.elections.set(electionsList);
     } catch (error) {
       this.error.set(error instanceof Error ? error.message : 'Events could not be loaded.');
     } finally {
       this.loading.set(false);
     }
+  }
+
+  formatDate(iso?: string): string {
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
   }
 
   clear() {

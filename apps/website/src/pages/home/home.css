@@ -268,13 +268,10 @@ img {
 
   padding: 7px 11px;
 
-  background: rgba(255, 250, 241, 0.9);
+  background: #fffaf1;
 
   border: 1px solid rgba(255, 255, 255, 0.65);
   border-radius: 999px;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 
   box-shadow:
     0 5px 18px rgba(20, 12, 8, 0.14);
@@ -297,13 +294,10 @@ img {
 
   padding: 7px 10px;
 
-  background: rgba(255, 250, 241, 0.92);
+  background: #fffaf1;
 
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 999px;
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 
   box-shadow:
     0 5px 18px rgba(20, 12, 8, 0.14);
@@ -973,10 +967,7 @@ app-countdown span.d-num{
 
   border-radius: 999px;
 
-  background: rgba(255, 250, 241, 0.9);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #fffaf1;
 
   border: 1px solid rgba(255, 255, 255, 0.65);
 
@@ -1091,8 +1082,7 @@ app-countdown span.d-num{
 
   font-size: 1rem;
 
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(30, 20, 15, 0.88);
 
   transition:
     transform 0.35s var(--ease),
@@ -1352,10 +1342,7 @@ app-countdown span.d-num{
 
   padding: 7px 8px 8px;
 
-  background: rgba(255, 250, 241, 0.94);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: #fffaf1;
 
   border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 11px;

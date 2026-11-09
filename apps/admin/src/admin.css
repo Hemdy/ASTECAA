@@ -312,7 +312,6 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  backdrop-filter: blur(8px);
 }
 .adm-page-title {
   font-family: var(--font-display);
@@ -870,8 +869,7 @@
 .adm-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(28, 22, 18, 0.55);
-  backdrop-filter: blur(4px);
+  background: rgba(28, 22, 18, 0.65);
   z-index: 100;
   display: grid;
   place-items: center;

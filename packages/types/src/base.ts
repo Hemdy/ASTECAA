@@ -59,7 +59,28 @@ export interface DashboardStatsItem {
   pendingApprovals: number;
   activeElections: number;
   totalVotes: number;
+  engagementRate?: number;
+  engagedUsersCount?: number;
+  inactiveUsersCount?: number;
   growthData: Array<{ label: string; value: number }>;
+  engagementData?: Array<{ label: string; value: number }>;
+  trafficData?: Array<{ label: string; value: number }>;
+  recentActivity?: Array<{
+    id: string;
+    user: string;
+    action: string;
+    target: string;
+    time: string;
+    icon: string;
+  }>;
+  pendingApprovalsList?: Array<{
+    id: string;
+    author: string;
+    avatar: string;
+    page: string;
+    message: string;
+    date: string;
+  }>;
   recentUsers: AdminUserItem[];
   upcomingEventsList: Array<{
     id: string;

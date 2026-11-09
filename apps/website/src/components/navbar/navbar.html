@@ -36,8 +36,14 @@
       @if (auth.loading()) {
         <span class="nav-auth-placeholder"></span>
       } @else if (auth.isAuthenticated()) {
-        <a routerLink="/dashboard" (click)="close()" class="btn btn-outline btn-sm nav-dashboard">
-          <i class="ri-user-smile-line"></i> My Dashboard
+        <a routerLink="/dashboard" (click)="close()" class="nav-user-chip" title="View your Alumni Dashboard">
+          <img
+            [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
+            [alt]="auth.displayName()"
+            class="nav-user-avatar"
+            (error)="onAvatarError($event)"
+          />
+          <span class="nav-user-name">{{ auth.displayName().split(' ')[0] }}</span>
         </a>
         <button class="btn btn-outline btn-sm nav-signout" (click)="signOut()">Sign out</button>
       } @else {

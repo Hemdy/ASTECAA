@@ -10,6 +10,33 @@
 
 <section class="section">
   <div class="container">
+    <!-- Active Elections Showcase Banner -->
+    @if (elections().length > 0) {
+      <div class="election-banner" appReveal>
+        <div class="election-banner-badge">
+          <i class="ri-government-line"></i> Official Alumni Ballot
+        </div>
+        <div class="election-banner-content">
+          <div class="election-banner-info">
+            <span class="tag tag-gold">Voting Now Live</span>
+            <h2 class="election-banner-title">{{ elections()[0].title }}</h2>
+            <p class="election-banner-desc">
+              {{ elections()[0].description || 'Your voice shapes our association leadership. Cast your vote securely.' }}
+            </p>
+            <div class="election-banner-meta">
+              <span><i class="ri-time-line"></i> Closes {{ formatDate(elections()[0].end_date) }}</span>
+              <span><i class="ri-shield-check-line"></i> Verified Voting with One-Time Code</span>
+            </div>
+          </div>
+          <div class="election-banner-action">
+            <a routerLink="/vote" class="btn btn-primary">
+              <i class="ri-checkbox-circle-line"></i> Cast Your Vote Now
+            </a>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Controls -->
     <div class="controls" appReveal>
       <div class="search">

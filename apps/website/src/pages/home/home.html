@@ -5,6 +5,8 @@
       [src]="featuredBanner()"
       alt=""
       class="hero-img"
+      fetchpriority="high"
+      decoding="async"
       (error)="onImageError($event)"
     />
     <div class="hero-veil"></div>
@@ -48,6 +50,8 @@
         [src]="event.poster"
         [alt]="event.title"
         class="hero-card-img"
+        loading="lazy"
+        decoding="async"
         (error)="onImageError($event)"
       />
 
@@ -89,7 +93,7 @@
   @if (featured(); as event) {
   <div class="container featured">
     <div class="featured-media" appReveal>
-      <img [src]="event.banner" alt="" class="photo-vintage" />
+      <img [src]="event.banner" alt="" class="photo-vintage" loading="lazy" decoding="async" />
       <div class="featured-seal seal">Since<br />1993</div>
       <div class="tape tape-tl"></div>
       <div class="tape tape-br"></div>
@@ -155,6 +159,8 @@
           <img
             [src]="m.thumb || m.url"
             [alt]="m.title"
+            loading="lazy"
+            decoding="async"
             (error)="onImageError($event)"
           />
 
@@ -198,7 +204,7 @@
       @for (ev of upcoming(); track ev.id) {
       <article class="card event-card" appReveal [routerLink]="['/events', ev.id]">
         <div class="event-card-media">
-          <img [src]="ev.poster" [alt]="ev.title" />
+          <img [src]="ev.poster" [alt]="ev.title" loading="lazy" decoding="async" />
 
           <div class="event-date-chip">
             <span class="ec-month"> {{ ui.monthDay(ev.date).month }} </span>
@@ -263,7 +269,7 @@
         <div class="tl-prev-year">{{ m.year }}</div>
         <div class="tl-prev-dot"></div>
         <div class="tl-prev-card">
-          <img [src]="m.image || m.url" alt="" class="photo-vintage" />
+          <img [src]="m.image || m.url" alt="" class="photo-vintage" loading="lazy" decoding="async" />
           <div class="tl-prev-text">
             <h4>{{ m.title }}</h4>
             <p>{{ m.story || m.description }}</p>
@@ -294,7 +300,7 @@
       <div class="filmstrip-track">
         @for (m of galleryPreview(); track m.id) {
         <figure class="film-frame">
-          <img [src]="m.thumb || m.url" [alt]="m.caption || m.title" class="photo-vintage" />
+          <img [src]="m.thumb || m.url" [alt]="m.caption || m.title" class="photo-vintage" loading="lazy" decoding="async" />
           <figcaption class="type">{{ m.year }} · {{ m.album }}</figcaption>
         </figure>
         }
@@ -333,6 +339,8 @@
             [src]="msg.avatar || '/images/reading-room.jpg'"
             [alt]="msg.author"
             class="msg-avatar"
+            loading="lazy"
+            decoding="async"
             (error)="onAvatarImageError($event)"
           />
 
@@ -373,6 +381,8 @@
             [src]="o.photo"
             [alt]="o.name"
             class="photo-vintage"
+            loading="lazy"
+            decoding="async"
             (error)="onAvatarImageError($event)"
           />
         </div>

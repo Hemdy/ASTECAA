@@ -172,9 +172,6 @@
   box-shadow:
     0 2px 8px rgba(55, 35, 25, 0.03),
     0 14px 40px rgba(55, 35, 25, 0.06);
-
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
 
@@ -558,6 +555,8 @@
   background:
     rgba(255, 250, 241, 0.94);
 
+  background: #fffaf1;
+
   border:
     1px solid
     rgba(255, 255, 255, 0.65);
@@ -571,9 +570,6 @@
   box-shadow:
     0 8px 20px
       rgba(35, 20, 12, 0.14);
-
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 
   transition:
     transform 0.3s ease,
@@ -1072,6 +1068,102 @@
   }
 }
 
+
+/* =========================================================
+   ELECTION SHOWCASE BANNER
+   ========================================================= */
+
+.election-banner {
+  background: linear-gradient(135deg, #2a1f18 0%, #3e1f26 100%);
+  border: 1px solid rgba(196, 154, 69, 0.4);
+  border-radius: 20px;
+  padding: clamp(24px, 4vw, 36px);
+  margin-bottom: 36px;
+  color: #fffaf1;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(35, 20, 15, 0.12);
+}
+
+.election-banner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(196, 154, 69, 0.18);
+  border: 1px solid rgba(196, 154, 69, 0.35);
+  color: var(--c-gold-300, #eed99e);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.election-banner-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.election-banner-info {
+  flex: 1 1 500px;
+}
+
+.election-banner-title {
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: clamp(1.4rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 10px 0 8px;
+}
+
+.election-banner-desc {
+  font-size: 0.95rem;
+  color: rgba(255, 250, 241, 0.82);
+  line-height: 1.55;
+  margin-bottom: 14px;
+  max-width: 650px;
+}
+
+.election-banner-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 0.84rem;
+  color: var(--c-gold-200, #f4e8c1);
+}
+
+.election-banner-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.election-banner-action {
+  flex-shrink: 0;
+}
+
+.election-banner-action .btn-primary {
+  background: var(--c-gold-500, #c49a45);
+  color: #1a120b;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  box-shadow: 0 4px 14px rgba(196, 154, 69, 0.35);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.election-banner-action .btn-primary:hover {
+  background: var(--c-gold-400, #d6ae5a);
+  transform: translateY(-2px);
+}
 
 /* =========================================================
    ACCESSIBILITY

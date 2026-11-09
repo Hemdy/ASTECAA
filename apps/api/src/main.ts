@@ -122,10 +122,16 @@ async function bootstrap(): Promise<void> {
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('Port must be an integer between 1 and 65535.');
   }
-  const host = process.env.ASTEC_API_HOST ?? '0.0.0.0';
+  const host = process.env.ASTEC_API_HOST?.trim();
 
-  await app.listen(port, host);
-  console.info(`ASTECAA API listening on ${host}:${port}.`);
+  if (host && host !== '0.0.0.0' && host !== '127.0.0.1') {
+    await app.listen(port, host);
+    console.info(`ASTECAA API listening on ${host}:${port}.`);
+  } else {
+    // Listen on dual-stack '::' so localhost resolves seamlessly for both IPv6 (::1) and IPv4 (127.0.0.1)
+    await app.listen(port, '::');
+    console.info(`ASTECAA API listening on port ${port} (dual-stack IPv4/IPv6).`);
+  }
 }
 
 function isBodyParserError(error: unknown): error is Error & { status?: number } {

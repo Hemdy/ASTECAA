@@ -28,6 +28,11 @@ export class Navbar {
     this.open.set(false);
   }
 
+  onAvatarError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/empty/avatar-fallback.jpg';
+  }
+
   async signOut() {
     this.close();
     await this.auth.signOut();
