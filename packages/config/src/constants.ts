@@ -13,8 +13,8 @@ export const DEFAULT_DEV_ENDPOINTS: ServiceEndpoints = {
 };
 
 export const DEFAULT_PROD_ENDPOINTS: ServiceEndpoints = {
-  website: 'https://astecaa.org',
-  admin: 'https://admin.astecaa.org',
-  api: 'https://api.astecaa.org',
+  website: 'https://astecaa.vercel.app',
+  admin: 'https://astecaa-admin.vercel.app',
+  api: 'https://astecaa-api.vercel.app',
 };
 

@@ -85,6 +85,12 @@ export function getAppConfig(): AstecAppConfig {
   allowedOriginsSet.add(new URL(websiteUrl).origin);
   allowedOriginsSet.add(new URL(adminUrl).origin);
   allowedOriginsSet.add(new URL(apiUrl).origin);
+  allowedOriginsSet.add('https://astecaa.vercel.app');
+  allowedOriginsSet.add('https://astecaa-admin.vercel.app');
+  allowedOriginsSet.add('https://astecaa-api.vercel.app');
+  allowedOriginsSet.add('https://astecaa.org');
+  allowedOriginsSet.add('https://admin.astecaa.org');
+  allowedOriginsSet.add('https://api.astecaa.org');
 
   // In development, ensure all local loopback permutations are accepted
   if (env === 'development') {

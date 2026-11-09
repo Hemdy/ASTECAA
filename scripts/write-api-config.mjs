@@ -7,11 +7,7 @@ const env =
 
 const rawApiUrl =
   process.env.ASTECAA_API_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:8000' : undefined);
-
-if (!rawApiUrl) {
-  throw new Error('ASTECAA_API_URL must be set to the deployed ASTECAA API origin in production.');
-}
+  (env !== 'production' ? 'http://localhost:8000' : 'https://astecaa-api.vercel.app');
 
 let apiUrl;
 try {
@@ -22,11 +18,11 @@ try {
 
 const rawWebsiteUrl =
   process.env.ASTECAA_WEBSITE_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:4200' : 'https://astecaa.org');
+  (env !== 'production' ? 'http://localhost:4200' : 'https://astecaa.vercel.app');
 
 const rawAdminUrl =
   process.env.ASTECAA_ADMIN_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:4300' : 'https://admin.astecaa.org');
+  (env !== 'production' ? 'http://localhost:4300' : 'https://astecaa-admin.vercel.app');
 
 let websiteOrigin;
 try {
