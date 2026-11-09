@@ -1,9 +1,9 @@
 globalThis.__ASTECAA_CONFIG__ = {
-  "env": "development",
+  "env": "production",
   "services": {
-    "website": "http://localhost:4200",
-    "admin": "http://localhost:4300",
-    "api": "http://localhost:8000"
+    "website": "https://astecaa.vercel.app",
+    "admin": "https://astecaa-admin.vercel.app",
+    "api": "https://astecaa-api.vercel.app"
   }
 };
-globalThis.__ASTECAA_API_URL__ = "http://localhost:8000";
+globalThis.__ASTECAA_API_URL__ = "https://astecaa-api.vercel.app";

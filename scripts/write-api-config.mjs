@@ -4,16 +4,13 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
-const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
 const env =
   process.env.APP_ENV ??
-  (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production' || isVercel
-    ? 'production'
-    : 'development');
+  (process.env.NODE_ENV === 'development' ? 'development' : 'production');
 
 const rawApiUrl =
   process.env.ASTECAA_API_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:8000' : 'https://astecaa-api.vercel.app');
+  (env === 'development' ? 'http://localhost:8000' : 'https://astecaa-api.vercel.app');
 
 let apiUrl;
 try {
@@ -24,11 +21,11 @@ try {
 
 const rawWebsiteUrl =
   process.env.ASTECAA_WEBSITE_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:4200' : 'https://astecaa.vercel.app');
+  (env === 'development' ? 'http://localhost:4200' : 'https://astecaa.vercel.app');
 
 const rawAdminUrl =
   process.env.ASTECAA_ADMIN_URL?.trim() ||
-  (env !== 'production' ? 'http://localhost:4300' : 'https://astecaa-admin.vercel.app');
+  (env === 'development' ? 'http://localhost:4300' : 'https://astecaa-admin.vercel.app');
 
 let websiteOrigin;
 try {

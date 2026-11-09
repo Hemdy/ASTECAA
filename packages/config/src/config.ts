@@ -17,9 +17,6 @@ function normalizeUrl(value: string): string {
 
 export function resolveEnvironment(): EnvironmentName {
   if (isBrowser()) {
-    if (globalThis.__ASTECAA_CONFIG__?.env) {
-      return globalThis.__ASTECAA_CONFIG__.env;
-    }
     const hostname = globalThis.location?.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'development';
@@ -48,23 +45,24 @@ export function getAppConfig(): AstecAppConfig {
     const windowConfig = globalThis.__ASTECAA_CONFIG__;
     const legacyApiUrl = globalThis.__ASTECAA_API_URL__;
     const loc = globalThis.location;
+    const isLocal = loc?.hostname === 'localhost' || loc?.hostname === '127.0.0.1';
 
-    if (windowConfig?.services?.website) websiteUrl = windowConfig.services.website;
-    if (windowConfig?.services?.admin) adminUrl = windowConfig.services.admin;
-    if (windowConfig?.services?.api) apiUrl = windowConfig.services.api;
-    else if (legacyApiUrl) apiUrl = legacyApiUrl;
-    else if (loc) {
-      const isLocal = loc.hostname === 'localhost' || loc.hostname === '127.0.0.1';
-      if (isLocal) {
-        websiteUrl = `http://${loc.hostname}:${LOCAL_PORTS.website}`;
-        adminUrl = `http://${loc.hostname}:${LOCAL_PORTS.admin}`;
-        apiUrl = `http://${loc.hostname}:${LOCAL_PORTS.api}`;
-      } else {
-        // Production: default same origin with /admin and API
-        websiteUrl = loc.origin;
-        adminUrl = `${loc.origin}/admin`;
-        apiUrl = `${loc.origin}/api`;
-      }
+    if (isLocal) {
+      websiteUrl = windowConfig?.services?.website || `http://${loc?.hostname || 'localhost'}:${LOCAL_PORTS.website}`;
+      adminUrl = windowConfig?.services?.admin || `http://${loc?.hostname || 'localhost'}:${LOCAL_PORTS.admin}`;
+      apiUrl = windowConfig?.services?.api || legacyApiUrl || `http://${loc?.hostname || 'localhost'}:${LOCAL_PORTS.api}`;
+    } else {
+      // In remote / production browser: NEVER use localhost URLs!
+      const isRemote = (url?: string): url is string => Boolean(url && !url.includes('localhost') && !url.includes('127.0.0.1'));
+
+      const customWebsite = windowConfig?.services?.website;
+      websiteUrl = isRemote(customWebsite) ? customWebsite : (loc?.origin || DEFAULT_PROD_ENDPOINTS.website);
+
+      const customAdmin = windowConfig?.services?.admin;
+      adminUrl = isRemote(customAdmin) ? customAdmin : DEFAULT_PROD_ENDPOINTS.admin;
+
+      const customApi = windowConfig?.services?.api;
+      apiUrl = isRemote(customApi) ? customApi : (isRemote(legacyApiUrl) ? legacyApiUrl : DEFAULT_PROD_ENDPOINTS.api);
     }
   } else if (typeof process !== 'undefined' && process.env) {
     const envWebsite = process.env['ASTECAA_WEBSITE_URL'] ?? process.env['WEBSITE_URL'];
