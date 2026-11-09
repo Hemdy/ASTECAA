@@ -8,7 +8,7 @@ export class HealthController {
 
   @Get('health')
   health() {
-    return { status: 'ok' };
+    return { status: 'ok', version: '2026-11-09-v2', auth: 'bearer-ready' };
   }
 
   @Get('ready')
