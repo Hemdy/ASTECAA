@@ -48,7 +48,7 @@ export class AuthService implements OnModuleDestroy {
             after: async (authUser) => {
               const normalizedEmail = authUser.email.trim().toLowerCase();
               const existing = await this.database.db.query.authIdentities.findFirst({
-                where: (identity, { and, eq: equals }) =>
+                where: (identity: any, { and, eq: equals }: any) =>
                   and(
                     equals(identity.issuer, baseOrigin),
                     equals(identity.subject, authUser.id),
@@ -85,7 +85,7 @@ export class AuthService implements OnModuleDestroy {
 
                 // Check for a pending invitation for this email
                 const invitation = await tx.query.invitations.findFirst({
-                  where: (inv, { and, eq: equals }) =>
+                  where: (inv: any, { and, eq: equals }: any) =>
                     and(
                       equals(inv.emailNormalized, normalizedEmail),
                       equals(inv.status, 'pending'),
@@ -102,7 +102,7 @@ export class AuthService implements OnModuleDestroy {
                 }
 
                 const targetRole = await tx.query.roles.findFirst({
-                  where: (r, { eq: equals }) => equals(r.code, assignedRoleCode),
+                  where: (r: any, { eq: equals }: any) => equals(r.code, assignedRoleCode),
                 });
 
                 if (targetRole) {

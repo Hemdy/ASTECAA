@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prebuild": "pnpm --filter @astec/types --filter @astec/config --filter @astec/database --filter @astec/validation build",
     "build": "tsc",
     "start": "node dist/main.js",
     "start:dev": "tsc && node --watch dist/main.js",
