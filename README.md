@@ -27,9 +27,13 @@ ASTECAA/
 
 ## Applications
 
-- **Website (`apps/website`)**: Public-facing platform for alumni. Includes dynamic Events, interactive Timeline, archival Gallery, Community Wall with real-time posting and likes, and secure alumni voting ballots.
-- **Admin Console (`apps/admin`)**: Granular RBAC-protected management console for Super Admins and managers (Events, Gallery, Media Library, Community Stories, Announcements, Moderation, and Homepage Settings).
-- **Backend API (`apps/api`)**: Modular NestJS service backed by Neon serverless PostgreSQL, Better Auth sessions, and Cloudflare R2 storage.
+- **Website (`apps/website`)**: Public-facing platform for alumni. Includes dynamic Events, interactive Timeline, archival Gallery, Community Wall with real-time posting and likes, interactive Announcements carousel (with 5-second auto-rotation, hover-pause, and touch/mouse swipe navigation), and secure alumni voting ballots.
+- **Admin Console (`apps/admin`)**: Granular RBAC-protected management console for Super Admins and managers:
+  - **Live Notifications**: Real-time event notifications (event registrations, ballots, contact submissions, comments) with read/unread tracking and batch actions.
+  - **Dynamic Analytics**: Multi-period community growth charts (12m, 6m, 3m, 1m, 2w) queried live from PostgreSQL.
+  - **Homepage CMS**: Full control over Hero Banner (background image, headlines, CTAs), Featured Gathering picker, individual section visibility toggles, and Footer metadata/socials.
+  - **Content Management**: Events, Gallery, Media Library with folders, Announcements, and Community moderation.
+- **Backend API (`apps/api`)**: Modular NestJS service backed by Neon serverless PostgreSQL, Better Auth sessions, Cloudflare R2 storage, and Resend email dispatching.
 
 ---
 
