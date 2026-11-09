@@ -13,6 +13,8 @@ import {
   stories,
   announcements,
   siteContent,
+  mediaFolders,
+  contactSubmissions,
 } from '@astec/database';
 import { DatabaseService } from './database.service.js';
 import { AuthService } from '../auth/auth.service.js';
@@ -351,6 +353,16 @@ export class BootstrapService implements OnApplicationBootstrap {
           ],
         },
       }).onConflictDoNothing();
+    }
+
+    // 7. Seed Media Folders if empty
+    const existingFolders = await db.select().from(mediaFolders).limit(1);
+    if (existingFolders.length === 0) {
+      this.logger.log('Seeding initial media folders...');
+      const defaultFolders = ['General', 'Gallery', 'Reunions', 'Concerts', 'Harvest'];
+      for (const name of defaultFolders) {
+        await db.insert(mediaFolders).values({ name }).onConflictDoNothing();
+      }
     }
   }
 }

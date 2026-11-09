@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { RevealDirective } from '../../reveal.directive';
@@ -12,6 +12,7 @@ import type {
   CmsTimelineMilestone,
   CmsCommunityMessage,
   CmsHomepageSettings,
+  CmsAnnouncement,
 } from '@astec/types';
 
 @Component({
@@ -21,7 +22,7 @@ import type {
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, OnDestroy {
   private eventsApi = inject(EventsApiService);
   private cmsApi = inject(CmsApiService);
 
@@ -40,7 +41,7 @@ export class Home implements OnInit {
   });
 
   featuredBanner = computed(() => {
-    return this.featured()?.banner || this.homepage()?.hero?.bgImage || '/images/empty/image-fallback.jpg';
+    return this.homepage()?.hero?.bgImage || this.featured()?.banner || '/images/empty/image-fallback.jpg';
   });
 
   upcoming = computed(() =>
@@ -54,11 +55,105 @@ export class Home implements OnInit {
   galleryPreview = signal<CmsGalleryItem[]>([]);
   timelinePreview = signal<CmsTimelineMilestone[]>([]);
   messagesPreview = signal<CmsCommunityMessage[]>([]);
+  announcements = signal<CmsAnnouncement[]>([]);
+  currentAnnouncementIndex = signal(0);
+  isAnnouncementPaused = signal(false);
+  private announcementInterval: any = null;
+  private touchStartX = 0;
+  private mouseStartX = 0;
+  private isMouseDown = false;
+
+  currentAnnouncement = computed(() => {
+    const list = this.announcements();
+    if (list.length === 0) return null;
+    return list[this.currentAnnouncementIndex() % list.length];
+  });
+
   organizers = ORGANIZERS;
   rotations = [-3, 2, -1.5, 3, -2.5, 1.8, -2, 2.5];
 
   ngOnInit() {
     void this.loadAll();
+    this.startAnnouncementRotation();
+  }
+
+  ngOnDestroy() {
+    this.stopAnnouncementRotation();
+  }
+
+  startAnnouncementRotation() {
+    this.stopAnnouncementRotation();
+    this.announcementInterval = setInterval(() => {
+      if (!this.isAnnouncementPaused() && this.announcements().length > 1) {
+        this.nextAnnouncement();
+      }
+    }, 5000);
+  }
+
+  stopAnnouncementRotation() {
+    if (this.announcementInterval) {
+      clearInterval(this.announcementInterval);
+      this.announcementInterval = null;
+    }
+  }
+
+  nextAnnouncement() {
+    const total = this.announcements().length;
+    if (total <= 1) return;
+    this.currentAnnouncementIndex.update((i) => (i + 1) % total);
+  }
+
+  prevAnnouncement() {
+    const total = this.announcements().length;
+    if (total <= 1) return;
+    this.currentAnnouncementIndex.update((i) => (i - 1 + total) % total);
+  }
+
+  goToAnnouncement(index: number) {
+    this.currentAnnouncementIndex.set(index);
+  }
+
+  pauseAnnouncements() {
+    this.isAnnouncementPaused.set(true);
+  }
+
+  resumeAnnouncements() {
+    this.isAnnouncementPaused.set(false);
+  }
+
+  onTouchStart(e: TouchEvent) {
+    this.touchStartX = e.changedTouches[0].clientX;
+  }
+
+  onTouchEnd(e: TouchEvent) {
+    const deltaX = e.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(deltaX) > 40) {
+      if (deltaX < 0) this.nextAnnouncement();
+      else this.prevAnnouncement();
+    }
+  }
+
+  onMouseDown(e: MouseEvent) {
+    this.mouseStartX = e.clientX;
+    this.isMouseDown = true;
+  }
+
+  onMouseUp(e: MouseEvent) {
+    if (this.isMouseDown) {
+      this.isMouseDown = false;
+      const deltaX = e.clientX - this.mouseStartX;
+      if (Math.abs(deltaX) > 40) {
+        if (deltaX < 0) this.nextAnnouncement();
+        else this.prevAnnouncement();
+      }
+    }
+  }
+
+  isSectionEnabled(id: string): boolean {
+    const list = this.homepage()?.sections;
+    if (!list || list.length === 0) return true;
+    const item = list.find((s) => s.id === id);
+    return item ? item.enabled !== false : true;
   }
 
   private async loadAll(): Promise<void> {
@@ -75,14 +170,18 @@ export class Home implements OnInit {
 
   private async loadCmsContent(): Promise<void> {
     try {
-      const [hp, gallery, timeline, messages] = await Promise.all([
+      const [hp, gallery, timeline, messages, ann] = await Promise.all([
         this.cmsApi.getHomepage().catch(() => null),
         this.cmsApi.getGallery().catch(() => []),
         this.cmsApi.getTimeline().catch(() => []),
         this.cmsApi.getCommunityMessages('community', 'approved').catch(() => []),
+        this.cmsApi.getAnnouncements().catch(() => []),
       ]);
 
       if (hp) this.homepage.set(hp);
+      if (ann && ann.length > 0) {
+        this.announcements.set(ann.filter((a) => a.status === 'published'));
+      }
       if (gallery && gallery.length > 0) {
         this.latestMemories.set(gallery.slice(0, 4));
         this.galleryPreview.set(gallery.slice(4, 11));

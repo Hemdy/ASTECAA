@@ -23,6 +23,16 @@ import {
   verification,
 } from './auth-schema.js';
 
+export {
+  account,
+  accountRelations,
+  session,
+  sessionRelations,
+  user,
+  userRelations,
+  verification,
+};
+
 const appTimestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -523,6 +533,60 @@ export const mediaFiles = pgTable(
   ]
 );
 
+export const contactSubmissions = pgTable(
+  'contact_submissions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    email: text('email').notNull(),
+    subject: text('subject').notNull(),
+    message: text('message').notNull(),
+    status: text('status').notNull().default('new'),
+    replies: jsonb('replies').$type<Array<{
+      id: string;
+      sender: string;
+      message: string;
+      sentAt: string;
+    }>>().notNull().default([]),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('contact_submissions_status_idx').on(table.status),
+    index('contact_submissions_created_at_idx').on(table.createdAt),
+    check('contact_submissions_status_check', sql`${table.status} in ('new', 'read', 'replied', 'closed')`),
+  ]
+);
+
+export const mediaFolders = pgTable(
+  'media_folders',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('media_folders_name_uidx').on(table.name),
+  ]
+);
+
+export const adminNotifications = pgTable(
+  'admin_notifications',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    type: text('type').notNull().default('system'),
+    title: text('title').notNull(),
+    message: text('message').notNull(),
+    link: text('link'),
+    read: boolean('read').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('admin_notifications_read_idx').on(table.read),
+    index('admin_notifications_created_at_idx').on(table.createdAt),
+  ]
+);
+
 export const astecSchema = {
   appUsers,
   authIdentities,
@@ -546,6 +610,9 @@ export const astecSchema = {
   announcements,
   siteContent,
   mediaFiles,
+  contactSubmissions,
+  mediaFolders,
+  adminNotifications,
   user,
   session,
   account,

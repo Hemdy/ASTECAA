@@ -93,16 +93,21 @@
         <div class="adm-notif-panel" (click)="$event.stopPropagation()">
           <div class="adm-notif-head">
             <strong>Notifications</strong>
-            <button class="adm-btn adm-btn-ghost adm-btn-sm">Mark all read</button>
+            <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="markAllRead()">Mark all read</button>
           </div>
           <div class="adm-notif-list">
-            @for (n of notifications; track n.id) {
-              <div class="adm-notif-item" [class.unread]="n.unread">
+            @for (n of notifications(); track n.id) {
+              <div class="adm-notif-item" [class.unread]="!n.read" (click)="onNotifClick(n)" style="cursor: pointer">
                 <div class="adm-notif-ico"><i [class]="notifIcon(n.type)"></i></div>
                 <div>
-                  <div class="adm-notif-text">{{ n.text }}</div>
-                  <div class="adm-notif-time">{{ n.time }}</div>
+                  <div class="adm-notif-text">{{ n.message || n.title }}</div>
+                  <div class="adm-notif-time">{{ shortDate(n.createdAt) }}</div>
                 </div>
+              </div>
+            } @empty {
+              <div style="padding: 24px; text-align: center; color: var(--ad-text-soft); font-size: 0.88rem">
+                <i class="ri-notification-line" style="font-size: 1.5rem; display: block; margin-bottom: 6px"></i>
+                No notifications yet.
               </div>
             }
           </div>

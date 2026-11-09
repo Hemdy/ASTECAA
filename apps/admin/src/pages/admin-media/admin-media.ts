@@ -1,4 +1,5 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { ToastService } from '@astec/ui';
@@ -13,6 +14,7 @@ import type { CmsMediaItem } from '@astec/types';
   styleUrl: './admin-media.css',
 })
 export class AdminMedia implements OnInit {
+  private route = inject(ActivatedRoute);
   private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
 
@@ -23,17 +25,16 @@ export class AdminMedia implements OnInit {
   typeFilter = signal('');
   selected = signal<CmsMediaItem | null>(null);
 
+  // Folders state
+  folders = signal<string[]>(['General', 'Gallery', 'Reunions', 'Concerts', 'Harvest']);
+  newFolderModal = signal(false);
+  newFolderName = '';
+
   // Upload modal state
   uploadModal = signal(false);
   uploading = signal(false);
   uploadFolder = signal('General');
   selectedFiles = signal<File[]>([]);
-
-  folders = computed(() => {
-    const list = [...new Set(this.items().map((m) => m.folder).filter(Boolean))];
-    const defaultFolders = ['General', 'Gallery', 'Reunions', 'Concerts', 'Harvest'];
-    return [...new Set([...defaultFolders, ...list])];
-  });
 
   filtered = computed(() => {
     const f = this.folder();
@@ -63,17 +64,71 @@ export class AdminMedia implements OnInit {
 
   ngOnInit() {
     void this.loadMedia();
+    this.route.queryParams.subscribe((params) => {
+      if (params['action'] === 'upload') {
+        this.openUpload();
+      }
+    });
   }
 
   async loadMedia() {
     this.loading.set(true);
     try {
-      const data = await this.cmsApi.adminListMedia();
-      this.items.set(data);
+      const [mediaData, folderData] = await Promise.all([
+        this.cmsApi.adminListMedia(),
+        this.cmsApi.adminListMediaFolders().catch(() => ['General', 'Gallery', 'Reunions', 'Concerts', 'Harvest']),
+      ]);
+      this.items.set(mediaData);
+      if (folderData && folderData.length > 0) {
+        this.folders.set(folderData);
+      }
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load media files');
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  openNewFolder() {
+    this.newFolderName = '';
+    this.newFolderModal.set(true);
+  }
+
+  async createFolder() {
+    const name = this.newFolderName.trim();
+    if (!name) {
+      this.toast.show('Please provide a folder name.');
+      return;
+    }
+    try {
+      await this.cmsApi.adminCreateMediaFolder(name);
+      this.toast.show(`Folder "${name}" created.`);
+      this.newFolderModal.set(false);
+      this.newFolderName = '';
+      const updatedFolders = await this.cmsApi.adminListMediaFolders();
+      this.folders.set(updatedFolders);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to create folder');
+    }
+  }
+
+  async deleteFolder(folderName: string) {
+    if (folderName.toLowerCase() === 'general') {
+      this.toast.show('Default General folder cannot be deleted.');
+      return;
+    }
+    if (!confirm(`Are you sure you want to delete category "${folderName}"? Any files will be moved to "General".`)) {
+      return;
+    }
+    try {
+      await this.cmsApi.adminDeleteMediaFolder(folderName);
+      this.toast.show(`Folder "${folderName}" deleted.`);
+      if (this.folder() === folderName) {
+        this.folder.set('all');
+      }
+      await this.loadMedia();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to delete folder');
     }
   }
 

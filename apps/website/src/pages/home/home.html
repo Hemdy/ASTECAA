@@ -1,4 +1,5 @@
 <!-- ============ HERO ============ -->
+@if (isSectionEnabled('hero')) {
 <section class="hero">
   <div class="hero-bg" aria-hidden="true">
     <img
@@ -87,8 +88,71 @@
 
   <div class="hero-scroll type" aria-hidden="true">scroll ↓ to wander</div>
 </section>
+}
+
+@if (announcements().length > 0 && currentAnnouncement(); as ann) {
+  <section
+    class="announcements-bar"
+    appReveal
+    (mouseenter)="pauseAnnouncements()"
+    (mouseleave)="resumeAnnouncements()"
+    (focusin)="pauseAnnouncements()"
+    (focusout)="resumeAnnouncements()"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+  >
+    <div class="container announcements-bar-inner">
+      <div class="announcements-badge">
+        <i class="ri-notification-3-line"></i>
+        <span>Official Notices</span>
+      </div>
+      <div class="announcements-carousel">
+        <div class="announcement-slide">
+          <span class="announcement-tag">{{ ann.pinned ? '📌 Pinned' : 'Notice' }}</span>
+          <strong class="announcement-title">{{ ann.title }}</strong>
+          <span class="announcement-body">{{ ann.body }}</span>
+          <span class="announcement-date">{{ ann.date }}</span>
+        </div>
+      </div>
+      @if (announcements().length > 1) {
+        <div class="announcements-controls">
+          <button
+            type="button"
+            class="announcement-arrow-btn"
+            (click)="prevAnnouncement()"
+            aria-label="Previous announcement"
+          >
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <div class="announcement-dots">
+            @for (item of announcements(); track item.id; let idx = $index) {
+              <button
+                type="button"
+                class="announcement-dot"
+                [class.active]="idx === currentAnnouncementIndex()"
+                (click)="goToAnnouncement(idx)"
+                [attr.aria-label]="'Go to notice ' + (idx + 1)"
+              ></button>
+            }
+          </div>
+          <button
+            type="button"
+            class="announcement-arrow-btn"
+            (click)="nextAnnouncement()"
+            aria-label="Next announcement"
+          >
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+}
 
 <!-- ============ FEATURED EVENT (large) ============ -->
+@if (isSectionEnabled('featured')) {
 <section class="section">
   @if (featured(); as event) {
   <div class="container featured">
@@ -141,8 +205,10 @@
     </div>
   }
 </section>
+}
 
 <!-- ============ LATEST MEMORIES ============ -->
+@if (isSectionEnabled('memories')) {
 <section class="section section-paper">
   <div class="container">
     <div class="shead" appReveal>
@@ -187,8 +253,10 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============ UPCOMING EVENTS ============ -->
+@if (isSectionEnabled('events')) {
 <section class="section">
   <div class="container">
     <div class="shead" appReveal>
@@ -253,8 +321,10 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============ TIMELINE PREVIEW ============ -->
+@if (isSectionEnabled('timeline')) {
 <section class="section section-paper">
   <div class="container">
     <div class="shead" appReveal>
@@ -286,8 +356,10 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============ GALLERY PREVIEW (film strip) ============ -->
+@if (isSectionEnabled('gallery')) {
 <section class="section">
   <div class="container">
     <div class="shead" appReveal>
@@ -312,8 +384,10 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============ ALUMNI STORIES PREVIEW ============ -->
+@if (isSectionEnabled('community')) {
 <section class="section section-paper">
   <div class="container">
     <div class="shead" appReveal>
@@ -360,8 +434,10 @@
     </div>
   </div>
 </section>
+}
 
 <!-- ============ LEADERSHIP PREVIEW ============ -->
+@if (isSectionEnabled('organizers')) {
 <section class="section">
   <div class="container">
     <div class="shead" appReveal>
@@ -396,3 +472,4 @@
     </div>
   </div>
 </section>
+}

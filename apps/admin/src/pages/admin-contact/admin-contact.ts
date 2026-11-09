@@ -1,8 +1,8 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AdmModal } from '../../components/adm-modal/adm-modal';
-import { ADMIN_CONTACT, AdminContactMsg } from '../../admin-data';
 import { ToastService } from '@astec/ui';
+import { CmsApiService } from '@astec/api-client';
+import type { ContactSubmission } from '@astec/types';
 
 @Component({
   selector: 'app-admin-contact',
@@ -11,11 +11,14 @@ import { ToastService } from '@astec/ui';
   templateUrl: './admin-contact.html',
   styleUrl: './admin-contact.css',
 })
-export class AdminContact {
+export class AdminContact implements OnInit {
+  private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
-  messages = signal<AdminContactMsg[]>(ADMIN_CONTACT);
+
+  messages = signal<ContactSubmission[]>([]);
+  loading = signal(false);
   tab = signal<'all' | 'new' | 'read' | 'replied' | 'closed'>('all');
-  selected = signal<AdminContactMsg | null>(null);
+  selected = signal<ContactSubmission | null>(null);
   replyText = '';
 
   filtered = computed(() => {
@@ -23,42 +26,83 @@ export class AdminContact {
     return t === 'all' ? this.messages() : this.messages().filter((m) => m.status === t);
   });
 
+  ngOnInit() {
+    void this.loadMessages();
+  }
+
+  async loadMessages() {
+    this.loading.set(true);
+    try {
+      const data = await this.cmsApi.adminListContact();
+      this.messages.set(data);
+      if (this.selected()) {
+        const updated = data.find((m) => m.id === this.selected()!.id);
+        if (updated) this.selected.set(updated);
+      }
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to load contact messages');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   countStatus(s: string): number {
     return this.messages().filter((m) => m.status === s).length;
   }
 
   shortDate(iso: string): string {
-    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (!iso) return '';
+    return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  select(m: AdminContactMsg) {
+  async select(m: ContactSubmission) {
     this.selected.set(m);
     this.replyText = '';
     if (m.status === 'new') {
-      this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'read' } : x)));
-      this.selected.set({ ...m, status: 'read' });
+      try {
+        const updated = await this.cmsApi.adminUpdateContactStatus(m.id, 'read');
+        this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
+        this.selected.set(updated);
+      } catch {}
     }
   }
 
-  markRead(m: AdminContactMsg) {
-    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'read' } : x)));
-    this.selected.set({ ...m, status: 'read' });
+  async markRead(m: ContactSubmission) {
+    try {
+      const updated = await this.cmsApi.adminUpdateContactStatus(m.id, 'read');
+      this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
+      this.selected.set(updated);
+      this.toast.show('Marked as read.');
+    } catch (err: any) {
+      this.toast.show(err.message || 'Action failed');
+    }
   }
 
-  sendReply(m: AdminContactMsg) {
-    if (!this.replyText.trim()) {
+  async sendReply(m: ContactSubmission) {
+    const text = this.replyText.trim();
+    if (!text) {
       this.toast.show('Please write a reply first.');
       return;
     }
-    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'replied' } : x)));
-    this.selected.set({ ...m, status: 'replied' });
-    this.toast.show(`Reply sent to ${m.name}.`);
-    this.replyText = '';
+    try {
+      const updated = await this.cmsApi.adminReplyContact(m.id, text);
+      this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
+      this.selected.set(updated);
+      this.toast.show(`Reply saved and sent to ${m.name}.`);
+      this.replyText = '';
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to send reply');
+    }
   }
 
-  markClosed(m: AdminContactMsg) {
-    this.messages.update((list) => list.map((x) => (x.id === m.id ? { ...x, status: 'closed' } : x)));
-    this.selected.set({ ...m, status: 'closed' });
-    this.toast.show('Ticket closed.');
+  async markClosed(m: ContactSubmission) {
+    try {
+      const updated = await this.cmsApi.adminUpdateContactStatus(m.id, 'closed');
+      this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
+      this.selected.set(updated);
+      this.toast.show('Ticket closed.');
+    } catch (err: any) {
+      this.toast.show(err.message || 'Action failed');
+    }
   }
 }

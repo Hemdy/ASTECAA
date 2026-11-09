@@ -2,7 +2,7 @@ import { Component, signal, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '@astec/ui';
 import { CmsApiService, EventsApiService } from '@astec/api-client';
-import type { CmsHomepageSettings, PublicEvent } from '@astec/types';
+import type { CmsHomepageSettings, CmsEvent } from '@astec/types';
 
 interface HomeSection {
   id: string;
@@ -24,7 +24,7 @@ export class AdminHomepage implements OnInit {
 
   tab = signal<'hero' | 'featured' | 'sections' | 'footer'>('hero');
   saving = signal(false);
-  availableEvents = signal<PublicEvent[]>([]);
+  availableEvents = signal<CmsEvent[]>([]);
 
   hero = {
     headline: 'Reconnect. Celebrate. Give Back.',
@@ -86,16 +86,8 @@ export class AdminHomepage implements OnInit {
     try {
       const [settings, events] = await Promise.all([
         this.cmsApi.adminGetHomepage().catch(() => null),
-        this.eventsApi.listPublic().catch(() => []),
+        this.eventsApi.listAdmin().catch(() => []),
       ]);
-
-      if (events && events.length > 0) {
-        this.availableEvents.set(events);
-        if (!this.featured.eventId) {
-          const feat = events.find((e) => e.featured) || events[0];
-          this.featured.eventId = feat.id;
-        }
-      }
 
       if (settings) {
         if (settings.hero) {
@@ -104,11 +96,25 @@ export class AdminHomepage implements OnInit {
         if (settings.featured) {
           this.featured = { ...this.featured, ...settings.featured };
         }
-        if (settings.sections) {
-          this.sections.set(settings.sections as HomeSection[]);
+        if (settings.sections && settings.sections.length > 0) {
+          const savedMap = new Map((settings.sections as HomeSection[]).map((s) => [s.id, s.enabled]));
+          this.sections.update((curr) =>
+            curr.map((s) => ({
+              ...s,
+              enabled: savedMap.has(s.id) ? (savedMap.get(s.id) as boolean) : s.enabled,
+            }))
+          );
         }
         if (settings.footer) {
           this.footer = { ...this.footer, ...settings.footer };
+        }
+      }
+
+      if (events && events.length > 0) {
+        this.availableEvents.set(events as any);
+        if (!this.featured.eventId) {
+          const feat = events.find((e: any) => e.featured) || events[0];
+          this.featured.eventId = feat.id;
         }
       }
     } catch (err: any) {

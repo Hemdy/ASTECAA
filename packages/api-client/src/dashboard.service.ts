@@ -4,8 +4,9 @@ import type { DashboardStatsItem } from '@astec/types';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardApiService {
-  async getStats(): Promise<DashboardStatsItem> {
-    return this.request<DashboardStatsItem>('/api/admin/v1/dashboard/stats');
+  async getStats(period?: string): Promise<DashboardStatsItem> {
+    const qs = period ? `?period=${encodeURIComponent(period)}` : '';
+    return this.request<DashboardStatsItem>(`/api/admin/v1/dashboard/stats${qs}`);
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {

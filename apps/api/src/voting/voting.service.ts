@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { and, desc, eq, inArray, sql } from 'drizzle-orm';
-import { createHash, randomInt } from 'node:crypto';
+import { createHash, randomInt, randomUUID } from 'node:crypto';
 import {
+  adminNotifications,
   candidates,
   elections,
   electionVoters,
@@ -636,6 +637,18 @@ export class VotingService {
         voterEmailNormalized: emailNorm,
       })
       .onConflictDoNothing();
+
+    void db
+      .insert(adminNotifications)
+      .values({
+        id: randomUUID(),
+        type: 'election',
+        title: 'New Ballot Submitted',
+        message: 'An alumni cast and finalized their ballot.',
+        link: '/admin/elections',
+        read: false,
+      })
+      .catch(() => {});
 
     return { success: true };
   }

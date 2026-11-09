@@ -1,16 +1,11 @@
 import { Component, signal, computed, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AdmBars, AdmDonut, AdmLine } from '../../components/adm-charts/adm-charts';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
 import { DashboardApiService, CmsApiService } from '@astec/api-client';
 import { AdminAuthService } from '../../auth.service';
 import type { DashboardStatsItem } from '@astec/types';
-import {
-  ADMIN_ACTIVITY,
-  ENGAGEMENT_DATA,
-  TRAFFIC_DATA,
-} from '../../admin-data';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -20,6 +15,7 @@ import {
   styleUrl: './dashboard.css',
 })
 export class AdminDashboard {
+  private router = inject(Router);
   private toast = inject(ToastService);
   private dashboardApi = inject(DashboardApiService);
   private cmsApi = inject(CmsApiService);
@@ -50,36 +46,44 @@ export class AdminDashboard {
   engagedCount = computed(() => this.stats().engagedUsersCount ?? Math.max(1, this.stats().totalUsers));
   inactiveCount = computed(() => this.stats().inactiveUsersCount ?? 0);
 
-  engagementData = computed(() =>
-    this.stats().engagementData && this.stats().engagementData!.length > 0
-      ? this.stats().engagementData!
-      : ENGAGEMENT_DATA
-  );
-
-  trafficData = computed(() =>
-    this.stats().trafficData && this.stats().trafficData!.length > 0
-      ? this.stats().trafficData!
-      : TRAFFIC_DATA
-  );
-
-  activity = computed(() =>
-    this.stats().recentActivity && this.stats().recentActivity!.length > 0
-      ? this.stats().recentActivity!
-      : ADMIN_ACTIVITY
-  );
+  engagementData = computed(() => this.stats().engagementData || []);
+  trafficData = computed(() => this.stats().trafficData || []);
+  activity = computed(() => this.stats().recentActivity || []);
 
   pendingComments = computed(() => this.stats().pendingApprovalsList || []);
 
   quickModal = signal('');
   quickModalTitle = signal('');
 
+  growthPeriod = signal<'12m' | '6m' | '3m' | '1m' | '2w'>('6m');
+  growthPeriodLabel = computed(() => {
+    switch (this.growthPeriod()) {
+      case '12m':
+        return '12 months';
+      case '6m':
+        return '6 months';
+      case '3m':
+        return '3 months';
+      case '1m':
+        return '1 month';
+      case '2w':
+        return '2 weeks';
+    }
+  });
+
   constructor() {
     this.loadStats();
   }
 
+  onPeriodSelect(event: Event) {
+    const val = (event.target as HTMLSelectElement).value as '12m' | '6m' | '3m' | '1m' | '2w';
+    this.growthPeriod.set(val);
+    void this.loadStats();
+  }
+
   async loadStats() {
     try {
-      const data = await this.dashboardApi.getStats();
+      const data = await this.dashboardApi.getStats(this.growthPeriod());
       this.stats.set(data);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load dashboard metrics.');
@@ -106,8 +110,17 @@ export class AdminDashboard {
   }
 
   confirmQuick() {
-    this.toast.show('Opening the editor for this action.');
+    const kind = this.quickModal();
     this.quickModal.set('');
+    if (kind === 'event') {
+      void this.router.navigate(['/admin/events'], { queryParams: { action: 'new' } });
+    } else if (kind === 'story') {
+      void this.router.navigate(['/admin/stories'], { queryParams: { action: 'new' } });
+    } else if (kind === 'upload') {
+      void this.router.navigate(['/admin/media'], { queryParams: { action: 'upload' } });
+    } else if (kind === 'announce') {
+      void this.router.navigate(['/admin/announcements'], { queryParams: { action: 'new' } });
+    }
   }
 
   async approve(id: string) {

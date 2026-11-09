@@ -1,4 +1,5 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
@@ -14,6 +15,7 @@ import type { CmsStory } from '@astec/types';
   templateUrl: './admin-stories.html',
 })
 export class AdminStories implements OnInit {
+  private route = inject(ActivatedRoute);
   private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
 
@@ -25,6 +27,44 @@ export class AdminStories implements OnInit {
   showModal = signal(false);
   editing = signal(false);
   deleteTarget = signal<CmsStory | null>(null);
+
+  selected = signal<string[]>([]);
+  allSelected = computed(() => {
+    const list = this.filtered();
+    return list.length > 0 && list.every((s) => this.selected().includes(s.id));
+  });
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this.selected.set(this.filtered().map((s) => s.id));
+    } else {
+      this.selected.set([]);
+    }
+  }
+
+  toggleSelect(id: string): void {
+    this.selected.update((s) =>
+      s.includes(id) ? s.filter((x) => x !== id) : [...s, id]
+    );
+  }
+
+  isSelected(id: string): boolean {
+    return this.selected().includes(id);
+  }
+
+  async bulkDelete(): Promise<void> {
+    const sel = this.selected();
+    if (sel.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${sel.length} selected story(s)?`)) return;
+    try {
+      await Promise.all(sel.map((id) => this.cmsApi.deleteStory(id)));
+      this.toast.show(`${sel.length} story(s) deleted.`);
+      this.selected.set([]);
+      await this.loadStories();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to delete stories');
+    }
+  }
 
   categories = ['History', 'Reunion', 'Spotlight', 'Legacy', 'Culture', 'Education'];
 
@@ -58,6 +98,11 @@ export class AdminStories implements OnInit {
 
   ngOnInit() {
     void this.loadStories();
+    this.route.queryParams.subscribe((params) => {
+      if (params['action'] === 'new') {
+        this.openCreate();
+      }
+    });
   }
 
   async loadStories() {

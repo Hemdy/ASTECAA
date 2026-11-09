@@ -54,11 +54,14 @@
     <div class="adm-card-head">
       <div>
         <div class="adm-card-title">Community Growth</div>
-        <div class="adm-card-sub">New registrations, last 7 months</div>
+        <div class="adm-card-sub">New registrations, last {{ growthPeriodLabel() }}</div>
       </div>
-      <select class="adm-select" style="width: auto">
-        <option>7 months</option>
-        <option>12 months</option>
+      <select class="adm-select" style="width: auto" [value]="growthPeriod()" (change)="onPeriodSelect($event)">
+        <option value="12m">12 months</option>
+        <option value="6m">6 months</option>
+        <option value="3m">3 months</option>
+        <option value="1m">1 month</option>
+        <option value="2w">2 weeks</option>
       </select>
     </div>
     <div class="adm-card-pad">

@@ -9,6 +9,29 @@
   </div>
 </section>
 
+@if (announcements().length > 0) {
+  <section style="background: var(--c-surface-card, #2a1515); border-bottom: 1px solid rgba(212, 175, 55, 0.25); padding: 20px 0; color: #fff;">
+    <div class="container" style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+      <div style="display: inline-flex; align-items: center; gap: 8px; background: #c89d3c; color: #1a0b0b; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 999px; white-space: nowrap;">
+        <i class="ri-megaphone-line"></i>
+        <span>Official Bulletins</span>
+      </div>
+      <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 10px;">
+        @for (ann of announcements(); track ann.id) {
+          <div style="display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 0.75rem; background: rgba(255, 255, 255, 0.12); padding: 2px 8px; border-radius: 4px; color: #e6c875;">{{ ann.pinned ? '📌 Pinned' : 'Notice' }}</span>
+              <strong style="color: #fff; font-size: 1rem;">{{ ann.title }}</strong>
+              <span style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.5); margin-left: auto;">{{ ann.date }}</span>
+            </div>
+            <p style="margin: 0; color: rgba(255, 255, 255, 0.85); font-size: 0.9rem; line-height: 1.5;">{{ ann.body }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+}
+
 <section class="section">
   <div class="container">
     <!-- Leave a message -->

@@ -6,7 +6,7 @@ import { RevealDirective } from '../../reveal.directive';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
 import { MemberAuthService } from '../../services/member-auth';
-import type { CmsCommunityMessage, CommunityReply } from '@astec/types';
+import type { CmsCommunityMessage, CommunityReply, CmsAnnouncement } from '@astec/types';
 
 @Component({
   selector: 'app-community',
@@ -22,6 +22,7 @@ export class Community implements OnInit {
 
   filter = signal<'all' | 'pinned'>('all');
   messages = signal<CmsCommunityMessage[]>([]);
+  announcements = signal<CmsAnnouncement[]>([]);
   loading = signal(false);
   submitting = signal(false);
   currentYear = new Date().getFullYear();
@@ -45,8 +46,14 @@ export class Community implements OnInit {
     this.loading.set(true);
     try {
       const email = this.auth.profile()?.email;
-      const data = await this.cmsApi.getCommunityMessages('community', 'approved', email);
+      const [data, ann] = await Promise.all([
+        this.cmsApi.getCommunityMessages('community', 'approved', email),
+        this.cmsApi.getAnnouncements().catch(() => []),
+      ]);
       this.messages.set(data);
+      if (ann && ann.length > 0) {
+        this.announcements.set(ann.filter((a) => a.status === 'published'));
+      }
     } catch {
       this.messages.set([]);
     } finally {

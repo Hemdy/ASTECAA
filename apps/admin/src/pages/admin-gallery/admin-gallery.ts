@@ -101,6 +101,19 @@ export class AdminGallery implements OnInit {
     this.selected.update((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   }
 
+  allSelected = computed(() => {
+    const list = this.filtered();
+    return list.length > 0 && list.every((item) => this.selected().includes(item.id));
+  });
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this.selected.set(this.filtered().map((item) => item.id));
+    } else {
+      this.selected.set([]);
+    }
+  }
+
   async bulkFeature() {
     const sel = this.selected();
     if (sel.length === 0) return;

@@ -22,24 +22,31 @@
 <div style="display: flex; gap: 20px; align-items: flex-start">
   <!-- List -->
   <div class="adm-card" style="flex: 1; min-width: 0">
-    <div style="display: flex; flex-direction: column">
-      @for (m of filtered(); track m.id) {
-        <div
-          class="contact-row"
-          [class.active]="selected()?.id === m.id"
-          (click)="select(m)"
-        >
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px">
-            <strong>{{ m.name }}</strong>
-            <span class="adm-badge" [class.adm-badge-warning]="m.status === 'new'" [class.adm-badge-info]="m.status === 'read'" [class.adm-badge-success]="m.status === 'replied'" [class.adm-badge-muted]="m.status === 'closed'">{{ m.status }}</span>
+    @if (loading()) {
+      <div class="adm-card-pad adm-empty">
+        <div class="adm-empty-ico"><i class="ri-loader-4-line ri-spin"></i></div>
+        <p>Loading contact messages…</p>
+      </div>
+    } @else {
+      <div style="display: flex; flex-direction: column">
+        @for (m of filtered(); track m.id) {
+          <div
+            class="contact-row"
+            [class.active]="selected()?.id === m.id"
+            (click)="select(m)"
+          >
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px">
+              <strong>{{ m.name }}</strong>
+              <span class="adm-badge" [class.adm-badge-warning]="m.status === 'new'" [class.adm-badge-info]="m.status === 'read'" [class.adm-badge-success]="m.status === 'replied'" [class.adm-badge-muted]="m.status === 'closed'">{{ m.status }}</span>
+            </div>
+            <div style="font-size: 0.86rem; color: var(--ad-text)">{{ m.subject }}</div>
+            <div class="adm-cell-user-sub" style="margin-top: 2px">{{ shortDate(m.createdAt) }} · {{ m.email }}</div>
           </div>
-          <div style="font-size: 0.86rem; color: var(--ad-text)">{{ m.subject }}</div>
-          <div class="adm-cell-user-sub" style="margin-top: 2px">{{ shortDate(m.date) }} · {{ m.email }}</div>
-        </div>
-      } @empty {
-        <div class="adm-empty"><div class="adm-empty-ico"><i class="ri-mail-line"></i></div><p>No messages in this view.</p></div>
-      }
-    </div>
+        } @empty {
+          <div class="adm-empty"><div class="adm-empty-ico"><i class="ri-mail-line"></i></div><p>No messages in this view.</p></div>
+        }
+      </div>
+    }
   </div>
 
   <!-- Detail -->
@@ -48,12 +55,31 @@
       <div class="adm-card-head">
         <div>
           <div class="adm-card-title">{{ m.subject }}</div>
-          <div class="adm-card-sub">From {{ m.name }} · {{ m.email }}</div>
+          <div class="adm-card-sub">From {{ m.name }} · {{ m.email }} · {{ shortDate(m.createdAt) }}</div>
         </div>
         <span class="adm-badge" [class.adm-badge-warning]="m.status === 'new'" [class.adm-badge-info]="m.status === 'read'" [class.adm-badge-success]="m.status === 'replied'" [class.adm-badge-muted]="m.status === 'closed'">{{ m.status }}</span>
       </div>
       <div class="adm-card-pad">
-        <p style="color: var(--ad-text-soft); line-height: 1.6; margin-bottom: 20px">{{ m.message }}</p>
+        <div class="adm-field-label" style="margin-bottom: 6px">Original Message</div>
+        <p style="color: var(--ad-text); line-height: 1.6; margin-bottom: 20px; padding: 12px; background: rgba(0, 0, 0, 0.02); border-radius: 6px">{{ m.message }}</p>
+
+        @if (m.replies && m.replies.length > 0) {
+          <div style="margin-bottom: 20px">
+            <div class="adm-field-label" style="margin-bottom: 8px">Response History ({{ m.replies.length }})</div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              @for (r of m.replies; track r.id) {
+                <div style="padding: 12px 14px; background: rgba(0, 0, 0, 0.03); border-radius: 6px; border-left: 3px solid var(--ad-burgundy)">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 0.85rem">
+                    <strong>{{ r.sender }}</strong>
+                    <span class="adm-cell-user-sub">{{ shortDate(r.sentAt) }}</span>
+                  </div>
+                  <p style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--ad-text)">{{ r.message }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <div class="adm-field">
           <label class="adm-field-label">Reply</label>
           <textarea class="adm-textarea" [(ngModel)]="replyText" placeholder="Write your reply…"></textarea>

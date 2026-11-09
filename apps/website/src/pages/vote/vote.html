@@ -36,7 +36,7 @@
         <div class="vote-submit-bar"><span>{{ selectedCount() }} of {{ selectedElection()!.positions.length }} positions selected</span><button class="btn btn-gold" (click)="reviewVotes()" [disabled]="!allPositionsSelected()">Review and verify →</button></div>
       }
     } @else {
-      <div class="vote-section-head"><div><span class="eyebrow">The ballot room</span><h2>Current elections</h2></div><span class="vote-demo-note">Demo mode · OTP: 123456</span></div>
+      <div class="vote-section-head"><div><span class="eyebrow">The ballot room</span><h2>Current elections</h2></div></div>
       <div class="vote-election-list">
         @for (e of activeElections(); track e.id) {
           <button class="vote-election-card paper" (click)="openElection(e)"><div class="vote-card-top"><span class="vote-status" [class.closed]="statusLabel(e) === 'Closed'"></span><span class="tag" [class.tag-forest]="statusLabel(e) === 'Open'">{{ statusLabel(e) }}</span><span class="type">{{ formatDate(e.start_date) }} — {{ formatDate(e.end_date) }}</span></div><h3>{{ e.title }}</h3><p>{{ e.description }}</p><div class="vote-card-foot"><span>View candidates</span><span><i class="ri-arrow-right-line"></i></span></div></button>

@@ -41,10 +41,19 @@
       <p>No stories found.</p>
     </div>
   } @else {
+    @if (selected().length > 0) {
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(139, 29, 39, 0.08); border-bottom: 1px solid rgba(139, 29, 39, 0.2)">
+        <span style="font-weight: 600; color: var(--ad-burgundy)">{{ selected().length }} story(s) selected</span>
+        <button class="adm-btn adm-btn-danger adm-btn-sm" (click)="bulkDelete()">
+          <i class="ri-delete-bin-line"></i> Delete Selected
+        </button>
+      </div>
+    }
     <div class="adm-table-wrap">
       <table class="adm-table">
         <thead>
           <tr>
+            <th style="width: 36px"><input type="checkbox" class="adm-cb" [checked]="allSelected()" (change)="toggleSelectAll($any($event.target).checked)" /></th>
             <th>Story</th>
             <th>Author</th>
             <th>Category</th>
@@ -58,6 +67,7 @@
         <tbody>
           @for (s of filtered(); track s.id) {
             <tr>
+              <td><input type="checkbox" class="adm-cb" [checked]="isSelected(s.id)" (change)="toggleSelect(s.id)" /></td>
               <td>
                 <div class="adm-cell-user">
                   <img class="adm-thumb" [src]="s.cover || '/images/ASTECAA.jpg'" [alt]="s.title" style="width: 56px; height: 36px" (error)="onImageError($event)"  />

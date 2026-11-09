@@ -11,6 +11,10 @@ import {
   announcements,
   siteContent,
   mediaFiles,
+  contactSubmissions,
+  mediaFolders,
+  adminNotifications,
+  events,
 } from '@astec/database';
 import { DatabaseService } from '../database/database.service.js';
 import { StorageService } from '../storage/storage.service.js';
@@ -290,6 +294,27 @@ export class CmsService {
       ? await db.select().from(communityMessages).where(and(...conditions)).orderBy(desc(communityMessages.createdAt))
       : await db.select().from(communityMessages).orderBy(desc(communityMessages.createdAt));
 
+    const msgIds = rows.map((r) => r.id);
+    const allReplies = msgIds.length > 0
+      ? await db.select().from(communityReplies).where(inArray(communityReplies.messageId, msgIds)).orderBy(asc(communityReplies.createdAt))
+      : [];
+    const repliesByMessage = new Map<string, Array<any>>();
+    for (const rep of allReplies) {
+      const list = repliesByMessage.get(rep.messageId) || [];
+      list.push({
+        id: rep.id,
+        messageId: rep.messageId,
+        userId: rep.userId,
+        author: rep.author,
+        email: rep.email,
+        avatar: rep.avatar,
+        graduationYear: rep.graduationYear,
+        message: rep.message,
+        createdAt: rep.createdAt.toISOString(),
+      });
+      repliesByMessage.set(rep.messageId, list);
+    }
+
     return rows.map((r) => ({
       id: r.id,
       author: r.author,
@@ -303,6 +328,7 @@ export class CmsService {
       status: r.status as 'approved' | 'pending' | 'reported' | 'spam',
       likes: r.likes,
       reports: 0,
+      replies: repliesByMessage.get(r.id) || [],
       date: r.createdAt.toISOString().slice(0, 10),
       createdAt: r.createdAt.toISOString(),
     }));
@@ -362,6 +388,15 @@ export class CmsService {
         pinned: false,
       })
       .returning();
+
+    void db.insert(adminNotifications).values({
+      type: 'comment',
+      title: 'New Community Note',
+      message: `${data.author.trim()} posted on ${data.page || 'community'}: "${data.message.trim().slice(0, 50)}…"`,
+      link: '/admin/comments',
+      read: false,
+    }).catch(() => {});
+
     return created;
   }
 
@@ -747,6 +782,19 @@ export class CmsService {
         set: { content, updatedAt: new Date() },
       })
       .returning();
+
+    if (key === 'homepage' && content?.featured?.eventId) {
+      try {
+        await db.update(events).set({ featured: false });
+        await db
+          .update(events)
+          .set({ featured: true })
+          .where(eq(events.id, content.featured.eventId));
+      } catch (err) {
+        this.logger.warn(`Failed to sync featured event flag: ${err}`);
+      }
+    }
+
     return saved.content;
   }
 
@@ -814,6 +862,297 @@ export class CmsService {
     await this.storage.delete(record.storageKey);
     await db.delete(mediaFiles).where(eq(mediaFiles.id, id));
     return { success: true, id };
+  }
+
+  // ==================== MEDIA FOLDERS ====================
+
+  async listMediaFolders(): Promise<string[]> {
+    const db = this.database.db;
+    const defaultFolders = ['General', 'Gallery', 'Reunions', 'Concerts', 'Harvest'];
+    const dbFolders = await db.select({ name: mediaFolders.name }).from(mediaFolders);
+    const mediaFileFolders = await db
+      .selectDistinct({ folder: mediaFiles.folder })
+      .from(mediaFiles);
+
+    const names = new Set<string>([
+      ...defaultFolders,
+      ...dbFolders.map((f) => f.name),
+      ...mediaFileFolders.map((f) => f.folder).filter(Boolean),
+    ]);
+    return Array.from(names);
+  }
+
+  async createMediaFolder(name: string): Promise<{ success: boolean; name: string }> {
+    const cleanName = name.trim();
+    if (!cleanName) throw new AppError(400, 'Folder name is required.', 'INVALID_INPUT');
+    const db = this.database.db;
+    const [existing] = await db
+      .select({ id: mediaFolders.id })
+      .from(mediaFolders)
+      .where(eq(mediaFolders.name, cleanName))
+      .limit(1);
+
+    if (!existing) {
+      await db.insert(mediaFolders).values({ name: cleanName });
+    }
+    return { success: true, name: cleanName };
+  }
+
+  async deleteMediaFolder(name: string): Promise<{ success: boolean; name: string }> {
+    const cleanName = name.trim();
+    if (!cleanName) throw new AppError(400, 'Folder name is required.', 'INVALID_INPUT');
+    if (cleanName.toLowerCase() === 'general') {
+      throw new AppError(400, 'The default General folder cannot be deleted.', 'FORBIDDEN');
+    }
+    const db = this.database.db;
+    await db.delete(mediaFolders).where(eq(mediaFolders.name, cleanName));
+    await db
+      .update(mediaFiles)
+      .set({ folder: 'General' })
+      .where(eq(mediaFiles.folder, cleanName));
+
+    return { success: true, name: cleanName };
+  }
+
+  // ==================== CONTACT SUBMISSIONS ====================
+
+  async submitContact(data: { name: string; email: string; subject: string; message: string }) {
+    if (!data.name?.trim() || !data.email?.trim() || !data.subject?.trim() || !data.message?.trim()) {
+      throw new AppError(400, 'All fields (name, email, subject, message) are required.', 'INVALID_INPUT');
+    }
+    const db = this.database.db;
+    const [created] = await db
+      .insert(contactSubmissions)
+      .values({
+        name: data.name.trim(),
+        email: data.email.trim().toLowerCase(),
+        subject: data.subject.trim(),
+        message: data.message.trim(),
+        status: 'new',
+        replies: [],
+      })
+      .returning();
+
+    void db.insert(adminNotifications).values({
+      type: 'contact',
+      title: 'New Contact Inquiry',
+      message: `${data.name.trim()} sent an inquiry: "${data.subject.trim()}"`,
+      link: '/admin/contact',
+      read: false,
+    }).catch(() => {});
+
+    return {
+      id: created.id,
+      name: created.name,
+      email: created.email,
+      subject: created.subject,
+      message: created.message,
+      status: created.status,
+      replies: created.replies || [],
+      createdAt: created.createdAt.toISOString(),
+      updatedAt: created.updatedAt.toISOString(),
+    };
+  }
+
+  async listContactSubmissions(status?: string) {
+    const db = this.database.db;
+    const rows = status && status !== 'all'
+      ? await db.select().from(contactSubmissions).where(eq(contactSubmissions.status, status)).orderBy(desc(contactSubmissions.createdAt))
+      : await db.select().from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt));
+
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      email: r.email,
+      subject: r.subject,
+      message: r.message,
+      status: r.status,
+      replies: r.replies || [],
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+    }));
+  }
+
+  async replyContactSubmission(id: string, reply: { sender?: string; message: string }) {
+    if (!reply.message?.trim()) {
+      throw new AppError(400, 'Reply message cannot be empty.', 'INVALID_INPUT');
+    }
+    const db = this.database.db;
+    const [sub] = await db.select().from(contactSubmissions).where(eq(contactSubmissions.id, id)).limit(1);
+    if (!sub) throw new AppError(404, 'Contact submission not found.', 'NOT_FOUND');
+
+    const newReply = {
+      id: crypto.randomUUID(),
+      sender: reply.sender?.trim() || 'ASTECAA Support',
+      message: reply.message.trim(),
+      sentAt: new Date().toISOString(),
+    };
+
+    const currentReplies = Array.isArray(sub.replies) ? sub.replies : [];
+    const updatedReplies = [...currentReplies, newReply];
+
+    const [updated] = await db
+      .update(contactSubmissions)
+      .set({
+        replies: updatedReplies,
+        status: 'replied',
+        updatedAt: new Date(),
+      })
+      .where(eq(contactSubmissions.id, id))
+      .returning();
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      email: updated.email,
+      subject: updated.subject,
+      message: updated.message,
+      status: updated.status,
+      replies: updated.replies || [],
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+    };
+  }
+
+  async updateContactStatus(id: string, status: string) {
+    if (!['new', 'read', 'replied', 'closed'].includes(status)) {
+      throw new AppError(400, 'Invalid status.', 'INVALID_INPUT');
+    }
+    const db = this.database.db;
+    const [sub] = await db.select().from(contactSubmissions).where(eq(contactSubmissions.id, id)).limit(1);
+    if (!sub) throw new AppError(404, 'Contact submission not found.', 'NOT_FOUND');
+
+    const [updated] = await db
+      .update(contactSubmissions)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(contactSubmissions.id, id))
+      .returning();
+
+    return {
+      id: updated.id,
+      name: updated.name,
+      email: updated.email,
+      subject: updated.subject,
+      message: updated.message,
+      status: updated.status,
+      replies: updated.replies || [],
+      createdAt: updated.createdAt.toISOString(),
+      updatedAt: updated.updatedAt.toISOString(),
+    };
+  }
+
+  // ==================== ADMIN NOTIFICATIONS ====================
+
+  async listAdminNotifications() {
+    const db = this.database.db;
+    let rows = await db
+      .select()
+      .from(adminNotifications)
+      .orderBy(desc(adminNotifications.createdAt))
+      .limit(30);
+
+    // If notifications are completely empty, bootstrap from real existing database records
+    if (rows.length === 0) {
+      const [recentContacts, recentNotes, recentUsers] = await Promise.all([
+        db.select().from(contactSubmissions).orderBy(desc(contactSubmissions.createdAt)).limit(3),
+        db.select().from(communityMessages).orderBy(desc(communityMessages.createdAt)).limit(3),
+        db.select().from(appUsers).orderBy(desc(appUsers.createdAt)).limit(3),
+      ]);
+
+      const initial: Array<typeof adminNotifications.$inferInsert> = [];
+      for (const c of recentContacts) {
+        initial.push({
+          type: 'contact',
+          title: 'Contact Inquiry',
+          message: `${c.name} submitted: "${c.subject}"`,
+          link: '/admin/contact',
+          read: c.status === 'replied' || c.status === 'closed',
+          createdAt: c.createdAt,
+        });
+      }
+      for (const m of recentNotes) {
+        initial.push({
+          type: 'comment',
+          title: 'Community Note',
+          message: `${m.author} posted: "${m.message.slice(0, 50)}…"`,
+          link: '/admin/comments',
+          read: m.status === 'approved',
+          createdAt: m.createdAt,
+        });
+      }
+      for (const u of recentUsers) {
+        initial.push({
+          type: 'user',
+          title: 'Alumni Joined',
+          message: `${u.fullName || u.email} joined the alumni community`,
+          link: '/admin/users',
+          read: u.status === 'active',
+          createdAt: u.createdAt,
+        });
+      }
+
+      if (initial.length > 0) {
+        await db.insert(adminNotifications).values(initial);
+        rows = await db
+          .select()
+          .from(adminNotifications)
+          .orderBy(desc(adminNotifications.createdAt))
+          .limit(30);
+      }
+    }
+
+    return rows.map((r) => ({
+      id: r.id,
+      type: r.type,
+      title: r.title,
+      text: r.message,
+      message: r.message,
+      link: r.link,
+      unread: !r.read,
+      read: r.read,
+      time: this.formatRelativeTime(r.createdAt),
+      createdAt: r.createdAt.toISOString(),
+    }));
+  }
+
+  async markAdminNotificationRead(id: string) {
+    const db = this.database.db;
+    const [updated] = await db
+      .update(adminNotifications)
+      .set({ read: true })
+      .where(eq(adminNotifications.id, id))
+      .returning();
+    if (!updated) throw new AppError(404, 'Notification not found.', 'NOT_FOUND');
+    return {
+      id: updated.id,
+      type: updated.type,
+      title: updated.title,
+      text: updated.message,
+      message: updated.message,
+      link: updated.link,
+      unread: !updated.read,
+      read: updated.read,
+      time: this.formatRelativeTime(updated.createdAt),
+      createdAt: updated.createdAt.toISOString(),
+    };
+  }
+
+  async markAllAdminNotificationsRead() {
+    const db = this.database.db;
+    await db.update(adminNotifications).set({ read: true });
+    return { success: true };
+  }
+
+  private formatRelativeTime(date: Date): string {
+    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 }
 

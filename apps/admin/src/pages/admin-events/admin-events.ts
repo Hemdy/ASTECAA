@@ -1,4 +1,5 @@
 import { Component, signal, computed, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
@@ -61,6 +62,7 @@ const blankEditor = (): EventEditor => ({
   templateUrl: './admin-events.html',
 })
 export class AdminEvents {
+  private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
   private eventsApi = inject(EventsApiService);
   private cmsApi = inject(CmsApiService);
@@ -75,6 +77,44 @@ export class AdminEvents {
   showModal = signal(false);
   editing = signal(false);
   deleteTarget = signal<CmsEvent | null>(null);
+
+  selectedIds = signal<string[]>([]);
+  allSelected = computed(() => {
+    const list = this.filtered();
+    return list.length > 0 && list.every((e) => this.selectedIds().includes(e.id));
+  });
+
+  toggleSelectAll(checked: boolean): void {
+    if (checked) {
+      this.selectedIds.set(this.filtered().map((e) => e.id));
+    } else {
+      this.selectedIds.set([]);
+    }
+  }
+
+  toggleSelect(id: string): void {
+    this.selectedIds.update((ids) =>
+      ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]
+    );
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedIds().includes(id);
+  }
+
+  async batchDelete(): Promise<void> {
+    const count = this.selectedIds().length;
+    if (count === 0) return;
+    if (!confirm(`Are you sure you want to delete ${count} selected event(s)?`)) return;
+    for (const id of this.selectedIds()) {
+      try {
+        await this.eventsApi.delete(id);
+      } catch {}
+    }
+    this.selectedIds.set([]);
+    this.toast.show(`${count} event(s) deleted.`);
+    await this.load();
+  }
 
   categories = computed(() => [
     ...new Set([
@@ -135,6 +175,11 @@ export class AdminEvents {
 
   constructor() {
     void this.load();
+    this.route.queryParams.subscribe((params) => {
+      if (params['action'] === 'new') {
+        this.openCreate();
+      }
+    });
   }
 
   async load(): Promise<void> {

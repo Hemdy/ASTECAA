@@ -1,4 +1,5 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
@@ -12,6 +13,7 @@ import type { CmsAnnouncement } from '@astec/types';
   templateUrl: './admin-announcements.html',
 })
 export class AdminAnnouncements implements OnInit {
+  private route = inject(ActivatedRoute);
   private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
 
@@ -31,6 +33,11 @@ export class AdminAnnouncements implements OnInit {
 
   ngOnInit() {
     void this.loadAnnouncements();
+    this.route.queryParams.subscribe((params) => {
+      if (params['action'] === 'new') {
+        this.openCreate();
+      }
+    });
   }
 
   async loadAnnouncements() {

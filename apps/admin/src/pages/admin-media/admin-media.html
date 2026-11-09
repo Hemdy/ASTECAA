@@ -11,15 +11,27 @@
 <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: flex-start">
   <!-- Folders sidebar -->
   <div class="adm-card adm-card-pad">
-    <div class="adm-field-label" style="margin-bottom: 10px">Folders</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px">
+      <div class="adm-field-label" style="margin-bottom: 0">Folders</div>
+      <button class="adm-btn adm-btn-ghost adm-btn-sm" style="padding: 2px 6px" (click)="openNewFolder()" title="Create new category">
+        <i class="ri-folder-add-line"></i> New
+      </button>
+    </div>
     <div style="display: flex; flex-direction: column; gap: 2px">
       <button class="folder-btn" [class.active]="folder() === 'all'" (click)="folder.set('all')">
         <span><i class="ri-folder-open-line"></i></span> All files <span class="adm-cell-user-sub" style="margin-left: auto">{{ items().length }}</span>
       </button>
       @for (f of folders(); track f) {
-        <button class="folder-btn" [class.active]="folder() === f" (click)="folder.set(f)">
-          <span><i class="ri-folder-line"></i></span> {{ f }} <span class="adm-cell-user-sub" style="margin-left: auto">{{ countFolder(f) }}</span>
-        </button>
+        <div style="display: flex; align-items: center; width: 100%; gap: 2px">
+          <button class="folder-btn" style="flex: 1; min-width: 0" [class.active]="folder() === f" (click)="folder.set(f)">
+            <span><i class="ri-folder-line"></i></span> {{ f }} <span class="adm-cell-user-sub" style="margin-left: auto">{{ countFolder(f) }}</span>
+          </button>
+          @if (f.toLowerCase() !== 'general') {
+            <button class="adm-btn adm-btn-ghost adm-btn-sm" style="padding: 4px 6px; color: var(--ad-danger, #c53030)" (click)="deleteFolder(f)" title="Delete folder">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          }
+        </div>
       }
     </div>
     <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--ad-border)">
@@ -145,6 +157,27 @@
         <button class="adm-btn adm-btn-ghost" (click)="remove(m)"><i class="ri-delete-bin-line"></i> Delete</button>
         <button class="adm-btn adm-btn-outline" (click)="copyUrl(m.url)"><i class="ri-file-copy-line"></i> Copy URL</button>
         <button class="adm-btn adm-btn-primary" (click)="selected.set(null)">Done</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (newFolderModal()) {
+  <div class="adm-modal-backdrop" (click)="newFolderModal.set(false)">
+    <div class="adm-modal" (click)="$event.stopPropagation()" style="max-width: 420px">
+      <div class="adm-modal-head">
+        <h3 class="adm-modal-title">New Media Category</h3>
+        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="newFolderModal.set(false)"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="adm-modal-body">
+        <div class="adm-field">
+          <label class="adm-field-label">Category Name</label>
+          <input class="adm-input" [(ngModel)]="newFolderName" placeholder="e.g. Alumni Dinner 2026" (keydown.enter)="createFolder()" />
+        </div>
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-btn adm-btn-outline" (click)="newFolderModal.set(false)">Cancel</button>
+        <button class="adm-btn adm-btn-primary" (click)="createFolder()">Create Category</button>
       </div>
     </div>
   </div>

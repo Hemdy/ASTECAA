@@ -61,6 +61,12 @@
       <option value="false">Not featured</option>
     </select>
   </div>
+  <div style="display: flex; align-items: flex-end; padding-bottom: 8px">
+    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.875rem; user-select: none; font-weight: 500">
+      <input type="checkbox" class="adm-cb" [checked]="allSelected()" (change)="toggleSelectAll($any($event.target).checked)" />
+      <span>Select all</span>
+    </label>
+  </div>
   @if (selected().length > 0) {
     <div style="display: flex; gap: 8px; align-items: center">
       <span class="adm-badge adm-badge-info">{{ selected().length }} selected</span>

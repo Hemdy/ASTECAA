@@ -37,8 +37,7 @@
           </div>
         </div>
         <p class="foot-mission">
-          A living digital archive where communities celebrate their heritage
-          while building excitement for what's next.
+          {{ mission() }}
         </p>
         <p class="type foot-quote">
           "Where memories live and new stories begin."
@@ -65,7 +64,7 @@
         <a href="tel:+23409012221212">09012221212</a>
 
         <div class="socials">
-          @for (social of socials; track social.name) {
+          @for (social of socials(); track social.name) {
           <a
             [href]="social.url"
             target="_blank"
@@ -82,7 +81,7 @@
 
     <div class="foot-base">
       <p class="type">
-        © 2026 ASTECAA Community Archive · A non-profit preservation project
+        {{ copyright() }}
       </p>
       <div class="foot-base-links">
         <a href="#">Privacy</a>

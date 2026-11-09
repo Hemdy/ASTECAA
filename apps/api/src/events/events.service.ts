@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, or, sql } from 'drizzle-orm';
-import { appUsers, eventRegistrations, events } from '@astec/database';
+import { randomUUID } from 'node:crypto';
+import { adminNotifications, appUsers, eventRegistrations, events } from '@astec/database';
 import { validateEventInput } from '@astec/validation';
 import type { CmsEvent, EventInput, EventStatus, PublicEvent } from '@astec/types';
 import { AppError } from '../core/app-error.js';
@@ -210,6 +211,19 @@ export class EventsService {
         .set({ registered: sql`${events.registered} + 1` })
         .where(eq(events.id, event.id));
     });
+
+    // Generate admin notification
+    void db
+      .insert(adminNotifications)
+      .values({
+        id: randomUUID(),
+        type: 'event',
+        title: 'New Event Registration',
+        message: `${data.name.trim()} registered for "${event.title}"`,
+        link: '/admin/events',
+        read: false,
+      })
+      .catch(() => {});
 
     // Send confirmation email asynchronously via Resend
     void this.email

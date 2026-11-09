@@ -8,6 +8,10 @@ import type {
   CmsAnnouncement,
   CmsHomepageSettings,
   CmsMediaItem,
+  ContactSubmission,
+  ContactReply,
+  CmsMediaFolder,
+  AdminNotificationItem,
 } from '@astec/types';
 
 @Injectable({ providedIn: 'root' })
@@ -102,6 +106,18 @@ export class CmsApiService {
 
   async getHomepage(): Promise<CmsHomepageSettings | null> {
     return this.request<CmsHomepageSettings | null>('/api/v1/site-content/homepage');
+  }
+
+  async submitContact(data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }): Promise<ContactSubmission> {
+    return this.request<ContactSubmission>('/api/v1/contact', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // ==================== ADMIN CMS ====================
@@ -258,6 +274,68 @@ export class CmsApiService {
   async adminDeleteMedia(id: string): Promise<{ success: boolean; id: string }> {
     return this.request<{ success: boolean; id: string }>(`/api/admin/v1/media/${id}`, {
       method: 'DELETE',
+    }, true);
+  }
+
+  // Media Folders
+  async adminListMediaFolders(): Promise<string[]> {
+    return this.request<string[]>('/api/admin/v1/media/folders', {}, true);
+  }
+
+  async adminCreateMediaFolder(name: string): Promise<{ success: boolean; name: string }> {
+    return this.request<{ success: boolean; name: string }>('/api/admin/v1/media/folders', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }, true);
+  }
+
+  async adminDeleteMediaFolder(name: string): Promise<{ success: boolean; name: string }> {
+    return this.request<{ success: boolean; name: string }>(`/api/admin/v1/media/folders/${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    }, true);
+  }
+
+  // Contact Submissions
+  async adminListContact(status?: string): Promise<ContactSubmission[]> {
+    const qs = status && status !== 'all' ? `?status=${encodeURIComponent(status)}` : '';
+    return this.request<ContactSubmission[]>(`/api/admin/v1/contact${qs}`, {}, true);
+  }
+
+  async adminReplyContact(
+    id: string,
+    message: string,
+    sender = 'ASTECAA Support'
+  ): Promise<ContactSubmission> {
+    return this.request<ContactSubmission>(`/api/admin/v1/contact/${id}/reply`, {
+      method: 'POST',
+      body: JSON.stringify({ message, sender }),
+    }, true);
+  }
+
+  async adminUpdateContactStatus(
+    id: string,
+    status: 'new' | 'read' | 'replied' | 'closed'
+  ): Promise<ContactSubmission> {
+    return this.request<ContactSubmission>(`/api/admin/v1/contact/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }, true);
+  }
+
+  // Admin Notifications
+  async adminListNotifications(): Promise<AdminNotificationItem[]> {
+    return this.request<AdminNotificationItem[]>('/api/admin/v1/notifications', {}, true);
+  }
+
+  async adminMarkNotificationRead(id: string): Promise<AdminNotificationItem> {
+    return this.request<AdminNotificationItem>(`/api/admin/v1/notifications/${id}/read`, {
+      method: 'PATCH',
+    }, true);
+  }
+
+  async adminMarkAllNotificationsRead(): Promise<{ success: boolean }> {
+    return this.request<{ success: boolean }>('/api/admin/v1/notifications/mark-all-read', {
+      method: 'POST',
     }, true);
   }
 

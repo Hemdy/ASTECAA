@@ -288,3 +288,41 @@ export interface CmsMediaItem {
   createdAt?: string;
   date?: string;
 }
+
+export interface ContactReply {
+  id: string;
+  sender: string;
+  message: string;
+  sentAt: string;
+}
+
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'read' | 'replied' | 'closed';
+  replies: ContactReply[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CmsMediaFolder {
+  id: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface AdminNotificationItem {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  link?: string | null;
+  read: boolean;
+  time?: string;
+  createdAt: string;
+}
+
+

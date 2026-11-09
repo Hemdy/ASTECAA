@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
+import { AdminAuthService } from '../../auth.service';
 
 export interface AdminCommentView {
   id: string;
@@ -17,6 +18,17 @@ export interface AdminCommentView {
   status: 'pending' | 'approved' | 'reported' | 'spam';
   likes: number;
   reports: number;
+  replies?: Array<{
+    id: string;
+    messageId: string;
+    userId?: string | null;
+    author: string;
+    email: string;
+    avatar?: string | null;
+    graduationYear?: string | null;
+    message: string;
+    createdAt: string;
+  }>;
   createdAt: string;
 }
 
@@ -28,6 +40,7 @@ export interface AdminCommentView {
 })
 export class AdminComments implements OnInit {
   private cmsApi = inject(CmsApiService);
+  private auth = inject(AdminAuthService);
   private toast = inject(ToastService);
 
   comments = signal<AdminCommentView[]>([]);
@@ -72,7 +85,7 @@ export class AdminComments implements OnInit {
     try {
       const list = await this.cmsApi.adminListComments();
       this.comments.set(
-        list.map((c) => ({
+        list.map((c: any) => ({
           id: c.id,
           author: c.author || 'Alumnus',
           email: c.email,
@@ -85,6 +98,7 @@ export class AdminComments implements OnInit {
           status: c.status || 'pending',
           likes: c.likes || 0,
           reports: c.reports || 0,
+          replies: c.replies || [],
           createdAt: c.createdAt || new Date().toISOString(),
         }))
       );
@@ -135,11 +149,28 @@ export class AdminComments implements OnInit {
     this.replyText = '';
   }
 
-  sendReply() {
-    if (!this.replyText.trim()) return;
-    this.toast.show('Reply sent to alumnus email.');
-    this.replyTarget.set(null);
-    this.replyText = '';
+  async sendReply() {
+    const target = this.replyTarget();
+    if (!target || !this.replyText.trim()) return;
+    const profile = this.auth.profile();
+    const adminName = profile?.full_name || 'ASTECAA Executive';
+    const adminEmail = profile?.email || this.auth.userEmail() || 'admin@astecaa.org';
+
+    try {
+      await this.cmsApi.replyCommunityMessage(target.id, {
+        author: adminName,
+        email: adminEmail,
+        message: this.replyText.trim(),
+        graduationYear: 'Executive Team',
+        avatar: '/images/ASTECAA.jpg',
+      });
+      this.toast.show('Reply saved and published to the community wall.');
+      this.replyTarget.set(null);
+      this.replyText = '';
+      await this.loadComments();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to send reply');
+    }
   }
 
   onAvatarImageError(event: Event): void {

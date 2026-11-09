@@ -306,5 +306,81 @@ export class CmsController {
   async adminDeleteMedia(@Param('id') id: string) {
     return this.cms.deleteMedia(id);
   }
+
+  // Media Folders
+  @Get('admin/v1/media/folders')
+  @UseGuards(AdminGuard)
+  async adminListMediaFolders() {
+    return this.cms.listMediaFolders();
+  }
+
+  @Post('admin/v1/media/folders')
+  @UseGuards(AdminGuard)
+  async adminCreateMediaFolder(@Body() body: { name: string }) {
+    return this.cms.createMediaFolder(body.name);
+  }
+
+  @Delete('admin/v1/media/folders/:name')
+  @UseGuards(AdminGuard)
+  async adminDeleteMediaFolder(@Param('name') name: string) {
+    return this.cms.deleteMediaFolder(name);
+  }
+
+  // Contact
+  @Post('v1/contact')
+  async submitContact(
+    @Body()
+    body: {
+      name: string;
+      email: string;
+      subject: string;
+      message: string;
+    }
+  ) {
+    return this.cms.submitContact(body);
+  }
+
+  @Get('admin/v1/contact')
+  @UseGuards(AdminGuard)
+  async adminListContact(@Query('status') status?: string) {
+    return this.cms.listContactSubmissions(status);
+  }
+
+  @Post('admin/v1/contact/:id/reply')
+  @UseGuards(AdminGuard)
+  async adminReplyContact(
+    @Param('id') id: string,
+    @Body() body: { message: string; sender?: string }
+  ) {
+    return this.cms.replyContactSubmission(id, body);
+  }
+
+  @Patch('admin/v1/contact/:id')
+  @UseGuards(AdminGuard)
+  async adminUpdateContactStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string }
+  ) {
+    return this.cms.updateContactStatus(id, body.status);
+  }
+
+  // Notifications
+  @Get('admin/v1/notifications')
+  @UseGuards(AdminGuard)
+  async adminListNotifications() {
+    return this.cms.listAdminNotifications();
+  }
+
+  @Patch('admin/v1/notifications/:id/read')
+  @UseGuards(AdminGuard)
+  async adminMarkNotificationRead(@Param('id') id: string) {
+    return this.cms.markAdminNotificationRead(id);
+  }
+
+  @Post('admin/v1/notifications/mark-all-read')
+  @UseGuards(AdminGuard)
+  async adminMarkAllNotificationsRead() {
+    return this.cms.markAllAdminNotificationsRead();
+  }
 }
 

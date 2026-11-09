@@ -50,6 +50,20 @@
             <span style="margin-left: auto" class="adm-card-sub">{{ shortDate(c.createdAt) }}</span>
           </div>
           <p style="color: var(--ad-text-soft); margin: 0 0 12px; line-height: 1.5; font-style: italic">"{{ c.message }}"</p>
+          @if (c.replies && c.replies.length > 0) {
+            <div style="margin: 0 0 12px; padding: 10px 14px; background: rgba(0, 0, 0, 0.03); border-radius: 6px; border-left: 3px solid var(--ad-gold, #bfa054)">
+              <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--ad-text-soft); margin-bottom: 6px">
+                Replies ({{ c.replies.length }})
+              </div>
+              @for (rep of c.replies; track rep.id) {
+                <div style="font-size: 0.85rem; margin-bottom: 6px; line-height: 1.4">
+                  <strong>{{ rep.author }}</strong>
+                  <span class="adm-cell-user-sub" style="margin-left: 6px">{{ shortDate(rep.createdAt) }}</span>:
+                  <span>{{ rep.message }}</span>
+                </div>
+              }
+            </div>
+          }
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
             @if (c.status !== 'approved') {
               <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="approve(c.id)">

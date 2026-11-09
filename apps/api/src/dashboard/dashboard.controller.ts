@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { AdminGuard } from '../auth/admin.guard.js';
 import { DashboardService } from './dashboard.service.js';
 
@@ -8,8 +8,8 @@ export class DashboardController {
   constructor(private readonly dashboard: DashboardService) {}
 
   @Get('stats')
-  async getStats() {
-    return this.dashboard.getStats();
+  async getStats(@Query('period') period?: string) {
+    return this.dashboard.getStats(period || '6m');
   }
 }
 
