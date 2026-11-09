@@ -83,7 +83,8 @@ export class UsersService {
       issuer = baseUrl;
     }
 
-    const [identity] = await this.database.db
+    // Match by subject first (across all issuers to survive domain migrations)
+    let [identity] = await this.database.db
       .select({
         id: appUsers.id,
         email: appUsers.email,
@@ -98,12 +99,50 @@ export class UsersService {
       .innerJoin(appUsers, eq(appUsers.id, authIdentities.userId))
       .where(
         and(
-          eq(authIdentities.issuer, issuer),
           eq(authIdentities.subject, subject),
           eq(appUsers.status, 'active'),
         ),
       )
       .limit(1);
+
+    // Fallback: match by email directly if subject mapping is missing or from an older domain
+    if (!identity && email) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const [emailUser] = await this.database.db
+        .select({
+          id: appUsers.id,
+          email: appUsers.email,
+          fullName: appUsers.fullName,
+          phone: appUsers.phone,
+          graduationYear: appUsers.graduationYear,
+          department: appUsers.department,
+          avatarUrl: appUsers.avatarUrl,
+          bio: appUsers.bio,
+        })
+        .from(appUsers)
+        .where(
+          and(
+            eq(appUsers.email, normalizedEmail),
+            eq(appUsers.status, 'active'),
+          ),
+        )
+        .limit(1);
+
+      if (emailUser) {
+        identity = emailUser;
+        // Auto-heal auth identity mapping with current issuer and subject
+        await this.database.db
+          .insert(authIdentities)
+          .values({
+            userId: emailUser.id,
+            issuer,
+            subject,
+            emailVerified: true,
+          })
+          .onConflictDoNothing()
+          .catch(() => {});
+      }
+    }
 
     if (!identity) {
       return null;
