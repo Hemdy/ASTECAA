@@ -43,7 +43,15 @@ async function sync() {
   await mkdir(appsAdminDist, { recursive: true });
   await cp(adminDist, appsAdminDist, { recursive: true });
 
-  console.log('[sync-builds] Successfully synced admin builds to all standalone and monolithic targets.');
+  // 4. Sync website build to apps/website/dist (when Vercel Root Directory is apps/website)
+  const websiteDist = resolve(ROOT_DIR, 'dist/astecaa/browser');
+  const appsWebsiteDist = resolve(ROOT_DIR, 'apps/website/dist');
+  if (existsSync(websiteDist)) {
+    await mkdir(appsWebsiteDist, { recursive: true });
+    await cp(websiteDist, appsWebsiteDist, { recursive: true });
+  }
+
+  console.log('[sync-builds] Successfully synced builds to all standalone and monolithic targets.');
 }
 
 void sync();

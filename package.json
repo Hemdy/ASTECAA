@@ -1,6 +1,7 @@
 {
   "name": "astecaa-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.33.2",
   "scripts": {
     "ng": "ng",
     "prestart": "node scripts/write-api-config.mjs",
@@ -10,7 +11,7 @@
     "start:website": "ng serve website",
     "start:admin": "ng serve admin",
     "start:api": "pnpm --filter @astec/api start:dev",
-    "build:website": "ng build website && node scripts/write-api-config.mjs",
+    "build:website": "ng build website && node scripts/write-api-config.mjs && node scripts/sync-builds.mjs",
     "build:admin": "ng build admin && node scripts/write-api-config.mjs && node scripts/sync-builds.mjs",
     "build:api": "pnpm --filter @astec/api build",
     "build": "pnpm run build:website && pnpm run build:admin && node scripts/write-api-config.mjs && node scripts/sync-builds.mjs",
