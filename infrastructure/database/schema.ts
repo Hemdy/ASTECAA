@@ -387,6 +387,7 @@ export const communityMessages = pgTable(
   'community_messages',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id').references(() => appUsers.id, { onDelete: 'set null' }),
     author: text('author').notNull(),
     email: text('email').notNull(),
     phone: text('phone'),
@@ -405,6 +406,51 @@ export const communityMessages = pgTable(
     index('community_messages_page_status_idx').on(table.page, table.status),
     index('community_messages_pinned_idx').on(table.pinned),
     index('community_messages_created_at_idx').on(table.createdAt),
+    index('community_messages_user_id_idx').on(table.userId),
+  ]
+);
+
+export const communityReplies = pgTable(
+  'community_replies',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    messageId: uuid('message_id')
+      .notNull()
+      .references(() => communityMessages.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => appUsers.id, { onDelete: 'set null' }),
+    author: text('author').notNull(),
+    email: text('email').notNull(),
+    avatar: text('avatar'),
+    graduationYear: text('graduation_year'),
+    message: text('message').notNull(),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('community_replies_message_id_idx').on(table.messageId),
+    index('community_replies_created_at_idx').on(table.createdAt),
+    index('community_replies_user_id_idx').on(table.userId),
+  ]
+);
+
+export const communityReactions = pgTable(
+  'community_reactions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    messageId: uuid('message_id')
+      .notNull()
+      .references(() => communityMessages.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id').references(() => appUsers.id, { onDelete: 'cascade' }),
+    userEmail: text('user_email').notNull(),
+    reaction: text('reaction').notNull().default('heart'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('community_reactions_msg_user_rxn_uidx').on(
+      table.messageId,
+      table.userEmail,
+      table.reaction,
+    ),
+    index('community_reactions_message_id_idx').on(table.messageId),
   ]
 );
 

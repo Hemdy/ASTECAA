@@ -1,0 +1,25 @@
+name = "astecaa-edge"
+main = "infrastructure/cloudflare/worker.ts"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+ALLOWED_ORIGINS = "https://astecaa.org,https://www.astecaa.org,https://admin.astecaa.org,http://localhost:4200,http://localhost:4300"
+BACKEND_API_URL = "https://api-origin.astecaa.org"
+
+# Cloudflare R2 Bucket Binding for Media & Uploads
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "astecaa-media"
+preview_bucket_name = "astecaa-media-preview"
+
+# Optional Cloudflare Pages / Static Assets integration
+# [assets]
+# directory = "./dist/astecaa/browser"
+# binding = "ASSETS"
+
+# Custom Domain Routing (Uncomment when domain is active in your Cloudflare zone)
+# routes = [
+#   { pattern = "api.astecaa.org/*", zone_name = "astecaa.org" }
+# ]

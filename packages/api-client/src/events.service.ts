@@ -51,6 +51,10 @@ export class EventsApiService {
     );
   }
 
+  async getUserRegistrations(idOrEmail: string): Promise<any[]> {
+    return this.request(`/api/v1/events/user/${encodeURIComponent(idOrEmail)}/registrations`);
+  }
+
   async getAttendees(id: string): Promise<any[]> {
     return this.request(
       `/api/admin/v1/events/${encodeURIComponent(id)}/attendees`,

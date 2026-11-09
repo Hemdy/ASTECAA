@@ -27,8 +27,9 @@ export class CmsApiService {
     return this.request<CmsTimelineMilestone[]>('/api/v1/timeline');
   }
 
-  async getCommunityMessages(page = 'community', status = 'approved'): Promise<CmsCommunityMessage[]> {
+  async getCommunityMessages(page = 'community', status = 'approved', userEmail?: string): Promise<CmsCommunityMessage[]> {
     const params = new URLSearchParams({ page, status });
+    if (userEmail) params.set('userEmail', userEmail);
     return this.request<CmsCommunityMessage[]>(`/api/v1/community?${params.toString()}`);
   }
 
@@ -38,13 +39,50 @@ export class CmsApiService {
     phone?: string;
     graduationYear?: string;
     location?: string;
+    avatar?: string;
     message: string;
     page?: string;
+    userId?: string;
   }): Promise<CmsCommunityMessage> {
     return this.request<CmsCommunityMessage>('/api/v1/community', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  async replyCommunityMessage(
+    id: string,
+    data: {
+      author: string;
+      email: string;
+      message: string;
+      graduationYear?: string;
+      avatar?: string;
+      userId?: string;
+    },
+  ): Promise<any> {
+    return this.request(`/api/v1/community/${id}/reply`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async reactCommunityMessage(
+    id: string,
+    data: {
+      reaction: string;
+      userEmail: string;
+      userId?: string;
+    },
+  ): Promise<{ messageId: string; reaction: string; active: boolean; reactions: Record<string, number> }> {
+    return this.request(`/api/v1/community/${id}/react`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getUserCommunityNotes(idOrEmail: string): Promise<any[]> {
+    return this.request<any[]>(`/api/v1/community/user/${encodeURIComponent(idOrEmail)}`);
   }
 
   async likeCommunityMessage(id: string): Promise<{ id: string; likes: number }> {
@@ -253,3 +291,4 @@ export class CmsApiService {
     return (await response.json()) as T;
   }
 }
+

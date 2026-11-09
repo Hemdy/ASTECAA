@@ -11,6 +11,7 @@ import {
 } from '@astec/database';
 import { DatabaseService } from '../database/database.service.js';
 import { AppError } from '../core/app-error.js';
+import { EmailService } from '../email/email.service.js';
 
 function computeVoterHash(electionId: string, email: string): string {
   return createHash('sha256')
@@ -26,7 +27,10 @@ function hashOtp(otp: string): string {
 export class VotingService {
   private readonly logger = new Logger(VotingService.name);
 
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly email: EmailService,
+  ) {}
 
   // --- Elections (Admin & Public) ---
 
@@ -505,6 +509,11 @@ export class VotingService {
     });
 
     this.logger.log(`[Voting OTP] Verification OTP generated for ${emailNorm} in election ${electionId}: ${rawOtp}`);
+
+    // Dispatch secure OTP to voter's email via Resend
+    void this.email
+      .sendVotingOtp(emailNorm, rawOtp, election.title)
+      .catch((e) => this.logger.error('Failed to dispatch voting OTP email', e));
 
     const cleanPhone = voter.phone.trim();
     const maskedPhone =

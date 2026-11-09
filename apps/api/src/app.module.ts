@@ -8,6 +8,7 @@ import { DashboardModule } from './dashboard/dashboard.module.js';
 import { StorageModule } from './storage/storage.module.js';
 import { CmsModule } from './cms/cms.module.js';
 import { HealthModule } from './health/health.module.js';
+import { EmailModule } from './email/email.module.js';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HealthModule } from './health/health.module.js';
     StorageModule,
     CmsModule,
     HealthModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

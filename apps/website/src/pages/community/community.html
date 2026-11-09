@@ -3,8 +3,8 @@
     <span class="eyebrow" appReveal>Voices from the wall</span>
     <h1 appReveal delay="80">The community wall</h1>
     <p class="lede" appReveal delay="160">
-     A place for ASTECAA alumni to share memories, celebrate old friendships, reflect on their
-  journey, and leave a message for the generations coming after them.
+      A place for ASTECAA alumni to share memories, celebrate old friendships, reflect on their
+      journey, and leave a message for the generations coming after them.
     </p>
   </div>
 </section>
@@ -13,11 +13,41 @@
   <div class="container">
     <!-- Leave a message -->
     <div class="post-card paper" appReveal>
-        <div class="post-head">
-          <span class="eyebrow">Pin a note</span>
-          <span class="type post-moderation">Enter your member details to post</span>
+      <div class="post-head">
+        <span class="eyebrow">Pin a note</span>
+        @if (auth.isAuthenticated() && auth.profile()) {
+          <span class="type post-moderation">Verified alumni post directly to the wall</span>
+        } @else {
+          <span class="type post-moderation">Enter your details to post</span>
+        }
+      </div>
+
+      @if (auth.isAuthenticated() && auth.profile()) {
+        <!-- Verified Alumni Posting Banner -->
+        <div class="alumni-posting-badge">
+          <img
+            [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
+            [alt]="auth.profile()?.full_name"
+            class="alumni-badge-avatar"
+            (error)="onAvatarImageError($event)"
+          />
+          <div class="alumni-badge-info">
+            <span class="alumni-badge-name">{{ auth.profile()?.full_name }}</span>
+            <span class="alumni-badge-sub">
+              {{ auth.profile()?.graduation_set ? 'Class of ' + auth.profile()?.graduation_set : 'Alumni Member' }}
+              &middot; {{ auth.profile()?.email }}
+            </span>
+          </div>
+          <span class="alumni-badge-pill"><i class="ri-checkbox-circle-fill"></i> Verified Alumni</span>
         </div>
-        <form (ngSubmit)="submit()">
+      } @else {
+        <div class="alumni-guest-hint">
+          <span>Are you an alumnus? <a routerLink="/sign-in" class="alumni-link">Sign in</a> to pin notes with 1-click and skip entering personal details.</span>
+        </div>
+      }
+
+      <form (ngSubmit)="submit()">
+        @if (!auth.isAuthenticated() || !auth.profile()) {
           <div class="post-row">
             <input
               type="text"
@@ -54,20 +84,22 @@
               aria-label="Graduation year"
             />
           </div>
-          <textarea
-            name="message"
-            placeholder="Leave a memory, a note, or a word for the community…"
-            [(ngModel)]="form.message"
-            required
-            aria-label="Your message"
-          ></textarea>
-          <div class="post-foot">
-            <span class="type post-count">{{ form.message.length }} / 400 characters</span>
-            <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit()">
-              Post to the wall
-            </button>
-          </div>
-        </form>
+        }
+
+        <textarea
+          name="message"
+          placeholder="Leave a memory, a note, or a word for the community…"
+          [(ngModel)]="form.message"
+          required
+          aria-label="Your message"
+        ></textarea>
+        <div class="post-foot">
+          <span class="type post-count">{{ form.message.length }} / 400 characters</span>
+          <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit() || submitting()">
+            {{ submitting() ? 'Pinning note…' : 'Post to the wall' }}
+          </button>
+        </div>
+      </form>
     </div>
 
     <!-- Filter -->
@@ -95,15 +127,125 @@
           }
           <p class="note-body">"{{ msg.message }}"</p>
           <div class="note-foot">
-            <img [src]="msg.avatar || '/images/reading-room.jpg'" [alt]="msg.author" class="note-avatar" (error)="onAvatarImageError($event)"  />
+            <img [src]="msg.avatar || '/images/reading-room.jpg'" [alt]="msg.author" class="note-avatar" (error)="onAvatarImageError($event)" />
             <div class="note-author">
               <strong>{{ msg.author }}</strong>
               <span class="type note-loc">{{ msg.location }}</span>
             </div>
-            <button class="note-like" (click)="like(msg.id)">
-              <i class="ri-heart-line"></i> <span>{{ msg.likes }}</span>
+          </div>
+
+          <!-- Reactions & Replies Bar -->
+          <div class="note-actions">
+            <div class="note-reactions">
+              <button
+                type="button"
+                class="rxn-btn"
+                [class.active]="hasReacted(msg, 'heart')"
+                (click)="react(msg, 'heart')"
+                title="Love"
+              >
+                <span class="rxn-emoji">❤️</span>
+                <span class="rxn-count">{{ (msg.reactions && msg.reactions['heart']) || msg.likes || 0 }}</span>
+              </button>
+              <button
+                type="button"
+                class="rxn-btn"
+                [class.active]="hasReacted(msg, 'clap')"
+                (click)="react(msg, 'clap')"
+                title="Applaud"
+              >
+                <span class="rxn-emoji">👏</span>
+                <span class="rxn-count">{{ (msg.reactions && msg.reactions['clap']) || 0 }}</span>
+              </button>
+              <button
+                type="button"
+                class="rxn-btn"
+                [class.active]="hasReacted(msg, 'celebrate')"
+                (click)="react(msg, 'celebrate')"
+                title="Celebrate"
+              >
+                <span class="rxn-emoji">🎉</span>
+                <span class="rxn-count">{{ (msg.reactions && msg.reactions['celebrate']) || 0 }}</span>
+              </button>
+              <button
+                type="button"
+                class="rxn-btn"
+                [class.active]="hasReacted(msg, 'inspire')"
+                (click)="react(msg, 'inspire')"
+                title="Inspire"
+              >
+                <span class="rxn-emoji">🔥</span>
+                <span class="rxn-count">{{ (msg.reactions && msg.reactions['inspire']) || 0 }}</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              class="replies-toggle-btn"
+              [class.active]="isRepliesOpen(msg.id)"
+              (click)="toggleReplies(msg.id)"
+              title="View and post replies"
+            >
+              <i [class]="isRepliesOpen(msg.id) ? 'ri-chat-1-fill' : 'ri-chat-1-line'"></i>
+              <span>{{ msg.replies?.length || 0 }}</span>
             </button>
           </div>
+
+          <!-- Replies Thread Drawer -->
+          @if (isRepliesOpen(msg.id)) {
+            <div class="replies-drawer">
+              @if (msg.replies && msg.replies.length > 0) {
+                <div class="replies-list">
+                  @for (rep of msg.replies; track rep.id) {
+                    <div class="reply-item">
+                      <img
+                        [src]="rep.avatar || '/images/reading-room.jpg'"
+                        [alt]="rep.author"
+                        class="reply-avatar"
+                        (error)="onAvatarImageError($event)"
+                      />
+                      <div class="reply-body">
+                        <div class="reply-header">
+                          <strong class="reply-author">{{ rep.author }}</strong>
+                          <span class="reply-set">{{ rep.graduationYear ? 'Class of ' + rep.graduationYear : 'Alumnus' }}</span>
+                          <span class="reply-time">{{ rep.createdAt | date:'mediumDate' }}</span>
+                        </div>
+                        <p class="reply-text">{{ rep.message }}</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="replies-empty">No replies yet. Be the first to leave a response!</div>
+              }
+
+              <!-- Reply Form -->
+              @if (auth.isAuthenticated() && auth.profile()) {
+                <div class="reply-box">
+                  <input
+                    type="text"
+                    class="reply-input"
+                    placeholder="Reply to {{ msg.author }}…"
+                    [value]="getReplyInput(msg.id)"
+                    (input)="setReplyInput(msg.id, $any($event.target).value)"
+                    (keydown.enter)="submitReply(msg)"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-gold btn-sm reply-btn"
+                    [disabled]="!getReplyInput(msg.id).trim() || replySubmitting()[msg.id]"
+                    (click)="submitReply(msg)"
+                  >
+                    {{ replySubmitting()[msg.id] ? 'Posting…' : 'Reply' }}
+                  </button>
+                </div>
+              } @else {
+                <div class="reply-login-prompt">
+                  <a routerLink="/sign-in" class="alumni-link">Sign in</a> as an alumni to reply to this note.
+                </div>
+              }
+            </div>
+          }
+
           <div class="note-tape"></div>
         </article>
       }

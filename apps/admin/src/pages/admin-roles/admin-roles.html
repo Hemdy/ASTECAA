@@ -8,7 +8,7 @@
 
 <!-- Role cards -->
 <div class="adm-grid-3" style="margin-bottom: 24px">
-  @for (r of roles(); track r.role) {
+  @for (r of roles(); track (r.id || r.code || r.role)) {
     <div class="adm-card adm-card-pad">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px">
         <span class="adm-badge" [class.adm-badge-burgundy]="r.color === 'burgundy'" [class.adm-badge-gold]="r.color === 'gold'" [class.adm-badge-success]="r.color === 'forest'" [class.adm-badge-info]="r.color === 'info'">{{ r.role }}</span>
@@ -46,7 +46,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (r of roles(); track r.role) {
+        @for (r of roles(); track (r.id || r.code || r.role)) {
           <tr>
             <td>
               <span class="adm-badge" [class.adm-badge-burgundy]="r.color === 'burgundy'" [class.adm-badge-gold]="r.color === 'gold'" [class.adm-badge-success]="r.color === 'forest'" [class.adm-badge-info]="r.color === 'info'">{{ r.role }}</span>

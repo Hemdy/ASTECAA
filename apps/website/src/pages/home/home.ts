@@ -105,11 +105,11 @@ export class Home implements OnInit {
 
   onAvatarImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'images/empty/avatar-fallback.jpg';
+    img.src = '/images/empty/avatar-fallback.jpg';
   }
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'images/empty/image-fallback.jpg';
+    img.src = '/images/empty/image-fallback.jpg';
   }
 }

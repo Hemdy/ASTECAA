@@ -52,14 +52,21 @@ export class AdminRoles {
 
   toggle(r: RolePermission, key: keyof RolePermission) {
     this.roles.update((list) =>
-      list.map((x) => (x.role === r.role ? { ...x, [key]: !x[key as keyof RolePermission] } : x))
+      list.map((x) =>
+        (x.id && r.id && x.id === r.id) || x.role === r.role
+          ? { ...x, [key]: !x[key as keyof RolePermission] }
+          : x
+      )
     );
   }
 
   async save() {
     try {
       for (const r of this.roles()) {
-        await this.usersApi.updateRolePermissions(r.role, {
+        if (r.code === 'super_admin' || r.role === 'Super Administrator') {
+          continue;
+        }
+        await this.usersApi.updateRolePermissions(r.id || r.code || r.role, {
           users: r.users,
           events: r.events,
           gallery: r.gallery,

@@ -843,7 +843,9 @@ export const ADMIN_CONTACT: AdminContactMsg[] = [
 ];
 
 export interface RolePermission {
-  role: Role;
+  id?: string;
+  code?: string;
+  role: Role | string;
   users: boolean;
   events: boolean;
   gallery: boolean;

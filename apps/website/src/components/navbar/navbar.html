@@ -4,7 +4,7 @@
       <!-- <span class="brand-mark"></span> -->
      
 
-        <img src="images/ASTECAA.jpg" alt="ASTECAA Logo" srcset="" class="brand-mark">
+        <img src="/images/ASTECAA.jpg" alt="ASTECAA Logo" class="brand-mark">
       <span class="brand-text">
         <span class="brand-name">ASTECAA</span>
         <span class="brand-sub">est. 1998</span>
@@ -36,7 +36,9 @@
       @if (auth.loading()) {
         <span class="nav-auth-placeholder"></span>
       } @else if (auth.isAuthenticated()) {
-        <span class="nav-greeting">Hi, {{ auth.displayName().split(' ')[0] }}</span>
+        <a routerLink="/dashboard" (click)="close()" class="btn btn-outline btn-sm nav-dashboard">
+          <i class="ri-user-smile-line"></i> My Dashboard
+        </a>
         <button class="btn btn-outline btn-sm nav-signout" (click)="signOut()">Sign out</button>
       } @else {
         <a routerLink="/login" (click)="close()" class="nav-signin">Sign in</a>

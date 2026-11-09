@@ -155,8 +155,21 @@ export interface CmsTimelineMilestone {
   updatedAt?: string;
 }
 
+export interface CommunityReply {
+  id: string;
+  messageId: string;
+  userId?: string | null;
+  author: string;
+  email: string;
+  avatar?: string | null;
+  graduationYear?: string | null;
+  message: string;
+  createdAt: string;
+}
+
 export interface CmsCommunityMessage {
   id: string;
+  userId?: string | null;
   author: string;
   email: string;
   phone?: string | null;
@@ -170,6 +183,9 @@ export interface CmsCommunityMessage {
   likes: number;
   reports?: number;
   pinned: boolean;
+  replies?: CommunityReply[];
+  reactions?: Record<string, number>;
+  userReactions?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

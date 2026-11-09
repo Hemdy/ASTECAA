@@ -14,6 +14,7 @@ import {
 import { getAstecApiUrl } from '@astec/config';
 import { DatabaseService } from '../database/database.service.js';
 import { AppError } from '../core/app-error.js';
+import { EmailService } from '../email/email.service.js';
 
 export interface ActiveIdentity {
   id: string;
@@ -33,7 +34,7 @@ export interface ActiveIdentity {
 export function roleCodeToDisplay(code: string): string {
   switch (code) {
     case 'super_admin': return 'Super Administrator';
-    case 'admin': return 'Super Administrator';
+    case 'admin': return 'Administrator';
     case 'content_manager': return 'Content Manager';
     case 'event_manager': return 'Event Manager';
     case 'community_moderator': return 'Community Moderator';
@@ -64,7 +65,10 @@ export function displayToRoleCode(name: string): string {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly email: EmailService,
+  ) {}
 
   async getActiveIdentity(
     subject: string,
@@ -336,8 +340,11 @@ export class UsersService {
   ) {
     const db = this.database.db;
     const targetCode = displayToRoleCode(roleNameOrId);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(roleNameOrId);
     const roleRow = await db.query.roles.findFirst({
-      where: or(eq(roles.id, roleNameOrId), eq(roles.code, targetCode)),
+      where: isUuid
+        ? eq(roles.id, roleNameOrId)
+        : or(eq(roles.code, targetCode), eq(roles.code, roleNameOrId), eq(roles.name, roleNameOrId)),
     });
     if (!roleRow) {
       throw new AppError(404, 'Role not found.', 'ROLE_NOT_FOUND');
@@ -402,6 +409,11 @@ export class UsersService {
         expiresAt,
       })
       .returning();
+
+    // Send invitation email via Resend
+    void this.email
+      .sendInvitation(invitation.email, roleCodeToDisplay(roleCode), invitation.token)
+      .catch(() => {});
 
     return {
       id: invitation.id,

@@ -11,6 +11,7 @@ import { NotFound } from '../pages/not-found/not-found';
 import { Register } from '../pages/register/register';
 import { Login } from '../pages/login/login';
 import { Vote } from '../pages/vote/vote';
+import { Dashboard } from '../pages/dashboard/dashboard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -24,5 +25,7 @@ export const routes: Routes = [
   { path: 'vote', component: Vote },
   { path: 'register', component: Register },
   { path: 'login', component: Login },
+  { path: 'dashboard', component: Dashboard },
+  { path: 'alumni/dashboard', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', component: NotFound },
 ];

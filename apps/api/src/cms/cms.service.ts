@@ -1,9 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { eq, desc, asc, and, sql, or } from 'drizzle-orm';
+import { eq, desc, asc, and, sql, or, inArray } from 'drizzle-orm';
 import {
   galleryItems,
   timelineMilestones,
   communityMessages,
+  communityReplies,
+  communityReactions,
+  appUsers,
   stories,
   announcements,
   siteContent,
@@ -188,7 +191,7 @@ export class CmsService {
 
   // ==================== COMMUNITY MESSAGES / COMMENTS ====================
 
-  async listCommunityMessages(page: string = 'community', status: string = 'approved') {
+  async listCommunityMessages(page: string = 'community', status: string = 'approved', userEmail?: string) {
     const db = this.database.db;
     const conditions = [];
     if (page) conditions.push(eq(communityMessages.page, page));
@@ -200,8 +203,54 @@ export class CmsService {
       .where(and(...conditions))
       .orderBy(desc(communityMessages.pinned), desc(communityMessages.createdAt));
 
+    if (rows.length === 0) return [];
+
+    const messageIds = rows.map((r) => r.id);
+
+    // Fetch replies for these messages
+    const repliesRows = await db
+      .select()
+      .from(communityReplies)
+      .where(inArray(communityReplies.messageId, messageIds))
+      .orderBy(asc(communityReplies.createdAt));
+
+    const repliesByMessage = new Map<string, typeof repliesRows>();
+    for (const reply of repliesRows) {
+      if (!repliesByMessage.has(reply.messageId)) {
+        repliesByMessage.set(reply.messageId, []);
+      }
+      repliesByMessage.get(reply.messageId)!.push(reply);
+    }
+
+    // Fetch reactions for these messages
+    const reactionsRows = await db
+      .select()
+      .from(communityReactions)
+      .where(inArray(communityReactions.messageId, messageIds));
+
+    const reactionsByMessage = new Map<string, Record<string, number>>();
+    const userReactionsByMessage = new Map<string, string[]>();
+
+    const normalizedUserEmail = userEmail?.trim().toLowerCase();
+
+    for (const rxn of reactionsRows) {
+      if (!reactionsByMessage.has(rxn.messageId)) {
+        reactionsByMessage.set(rxn.messageId, {});
+      }
+      const counts = reactionsByMessage.get(rxn.messageId)!;
+      counts[rxn.reaction] = (counts[rxn.reaction] || 0) + 1;
+
+      if (normalizedUserEmail && rxn.userEmail.toLowerCase() === normalizedUserEmail) {
+        if (!userReactionsByMessage.has(rxn.messageId)) {
+          userReactionsByMessage.set(rxn.messageId, []);
+        }
+        userReactionsByMessage.get(rxn.messageId)!.push(rxn.reaction);
+      }
+    }
+
     return rows.map((r) => ({
       id: r.id,
+      userId: r.userId,
       author: r.author,
       email: r.email,
       phone: r.phone,
@@ -214,6 +263,19 @@ export class CmsService {
       status: r.status as 'approved' | 'pending' | 'reported' | 'spam',
       likes: r.likes,
       pinned: r.pinned,
+      replies: (repliesByMessage.get(r.id) || []).map((rep) => ({
+        id: rep.id,
+        messageId: rep.messageId,
+        userId: rep.userId,
+        author: rep.author,
+        email: rep.email,
+        avatar: rep.avatar,
+        graduationYear: rep.graduationYear,
+        message: rep.message,
+        createdAt: rep.createdAt.toISOString(),
+      })),
+      reactions: reactionsByMessage.get(r.id) || { heart: 0, clap: 0, celebrate: 0, inspire: 0 },
+      userReactions: userReactionsByMessage.get(r.id) || [],
       createdAt: r.createdAt.toISOString(),
     }));
   }
@@ -256,19 +318,41 @@ export class CmsService {
     message: string;
     page?: string;
     targetId?: string;
+    userId?: string;
   }) {
     if (!data.author?.trim() || !data.email?.trim() || !data.message?.trim()) {
       throw new AppError(400, 'Author, email, and message are required.', 'INVALID_INPUT');
     }
     const db = this.database.db;
+    const emailNormalized = data.email.trim().toLowerCase();
+
+    // Verify valid user ID if provided
+    let verifiedUserId: string | null = null;
+    if (data.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.userId)) {
+      const u = await db.query.appUsers.findFirst({
+        where: eq(appUsers.id, data.userId),
+        columns: { id: true },
+      });
+      if (u) verifiedUserId = u.id;
+    }
+
+    if (!verifiedUserId) {
+      const u = await db.query.appUsers.findFirst({
+        where: eq(appUsers.emailNormalized, emailNormalized),
+        columns: { id: true },
+      });
+      if (u) verifiedUserId = u.id;
+    }
+
     const [created] = await db
       .insert(communityMessages)
       .values({
+        userId: verifiedUserId,
         author: data.author.trim(),
         email: data.email.trim(),
         phone: data.phone?.trim() || null,
         graduationYear: data.graduationYear?.trim() || null,
-        location: data.location?.trim() || 'Global Alumni',
+        location: data.location?.trim() || (data.graduationYear ? `Class of ${data.graduationYear.trim()}` : 'Global Alumni'),
         avatar: data.avatar || '/images/reading-room.jpg',
         message: data.message.trim(),
         page: data.page || 'community',
@@ -279,6 +363,181 @@ export class CmsService {
       })
       .returning();
     return created;
+  }
+
+  async createCommunityReply(
+    messageId: string,
+    data: {
+      author: string;
+      email: string;
+      message: string;
+      graduationYear?: string;
+      avatar?: string;
+      userId?: string;
+    },
+  ) {
+    if (!data.author?.trim() || !data.email?.trim() || !data.message?.trim()) {
+      throw new AppError(400, 'Author, email, and message are required to reply.', 'INVALID_INPUT');
+    }
+    const db = this.database.db;
+    const [msg] = await db
+      .select({ id: communityMessages.id })
+      .from(communityMessages)
+      .where(eq(communityMessages.id, messageId))
+      .limit(1);
+
+    if (!msg) {
+      throw new AppError(404, 'Community note not found.', 'NOT_FOUND');
+    }
+
+    let verifiedUserId: string | null = null;
+    if (data.userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(data.userId)) {
+      const u = await db.query.appUsers.findFirst({
+        where: eq(appUsers.id, data.userId),
+        columns: { id: true },
+      });
+      if (u) verifiedUserId = u.id;
+    }
+
+    const [reply] = await db
+      .insert(communityReplies)
+      .values({
+        messageId: msg.id,
+        userId: verifiedUserId,
+        author: data.author.trim(),
+        email: data.email.trim(),
+        avatar: data.avatar || null,
+        graduationYear: data.graduationYear?.trim() || null,
+        message: data.message.trim(),
+      })
+      .returning();
+
+    return {
+      id: reply.id,
+      messageId: reply.messageId,
+      userId: reply.userId,
+      author: reply.author,
+      email: reply.email,
+      avatar: reply.avatar,
+      graduationYear: reply.graduationYear,
+      message: reply.message,
+      createdAt: reply.createdAt.toISOString(),
+    };
+  }
+
+  async toggleCommunityReaction(
+    messageId: string,
+    reaction: string,
+    userEmail: string,
+    userId?: string,
+  ) {
+    const db = this.database.db;
+    const cleanReaction = ['heart', 'clap', 'celebrate', 'inspire'].includes(reaction) ? reaction : 'heart';
+    const emailNormalized = userEmail.trim().toLowerCase();
+
+    const [msg] = await db
+      .select({ id: communityMessages.id, likes: communityMessages.likes })
+      .from(communityMessages)
+      .where(eq(communityMessages.id, messageId))
+      .limit(1);
+
+    if (!msg) {
+      throw new AppError(404, 'Community note not found.', 'NOT_FOUND');
+    }
+
+    let verifiedUserId: string | null = null;
+    if (userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userId)) {
+      const u = await db.query.appUsers.findFirst({
+        where: eq(appUsers.id, userId),
+        columns: { id: true },
+      });
+      if (u) verifiedUserId = u.id;
+    }
+
+    // Check if user already reacted with this reaction
+    const [existing] = await db
+      .select({ id: communityReactions.id })
+      .from(communityReactions)
+      .where(
+        and(
+          eq(communityReactions.messageId, messageId),
+          eq(communityReactions.userEmail, emailNormalized),
+          eq(communityReactions.reaction, cleanReaction),
+        ),
+      )
+      .limit(1);
+
+    let userReacted = false;
+    if (existing) {
+      // Remove reaction
+      await db.delete(communityReactions).where(eq(communityReactions.id, existing.id));
+      if (cleanReaction === 'heart') {
+        await db
+          .update(communityMessages)
+          .set({ likes: sql`GREATEST(${communityMessages.likes} - 1, 0)` })
+          .where(eq(communityMessages.id, messageId));
+      }
+      userReacted = false;
+    } else {
+      // Add reaction
+      await db.insert(communityReactions).values({
+        messageId,
+        userId: verifiedUserId,
+        userEmail: emailNormalized,
+        reaction: cleanReaction,
+      });
+      if (cleanReaction === 'heart') {
+        await db
+          .update(communityMessages)
+          .set({ likes: sql`${communityMessages.likes} + 1` })
+          .where(eq(communityMessages.id, messageId));
+      }
+      userReacted = true;
+    }
+
+    // Return updated reaction counts for this message
+    const allReactions = await db
+      .select({ reaction: communityReactions.reaction })
+      .from(communityReactions)
+      .where(eq(communityReactions.messageId, messageId));
+
+    const reactionsCount: Record<string, number> = { heart: 0, clap: 0, celebrate: 0, inspire: 0 };
+    for (const r of allReactions) {
+      reactionsCount[r.reaction] = (reactionsCount[r.reaction] || 0) + 1;
+    }
+
+    return {
+      messageId,
+      reaction: cleanReaction,
+      active: userReacted,
+      reactions: reactionsCount,
+    };
+  }
+
+  async getUserCommunityNotes(userIdOrEmail: string) {
+    const db = this.database.db;
+    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(userIdOrEmail);
+
+    const conditions = isId
+      ? eq(communityMessages.userId, userIdOrEmail)
+      : eq(communityMessages.email, userIdOrEmail.trim().toLowerCase());
+
+    const rows = await db
+      .select()
+      .from(communityMessages)
+      .where(conditions)
+      .orderBy(desc(communityMessages.createdAt));
+
+    return rows.map((r) => ({
+      id: r.id,
+      author: r.author,
+      message: r.message,
+      location: r.location,
+      likes: r.likes,
+      status: r.status,
+      pinned: r.pinned,
+      createdAt: r.createdAt.toISOString(),
+    }));
   }
 
   async likeCommunityMessage(id: string) {
@@ -557,3 +816,4 @@ export class CmsService {
     return { success: true, id };
   }
 }
+

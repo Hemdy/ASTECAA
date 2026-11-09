@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { and, asc, desc, eq, or, sql } from 'drizzle-orm';
-import { eventRegistrations, events } from '@astec/database';
+import { appUsers, eventRegistrations, events } from '@astec/database';
 import { validateEventInput } from '@astec/validation';
 import type { CmsEvent, EventInput, EventStatus, PublicEvent } from '@astec/types';
 import { AppError } from '../core/app-error.js';
 import { DatabaseService } from '../database/database.service.js';
+import { EmailService } from '../email/email.service.js';
 
 @Injectable()
 export class EventsService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    private readonly email: EmailService,
+  ) {}
 
   async listPublic(): Promise<PublicEvent[]> {
     const rows = await this.database.db
@@ -26,6 +30,43 @@ export class EventsService {
       .where(and(eq(events.slug, slug), eq(events.status, 'published')))
       .limit(1);
     return event ? toPublicEvent(event) : null;
+  }
+
+  async getUserRegistrations(idOrEmail: string) {
+    const db = this.database.db;
+    const isId = isUuid(idOrEmail);
+    const emailNorm = idOrEmail.trim().toLowerCase();
+
+    const condition = isId
+      ? or(eq(eventRegistrations.userId, idOrEmail), eq(eventRegistrations.emailNormalized, emailNorm))
+      : eq(eventRegistrations.emailNormalized, emailNorm);
+
+    const rows = await db
+      .select({
+        id: eventRegistrations.id,
+        eventId: eventRegistrations.eventId,
+        name: eventRegistrations.name,
+        email: eventRegistrations.emailNormalized,
+        phone: eventRegistrations.phone,
+        graduationYear: eventRegistrations.graduationYear,
+        status: eventRegistrations.status,
+        createdAt: eventRegistrations.createdAt,
+        eventTitle: events.title,
+        eventSlug: events.slug,
+        eventDate: events.startDate,
+        eventVenue: events.venue,
+        eventCategory: events.category,
+        eventPoster: events.poster,
+      })
+      .from(eventRegistrations)
+      .innerJoin(events, eq(eventRegistrations.eventId, events.id))
+      .where(condition)
+      .orderBy(desc(eventRegistrations.createdAt));
+
+    return rows.map((r) => ({
+      ...r,
+      createdAt: r.createdAt.toISOString(),
+    }));
   }
 
   async listAdmin(): Promise<CmsEvent[]> {
@@ -97,10 +138,14 @@ export class EventsService {
     const db = this.database.db;
     const emailNormalized = data.email.trim().toLowerCase();
 
+    const eventCondition = isUuid(eventIdOrSlug)
+      ? eq(events.id, eventIdOrSlug)
+      : eq(events.slug, eventIdOrSlug);
+
     const [event] = await db
       .select()
       .from(events)
-      .where(or(eq(events.id, eventIdOrSlug), eq(events.slug, eventIdOrSlug)))
+      .where(eventCondition)
       .limit(1);
 
     if (!event) {
@@ -126,10 +171,33 @@ export class EventsService {
       throw new AppError(400, 'You are already registered for this event.', 'ALREADY_REGISTERED');
     }
 
+    let verifiedUserId: string | null = null;
+    if (data.userId && isUuid(data.userId)) {
+      const user = await db
+        .select({ id: appUsers.id })
+        .from(appUsers)
+        .where(eq(appUsers.id, data.userId))
+        .limit(1);
+      if (user.length > 0) {
+        verifiedUserId = user[0].id;
+      }
+    }
+
+    if (!verifiedUserId) {
+      const user = await db
+        .select({ id: appUsers.id })
+        .from(appUsers)
+        .where(eq(appUsers.emailNormalized, emailNormalized))
+        .limit(1);
+      if (user.length > 0) {
+        verifiedUserId = user[0].id;
+      }
+    }
+
     await db.transaction(async (tx) => {
       await tx.insert(eventRegistrations).values({
         eventId: event.id,
-        userId: data.userId || null,
+        userId: verifiedUserId,
         name: data.name.trim(),
         emailNormalized,
         phone: data.phone?.trim() || null,
@@ -143,6 +211,19 @@ export class EventsService {
         .where(eq(events.id, event.id));
     });
 
+    // Send confirmation email asynchronously via Resend
+    void this.email
+      .sendEventConfirmation(
+        data.email,
+        {
+          title: event.title,
+          date: event.startDate,
+          venue: event.venue,
+        },
+        data.name.trim(),
+      )
+      .catch(() => {});
+
     return {
       success: true,
       message: `Registration confirmed for ${event.title}!`,
@@ -152,10 +233,14 @@ export class EventsService {
 
   async getAttendees(eventIdOrSlug: string) {
     const db = this.database.db;
+    const eventCondition = isUuid(eventIdOrSlug)
+      ? eq(events.id, eventIdOrSlug)
+      : eq(events.slug, eventIdOrSlug);
+
     const [event] = await db
       .select({ id: events.id })
       .from(events)
-      .where(or(eq(events.id, eventIdOrSlug), eq(events.slug, eventIdOrSlug)))
+      .where(eventCondition)
       .limit(1);
 
     if (!event) {

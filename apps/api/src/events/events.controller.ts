@@ -11,6 +11,14 @@ export class EventsController {
     return this.events.listPublic();
   }
 
+  @Get('user/:idOrEmail/registrations')
+  getUserRegistrations(@Param('idOrEmail') idOrEmail: string) {
+    if (!idOrEmail) {
+      throw new AppError(400, 'User identifier is required.', 'INVALID_INPUT');
+    }
+    return this.events.getUserRegistrations(idOrEmail);
+  }
+
   @Get(':slug')
   get(@Param('slug') slug: string) {
     if (!slug || slug.includes('/')) {

@@ -41,9 +41,10 @@ export class CmsController {
   @Get('v1/community')
   async getCommunityMessages(
     @Query('page') page?: string,
-    @Query('status') status?: string
+    @Query('status') status?: string,
+    @Query('userEmail') userEmail?: string,
   ) {
-    return this.cms.listCommunityMessages(page, status || 'approved');
+    return this.cms.listCommunityMessages(page, status || 'approved', userEmail);
   }
 
   @Post('v1/community')
@@ -56,8 +57,10 @@ export class CmsController {
       phone?: string;
       graduationYear?: string;
       location?: string;
+      avatar?: string;
       message: string;
       page?: string;
+      userId?: string;
     }
   ) {
     return this.cms.createCommunityMessage({
@@ -66,14 +69,50 @@ export class CmsController {
       phone: body.phone,
       graduationYear: body.graduationYear,
       location: body.location,
+      avatar: body.avatar,
       message: body.message,
       page: body.page || 'community',
+      userId: body.userId,
     });
   }
 
   @Post('v1/community/:id/like')
   async likeCommunityMessage(@Param('id') id: string) {
     return this.cms.likeCommunityMessage(id);
+  }
+
+  @Post('v1/community/:id/reply')
+  async replyCommunityMessage(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      author: string;
+      email: string;
+      message: string;
+      graduationYear?: string;
+      avatar?: string;
+      userId?: string;
+    },
+  ) {
+    return this.cms.createCommunityReply(id, body);
+  }
+
+  @Post('v1/community/:id/react')
+  async reactCommunityMessage(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      reaction: string;
+      userEmail: string;
+      userId?: string;
+    },
+  ) {
+    return this.cms.toggleCommunityReaction(id, body.reaction, body.userEmail, body.userId);
+  }
+
+  @Get('v1/community/user/:idOrEmail')
+  async getUserCommunityNotes(@Param('idOrEmail') idOrEmail: string) {
+    return this.cms.getUserCommunityNotes(idOrEmail);
   }
 
   @Get('v1/announcements')
@@ -268,3 +307,4 @@ export class CmsController {
     return this.cms.deleteMedia(id);
   }
 }
+
