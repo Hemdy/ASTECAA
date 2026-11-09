@@ -2,4 +2,5 @@ packages:
   - 'packages/*'
   - 'infrastructure/*'
   - 'apps/api'
+  - 'apps/admin'
 

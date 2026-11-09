@@ -97,12 +97,11 @@
             ],
             "baseHref": "/",
             "browser": "apps/admin/src/main.ts",
-            "deleteOutputPath": false,
-            "deployUrl": "/admin/",
+            "deleteOutputPath": true,
             "index": "apps/admin/src/index.html",
             "outputPath": {
-              "base": "dist/astecaa/browser",
-              "browser": "admin"
+              "base": "dist/admin",
+              "browser": ""
             },
             "polyfills": [],
             "scripts": [],

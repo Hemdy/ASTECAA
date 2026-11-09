@@ -1,9 +1,15 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
+const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+const isVercel = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
 const env =
   process.env.APP_ENV ??
-  (process.env.NODE_ENV === 'production' ? 'production' : 'development');
+  (process.env.NODE_ENV === 'production' || process.env.VERCEL_ENV === 'production' || isVercel
+    ? 'production'
+    : 'development');
 
 const rawApiUrl =
   process.env.ASTECAA_API_URL?.trim() ||
@@ -48,11 +54,13 @@ const config = {
 };
 
 const targetDirectories = [
-  resolve('apps/website/public'),
-  resolve('apps/admin/public'),
-  resolve('dist/astecaa/browser'),
-  resolve('dist/astecaa/browser/admin'),
-  resolve('dist/astecaa'),
+  resolve(ROOT_DIR, 'apps/website/public'),
+  resolve(ROOT_DIR, 'apps/admin/public'),
+  resolve(ROOT_DIR, 'dist/admin'),
+  resolve(ROOT_DIR, 'apps/admin/dist'),
+  resolve(ROOT_DIR, 'dist/astecaa/browser'),
+  resolve(ROOT_DIR, 'dist/astecaa/browser/admin'),
+  resolve(ROOT_DIR, 'dist/astecaa'),
 ];
 
 for (const outputDirectory of targetDirectories) {

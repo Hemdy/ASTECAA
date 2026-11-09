@@ -23,6 +23,8 @@ bootstrapApplication(AdminApp, {
   providers: [
     provideRouter([
       { path: '', redirectTo: 'admin/dashboard', pathMatch: 'full' },
+      { path: 'login', redirectTo: 'admin/login', pathMatch: 'full' },
+      { path: 'dashboard', redirectTo: 'admin/dashboard', pathMatch: 'full' },
       { path: 'admin/login', component: AdminLogin },
       {
         path: 'admin',
