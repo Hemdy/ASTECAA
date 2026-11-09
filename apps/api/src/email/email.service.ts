@@ -15,26 +15,40 @@ export class EmailService {
   private readonly fromEmail: string;
 
   constructor() {
-    const apiKey = process.env.RESEND_API_KEY;
     this.fromEmail = process.env.RESEND_FROM_EMAIL || 'ASTECAA <notifications@astecaa.org>';
 
-    if (apiKey && apiKey.trim().length > 0 && !apiKey.startsWith('placeholder')) {
+    // Live email dispatch via Resend is disabled until the live domain (astecaa.org) is purchased and verified.
+    // Set ENABLE_LIVE_RESEND=true once the domain is acquired and DNS records are verified in Resend.
+    const enableLiveResend = process.env.ENABLE_LIVE_RESEND === 'true';
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (enableLiveResend && apiKey && apiKey.trim().length > 0 && !apiKey.startsWith('placeholder')) {
       this.resend = new Resend(apiKey.trim());
       this.logger.log(`Resend email client initialized with sender: ${this.fromEmail}`);
     } else {
-      this.logger.warn(
-        'RESEND_API_KEY is not configured. Outgoing emails will be simulated and logged in the console.',
+      this.resend = null;
+      this.logger.log(
+        'Live email sending via Resend is disabled pending custom domain purchase & verification. Outgoing emails are simulated.',
       );
     }
   }
 
+  isLive(): boolean {
+    return this.resend !== null;
+  }
+
   async sendEmail(to: string, subject: string, html: string, text?: string): Promise<EmailResult> {
+    const plainText = text || html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
     if (!this.resend) {
-      this.logger.log(`[SIMULATED EMAIL DISPATCH]
-To: ${to}
-From: ${this.fromEmail}
-Subject: ${subject}
-Text snippet: ${text ? text.slice(0, 150) : '(HTML email)'}`);
+      this.logger.log(
+        `[SIMULATED EMAIL DISPATCH]\n` +
+        `To: ${to}\n` +
+        `From: ${this.fromEmail}\n` +
+        `Subject: ${subject}\n` +
+        `Body:\n${plainText}\n` +
+        `----------------------------------------`,
+      );
       return { success: true, simulated: true, id: `sim_${Date.now()}` };
     }
 
@@ -44,7 +58,7 @@ Text snippet: ${text ? text.slice(0, 150) : '(HTML email)'}`);
         to: [to],
         subject,
         html,
-        text: text || html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+        text: plainText,
       });
 
       if (response.error) {

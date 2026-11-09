@@ -69,13 +69,14 @@ export async function bootstrapApp(): Promise<Express> {
     if (origin && allowed) {
       response.setHeader('Access-Control-Allow-Origin', origin);
       response.setHeader('Access-Control-Allow-Credentials', 'true');
+      response.setHeader('Access-Control-Expose-Headers', 'set-auth-token, Content-Length, X-Request-Id');
     }
 
     if (request.method === 'OPTIONS') {
       response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
       response.setHeader(
         'Access-Control-Allow-Headers',
-        'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Origin, Cookie',
+        'Authorization, Content-Type, X-CSRF-Token, X-Requested-With, Accept, Origin, Cookie, set-auth-token',
       );
       response.setHeader('Access-Control-Max-Age', '86400');
       response.status(204).end();

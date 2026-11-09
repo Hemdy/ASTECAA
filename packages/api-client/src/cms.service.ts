@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
+import { applyAuthHeaders, captureAuthHeader } from './token-storage.js';
 import type {
   CmsGalleryItem,
   CmsTimelineMilestone,
@@ -346,6 +347,9 @@ export class CmsApiService {
     if (init.body) {
       headers.set('Content-Type', 'application/json');
     }
+    if (authenticated) {
+      applyAuthHeaders(headers);
+    }
 
     const response = await fetch(`${getAstecApiUrl()}${path}`, {
       ...init,
@@ -353,6 +357,7 @@ export class CmsApiService {
       credentials: authenticated ? 'include' : 'same-origin',
       cache: 'no-store',
     });
+    captureAuthHeader(response);
 
     if (!response.ok) {
       const body: unknown = await response.json().catch(() => null);

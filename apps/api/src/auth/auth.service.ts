@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
+import { bearer } from 'better-auth/plugins';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { fromNodeHeaders } from 'better-auth/node';
 import { eq } from 'drizzle-orm';
@@ -26,12 +27,20 @@ export class AuthService implements OnModuleDestroy {
       throw new Error('BETTER_AUTH_SECRET must be at least 32 characters.');
     }
 
+    const isProd = this.appEnv === 'production' || process.env.VERCEL === '1';
+
     this.auth = betterAuth({
       appName: 'ASTECAA',
       baseURL: this.baseUrl,
       secret,
+      plugins: [bearer()],
       advanced: {
-        useSecureCookies: this.appEnv === 'production',
+        useSecureCookies: isProd,
+        defaultCookieAttributes: {
+          sameSite: isProd ? 'none' : 'lax',
+          secure: isProd,
+          partitioned: isProd,
+        },
       },
       session: {
         expiresIn: 60 * 60 * 24 * 7,

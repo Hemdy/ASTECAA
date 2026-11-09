@@ -44,8 +44,8 @@ export class AdminAuthService {
     this.authError.set(null);
     this.loading.set(true);
     try {
-      await this.authApi.signIn(email, password, remember);
-      const user = await this.authApi.getSession();
+      const signInRes = await this.authApi.signIn(email, password, remember);
+      const user = signInRes?.user || (await this.authApi.getSession());
       if (!user) {
         throw new Error('Sign-in completed without an active session.');
       }

@@ -95,6 +95,9 @@ export class Vote {
         return;
       }
       this.maskedPhone = result.maskedPhone;
+      if (result.debugOtp) {
+        this.otp = result.debugOtp;
+      }
       this.verificationStep.set('otp');
     } catch (err: any) {
       this.otpLoading.set(false);

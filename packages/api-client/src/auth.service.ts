@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
+import { applyAuthHeaders, captureAuthHeader, setStoredAuthToken } from './token-storage.js';
 
 export interface AuthSessionUser {
   id: string;
@@ -35,22 +36,43 @@ export class AuthApiService {
     return this.request('/api/v1/me');
   }
 
-  async signIn(email: string, password: string, rememberMe: boolean): Promise<void> {
-    await this.request('/api/auth/sign-in/email', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, rememberMe }),
-    });
+  async signIn(
+    email: string,
+    password: string,
+    rememberMe: boolean
+  ): Promise<{ user?: AuthSessionUser; token?: string }> {
+    const res = await this.request<{ user?: AuthSessionUser; token?: string }>(
+      '/api/auth/sign-in/email',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, password, rememberMe }),
+      }
+    );
+    if (res?.token) {
+      setStoredAuthToken(res.token, rememberMe);
+    }
+    return res;
   }
 
   async signUp(email: string, password: string, name: string): Promise<void> {
-    await this.request('/api/auth/sign-up/email', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name }),
-    });
+    const res = await this.request<{ user?: AuthSessionUser; token?: string }>(
+      '/api/auth/sign-up/email',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, password, name }),
+      }
+    );
+    if (res?.token) {
+      setStoredAuthToken(res.token, true);
+    }
   }
 
   async signOut(): Promise<void> {
-    await this.request('/api/auth/sign-out', { method: 'POST' });
+    try {
+      await this.request('/api/auth/sign-out', { method: 'POST' });
+    } finally {
+      setStoredAuthToken(null);
+    }
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -58,6 +80,7 @@ export class AuthApiService {
     if (init.body) {
       headers.set('Content-Type', 'application/json');
     }
+    applyAuthHeaders(headers);
 
     const response = await fetch(`${getAstecApiUrl()}${path}`, {
       ...init,
@@ -65,6 +88,7 @@ export class AuthApiService {
       credentials: 'include',
       cache: 'no-store',
     });
+    captureAuthHeader(response);
 
     if (!response.ok) {
       const body: unknown = await response.json().catch(() => null);

@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
+import { applyAuthHeaders, captureAuthHeader } from './token-storage.js';
 import type {
   Candidate,
   CandidateWithVotes,
@@ -133,7 +134,7 @@ export class VotingService {
     return normalizeElectionWithDetails(res);
   }
 
-  async requestOtp(voter: VoterDetails, electionId?: string): Promise<{ success: boolean; maskedPhone: string }> {
+  async requestOtp(voter: VoterDetails, electionId?: string): Promise<{ success: boolean; maskedPhone: string; debugOtp?: string }> {
     this.currentVoter = { ...voter };
     const eId = electionId || this.currentElectionId;
     if (!eId) {
@@ -299,6 +300,7 @@ export class VotingService {
     if (init.body) {
       headers.set('Content-Type', 'application/json');
     }
+    applyAuthHeaders(headers);
 
     const response = await fetch(`${getAstecApiUrl()}${path}`, {
       ...init,
@@ -306,6 +308,7 @@ export class VotingService {
       credentials: 'include',
       cache: 'no-store',
     });
+    captureAuthHeader(response);
 
     if (!response.ok) {
       const body: unknown = await response.json().catch(() => null);

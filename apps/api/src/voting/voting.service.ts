@@ -525,8 +525,10 @@ export class VotingService {
     return {
       success: true,
       maskedPhone,
-      // For development ease, include otp in log and response if not production
-      ...(process.env.APP_ENV !== 'production' ? { debugOtp: rawOtp } : {}),
+      // While live email dispatch is disabled, include otp in response for seamless verification
+      ...(process.env.APP_ENV !== 'production' || process.env.ENABLE_LIVE_RESEND !== 'true'
+        ? { debugOtp: rawOtp }
+        : {}),
     };
   }
 

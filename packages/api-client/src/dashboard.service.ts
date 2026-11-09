@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
+import { applyAuthHeaders, captureAuthHeader } from './token-storage.js';
 import type { DashboardStatsItem } from '@astec/types';
 
 @Injectable({ providedIn: 'root' })
@@ -14,6 +15,7 @@ export class DashboardApiService {
     if (init.body) {
       headers.set('Content-Type', 'application/json');
     }
+    applyAuthHeaders(headers);
 
     const response = await fetch(`${getAstecApiUrl()}${path}`, {
       ...init,
@@ -21,6 +23,7 @@ export class DashboardApiService {
       credentials: 'include',
       cache: 'no-store',
     });
+    captureAuthHeader(response);
 
     if (!response.ok) {
       const body: unknown = await response.json().catch(() => null);
