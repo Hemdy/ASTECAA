@@ -1,9 +1,15 @@
 <div class="adm-toolbar">
   <div>
     <div class="adm-section-title">Homepage Content</div>
-    <div class="adm-section-sub">Update every section of the public homepage — no code changes required.</div>
+    <div class="adm-section-sub">Update every section of the public homepage — saved directly to Neon database.</div>
   </div>
-  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="saveAll()">Save all changes</button>
+  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="saveAll()" [disabled]="saving()">
+    @if (saving()) {
+      <i class="ri-loader-4-line ri-spin"></i> Saving…
+    } @else {
+      <i class="ri-save-line"></i> Save all changes
+    }
+  </button>
 </div>
 
 <div class="adm-tabs">
@@ -40,9 +46,15 @@
       </div>
       <div class="adm-field">
         <label class="adm-field-label">Background Image</label>
-        <div class="adm-dropzone" style="padding: 24px">
-          <div style="font-size: 1.4rem">🖼</div>
-          <div style="margin-top: 6px">Current: hero-orchard.jpg · Click to replace</div>
+        <input type="file" #heroBgInput (change)="onHeroBgSelected($event)" accept="image/*" style="display: none" />
+        <div class="adm-dropzone" style="padding: 24px; cursor: pointer" (click)="heroBgInput.click()">
+          @if (hero.bgImage) {
+            <img [src]="hero.bgImage" alt="Hero Background" style="max-height: 120px; border-radius: var(--ad-radius-sm); margin-bottom: 8px" />
+            <div><strong>Click to replace image from your computer</strong></div>
+          } @else {
+            <div style="font-size: 1.4rem"><i class="ri-image-line"></i></div>
+            <div style="margin-top: 6px">Click to upload background image from your file system</div>
+          }
         </div>
       </div>
     </div>
@@ -53,22 +65,22 @@
   <div class="adm-card adm-card-pad">
     <div style="display: grid; gap: 16px">
       <div class="adm-field">
-        <label class="adm-field-label">Featured Event</label>
+        <label class="adm-field-label">Featured Gathering</label>
         <select class="adm-select" [(ngModel)]="featured.eventId">
-          <option value="harvest-festival-2026">Sounds of Worship Concert 2026 Festival</option>
-          <option value="voices-oral-history-2026">Voices: An Oral History Evening</option>
-          <option value="winter-carol-night-2026">Winter Carol Night</option>
-          <option value="spring-reunion-2027">Spring Alumni Reunion</option>
+          <option value="">-- Choose an event --</option>
+          @for (e of availableEvents(); track e.id) {
+            <option [value]="e.id">{{ e.title }} ({{ e.date }})</option>
+          }
         </select>
-        <span class="adm-field-hint">This event appears in the hero card and the featured section.</span>
+        <span class="adm-field-hint">Select which gathering is spotlighted on the homepage banner.</span>
       </div>
       <div class="adm-field">
-        <label class="adm-field-label">Featured Stories (pick 3)</label>
-        <div style="display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm)">
+        <label class="adm-field-label">Featured Alumni Stories</label>
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px">
           @for (s of storyOptions; track s) {
-            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer">
+            <label style="display: flex; gap: 10px; align-items: center; font-size: 0.88rem; cursor: pointer">
               <input type="checkbox" class="adm-cb" [checked]="featured.stories.includes(s)" (change)="toggleStory(s)" />
-              <span>{{ s }}</span>
+              {{ s }}
             </label>
           }
         </div>
@@ -78,10 +90,11 @@
 }
 
 @if (tab() === 'sections') {
-  <div class="adm-card">
-    <div style="display: flex; flex-direction: column">
+  <div class="adm-card adm-card-pad">
+    <div class="adm-field-label" style="margin-bottom: 12px">Enable or Disable Homepage Sections</div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
       @for (s of sections(); track s.id) {
-        <div class="adm-toggle-row" style="padding: 16px 20px">
+        <div class="adm-toggle-row">
           <div class="adm-toggle-row-text">
             <div class="adm-toggle-row-title">{{ s.name }}</div>
             <div class="adm-toggle-row-desc">{{ s.description }}</div>
@@ -94,42 +107,32 @@
       }
     </div>
   </div>
-  <div class="adm-card adm-card-pad" style="margin-top: 16px">
-    <div class="adm-field">
-      <label class="adm-field-label">Statistics Displayed</label>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px">
-        <div class="adm-field" style="margin: 0">
-          <input class="adm-input" [(ngModel)]="stats[0].value" placeholder="100+" />
-          <span class="adm-field-hint">{{ stats[0].label }}</span>
-        </div>
-        <div class="adm-field" style="margin: 0">
-          <input class="adm-input" [(ngModel)]="stats[1].value" placeholder="4,000+" />
-          <span class="adm-field-hint">{{ stats[1].label }}</span>
-        </div>
-        <div class="adm-field" style="margin: 0">
-          <input class="adm-input" [(ngModel)]="stats[2].value" placeholder="38" />
-          <span class="adm-field-hint">{{ stats[2].label }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
 }
 
 @if (tab() === 'footer') {
   <div class="adm-card adm-card-pad">
     <div style="display: grid; gap: 16px">
       <div class="adm-field">
-        <label class="adm-field-label">Footer Mission Text</label>
+        <label class="adm-field-label">Mission Statement</label>
         <textarea class="adm-textarea" [(ngModel)]="footer.mission" style="min-height: 80px"></textarea>
       </div>
       <div class="adm-field">
-        <label class="adm-field-label">Copyright Line</label>
+        <label class="adm-field-label">Copyright Notice</label>
         <input class="adm-input" [(ngModel)]="footer.copyright" />
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px">
-        <div class="adm-field" style="margin: 0"><label class="adm-field-label">Instagram URL</label><input class="adm-input" [(ngModel)]="footer.instagram" /></div>
-        <div class="adm-field" style="margin: 0"><label class="adm-field-label">Facebook URL</label><input class="adm-input" [(ngModel)]="footer.facebook" /></div>
-        <div class="adm-field" style="margin: 0"><label class="adm-field-label">Twitter URL</label><input class="adm-input" [(ngModel)]="footer.twitter" /></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px">
+        <div class="adm-field">
+          <label class="adm-field-label">Instagram URL</label>
+          <input class="adm-input" [(ngModel)]="footer.instagram" />
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label">Facebook URL</label>
+          <input class="adm-input" [(ngModel)]="footer.facebook" />
+        </div>
+        <div class="adm-field">
+          <label class="adm-field-label">X / Twitter URL</label>
+          <input class="adm-input" [(ngModel)]="footer.twitter" />
+        </div>
       </div>
     </div>
   </div>

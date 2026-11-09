@@ -1,12 +1,12 @@
 <section class="page-hero">
   <div class="container">
     <span class="eyebrow" appReveal>From the archive</span>
-<h1 appReveal delay="80">Memories that connect Us</h1>
+    <h1 appReveal delay="80">Memories that connect Us</h1>
 
-<p class="lede" appReveal delay="160">
-  Step into the ASTECAA archive and revisit the people, school days, reunions, celebrations,
-  and milestones that have shaped our alumni story since 1998.
-</p>
+    <p class="lede" appReveal delay="160">
+      Step into the ASTECAA archive and revisit the people, school days, reunions, celebrations,
+      and milestones that have shaped our alumni story since 1998.
+    </p>
   </div>
 </section>
 
@@ -22,13 +22,6 @@
         >
           Scrapbook
         </button>
-        <!-- <button
-          class="style-btn"
-          [class.active]="style() === 'filmstrip'"
-          (click)="style.set('filmstrip')"
-        >
-          Film strip
-        </button> -->
         <button
           class="style-btn"
           [class.active]="style() === 'polaroid'"
@@ -39,15 +32,15 @@
       </div>
 
       <div class="g-filters">
-        <select name="album" [(ngModel)]="album" aria-label="Filter by album">
+        <select name="album" [ngModel]="album()" (ngModelChange)="album.set($event)" aria-label="Filter by album">
           <option value="">All albums</option>
-          @for (a of albums; track a) {
+          @for (a of albums(); track a) {
             <option [value]="a">{{ a }}</option>
           }
         </select>
-        <select name="year" [(ngModel)]="year" aria-label="Filter by year">
+        <select name="year" [ngModel]="year()" (ngModelChange)="year.set($event)" aria-label="Filter by year">
           <option value="">All years</option>
-          @for (y of years; track y) {
+          @for (y of years(); track y) {
             <option [value]="y">{{ y }}</option>
           }
         </select>
@@ -67,32 +60,16 @@
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
           >
-            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" (error)="onImageError($event)" />
-            <figcaption class="caption">{{ m.caption }}</figcaption>
+            <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+            <figcaption class="caption">{{ m.caption || m.title }}</figcaption>
             <span class="sb-year">{{ m.year }}</span>
-            @if (m.format === 'video') {
-              <span class="sb-video">▶</span>
+            @if (m.type === 'video') {
+              <span class="sb-video"><i class="ri-movie-line"></i></span>
             }
           </figure>
         }
       </div>
     }
-
-    <!-- Film strip style -->
-    <!-- @if (style() === 'filmstrip') {
-      <div class="filmstrip-wrap" appReveal>
-        <div class="filmstrip-big">
-          <div class="fs-track">
-            @for (m of filtered(); track m.id) {
-              <figure class="fs-frame">
-                <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
-                <figcaption class="type">{{ m.year }} · {{ m.event }}</figcaption>
-              </figure>
-            }
-          </div>
-        </div>
-      </div>
-    } -->
 
     <!-- Polaroid wall style -->
     @if (style() === 'polaroid') {
@@ -103,9 +80,9 @@
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
           >
-            <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
-            <figcaption class="caption">{{ m.caption }}</figcaption>
-            <span class="pw-meta type">{{ m.year }}</span>
+            <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+            <figcaption class="caption">{{ m.caption || m.title }}</figcaption>
+            <span class="pw-meta type">{{ m.album }} · {{ m.year }}</span>
           </figure>
         }
       </div>
@@ -113,9 +90,9 @@
 
     @if (filtered().length === 0) {
       <div class="empty">
-        <div class="empty-mark">✦</div>
+        <div class="empty-mark"><i class="ri-image-line" style="font-size: 2.2rem; color: var(--c-gold)"></i></div>
         <h3>No memories in this album yet.</h3>
-        <p>Try a different filter combination.</p>
+        <p>Try a different filter combination or check back as more archival items are added.</p>
         <button class="btn btn-outline" (click)="clear()">Clear filters</button>
       </div>
     }

@@ -343,6 +343,140 @@ export const eventRegistrations = pgTable(
   ]
 );
 
+export const galleryItems = pgTable(
+  'gallery_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: text('title').notNull(),
+    description: text('description'),
+    url: text('url').notNull(),
+    album: text('album').notNull(),
+    year: integer('year').notNull(),
+    mediaType: text('media_type').notNull().default('photo'),
+    featured: boolean('featured').notNull().default(false),
+    size: text('size'),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('gallery_items_album_idx').on(table.album),
+    index('gallery_items_year_idx').on(table.year),
+  ]
+);
+
+export const timelineMilestones = pgTable(
+  'timeline_milestones',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    year: integer('year').notNull(),
+    title: text('title').notNull(),
+    subtitle: text('subtitle'),
+    story: text('story').notNull(),
+    quote: text('quote'),
+    quoteAuthor: text('quote_author'),
+    imageUrl: text('image_url'),
+    sortOrder: integer('sort_order').notNull().default(0),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('timeline_milestones_year_idx').on(table.year),
+    index('timeline_milestones_sort_order_idx').on(table.sortOrder),
+  ]
+);
+
+export const communityMessages = pgTable(
+  'community_messages',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    author: text('author').notNull(),
+    email: text('email').notNull(),
+    phone: text('phone'),
+    graduationYear: text('graduation_year'),
+    location: text('location'),
+    avatar: text('avatar'),
+    message: text('message').notNull(),
+    page: text('page').notNull().default('community'),
+    targetId: text('target_id'),
+    status: text('status').notNull().default('approved'),
+    likes: integer('likes').notNull().default(0),
+    pinned: boolean('pinned').notNull().default(false),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('community_messages_page_status_idx').on(table.page, table.status),
+    index('community_messages_pinned_idx').on(table.pinned),
+    index('community_messages_created_at_idx').on(table.createdAt),
+  ]
+);
+
+export const stories = pgTable(
+  'stories',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    slug: text('slug').notNull(),
+    title: text('title').notNull(),
+    excerpt: text('excerpt').notNull(),
+    body: text('body').notNull(),
+    category: text('category').notNull().default('History'),
+    cover: text('cover'),
+    author: text('author').notNull(),
+    authorAvatar: text('author_avatar'),
+    status: text('status').notNull().default('published'),
+    views: integer('views').notNull().default(0),
+    commentsCount: integer('comments_count').notNull().default(0),
+    ...appTimestamps,
+  },
+  (table) => [
+    uniqueIndex('stories_slug_uidx').on(table.slug),
+    index('stories_status_idx').on(table.status),
+    index('stories_category_idx').on(table.category),
+  ]
+);
+
+export const announcements = pgTable(
+  'announcements',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    date: text('date').notNull(),
+    status: text('status').notNull().default('published'),
+    pinned: boolean('pinned').notNull().default(false),
+    channel: text('channel').notNull().default('site'),
+    ...appTimestamps,
+  },
+  (table) => [
+    index('announcements_status_pinned_idx').on(table.status, table.pinned),
+  ]
+);
+
+export const siteContent = pgTable(
+  'site_content',
+  {
+    id: text('id').primaryKey(),
+    content: jsonb('content').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  }
+);
+
+export const mediaFiles = pgTable(
+  'media_files',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    name: text('name').notNull(),
+    url: text('url').notNull(),
+    mediaType: text('media_type').notNull().default('image'),
+    sizeBytes: integer('size_bytes'),
+    sizeFormatted: text('size_formatted'),
+    folder: text('folder').notNull().default('General'),
+    storageKey: text('storage_key').notNull(),
+    mimeType: text('mime_type'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('media_files_folder_idx').on(table.folder),
+  ]
+);
+
 export const astecSchema = {
   appUsers,
   authIdentities,
@@ -359,6 +493,13 @@ export const astecSchema = {
   electionVoters,
   voterOtpRequests,
   eventRegistrations,
+  galleryItems,
+  timelineMilestones,
+  communityMessages,
+  stories,
+  announcements,
+  siteContent,
+  mediaFiles,
   user,
   session,
   account,

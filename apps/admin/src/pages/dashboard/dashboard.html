@@ -9,7 +9,7 @@
         <div class="adm-stat-label">Total Users</div>
         <div class="adm-stat-value">{{ stats().totalUsers }}</div>
       </div>
-      <div class="adm-stat-ico">👥</div>
+      <div class="adm-stat-ico"><i class="ri-group-line"></i></div>
     </div>
     <span class="adm-stat-delta up">Live database records</span>
   </div>
@@ -20,7 +20,7 @@
         <div class="adm-stat-label">Upcoming Events</div>
         <div class="adm-stat-value">{{ stats().upcomingEvents }}</div>
       </div>
-      <div class="adm-stat-ico">📅</div>
+      <div class="adm-stat-ico"><i class="ri-calendar-event-line"></i></div>
     </div>
     <span class="adm-stat-delta up">Published & scheduled</span>
   </div>
@@ -31,7 +31,7 @@
         <div class="adm-stat-label">Pending Approvals</div>
         <div class="adm-stat-value">{{ stats().pendingApprovals }}</div>
       </div>
-      <div class="adm-stat-ico">⏳</div>
+      <div class="adm-stat-ico"><i class="ri-time-line"></i></div>
     </div>
     <span class="adm-stat-delta down">Pending members</span>
   </div>
@@ -42,7 +42,7 @@
         <div class="adm-stat-label">Active Elections</div>
         <div class="adm-stat-value">{{ stats().activeElections }}</div>
       </div>
-      <div class="adm-stat-ico">🗳</div>
+      <div class="adm-stat-ico"><i class="ri-survey-line"></i></div>
     </div>
     <span class="adm-stat-delta up">{{ stats().totalVotes }} ballots cast</span>
   </div>
@@ -120,19 +120,19 @@
   <div class="adm-card-pad">
     <div class="adm-quick">
       <button class="adm-quick-item" (click)="quickNew('event')">
-        <span class="adm-quick-ico">📅</span>
+        <span class="adm-quick-ico"><i class="ri-calendar-event-line"></i></span>
         <span class="adm-quick-label">New Event</span>
       </button>
       <button class="adm-quick-item" (click)="quickNew('story')">
-        <span class="adm-quick-ico">✎</span>
+        <span class="adm-quick-ico"><i class="ri-article-line"></i></span>
         <span class="adm-quick-label">Write Story</span>
       </button>
       <button class="adm-quick-item" (click)="quickNew('upload')">
-        <span class="adm-quick-ico">📤</span>
+        <span class="adm-quick-ico"><i class="ri-upload-cloud-2-line"></i></span>
         <span class="adm-quick-label">Upload Media</span>
       </button>
       <button class="adm-quick-item" (click)="quickNew('announce')">
-        <span class="adm-quick-ico">📢</span>
+        <span class="adm-quick-ico"><i class="ri-notification-badge-line"></i></span>
         <span class="adm-quick-label">Announce</span>
       </button>
     </div>
@@ -151,7 +151,7 @@
       <div class="adm-feed">
         @for (a of activity; track a.id) {
           <div class="adm-feed-item">
-            <div class="adm-feed-ico">{{ a.icon }}</div>
+            <div class="adm-feed-ico"><i [class]="a.icon"></i></div>
             <div style="flex: 1">
               <div class="adm-feed-text">
                 <strong>{{ a.user }}</strong> {{ a.action }}
@@ -183,8 +183,8 @@
               <div class="adm-feed-time" style="font-style: italic">"{{ truncate(c.message) }}"</div>
             </div>
             <div style="display: flex; gap: 4px">
-              <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(c.id)" title="Approve">✓</button>
-              <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="reject(c.id)" title="Reject">✕</button>
+              <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(c.id)" title="Approve"><i class="ri-check-line"></i></button>
+              <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="reject(c.id)" title="Reject"><i class="ri-close-line"></i></button>
             </div>
           </div>
         }

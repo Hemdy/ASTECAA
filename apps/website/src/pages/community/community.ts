@@ -1,8 +1,9 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RevealDirective } from '../../reveal.directive';
-import { MESSAGES, CommunityMessage } from '../../data';
 import { ToastService } from '@astec/ui';
+import { CmsApiService } from '@astec/api-client';
+import type { CmsCommunityMessage } from '@astec/types';
 
 @Component({
   selector: 'app-community',
@@ -11,16 +12,36 @@ import { ToastService } from '@astec/ui';
   templateUrl: './community.html',
   styleUrl: './community.css',
 })
-export class Community {
+export class Community implements OnInit {
+  private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
+
   filter = signal<'all' | 'pinned'>('all');
-  messages = signal<CommunityMessage[]>(MESSAGES);
+  messages = signal<CmsCommunityMessage[]>([]);
+  loading = signal(false);
+  submitting = signal(false);
   currentYear = new Date().getFullYear();
 
   form = { name: '', email: '', phone: '', graduationYear: '', message: '' };
   rotations = [-1.5, 2, -2, 1.5, -1, 2.5, -2.5, 1.2, -1.8, 2.2, -1.2, 1.8];
   rot(i: number) {
     return this.rotations[i % this.rotations.length];
+  }
+
+  ngOnInit() {
+    void this.loadMessages();
+  }
+
+  async loadMessages() {
+    this.loading.set(true);
+    try {
+      const data = await this.cmsApi.getCommunityMessages('community', 'approved');
+      this.messages.set(data);
+    } catch {
+      this.messages.set([]);
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   visible = () => {
@@ -32,39 +53,53 @@ export class Community {
 
   canSubmit() {
     return (
-      this.form.name.trim() &&
-      this.form.email.trim() &&
-      this.form.phone.trim() &&
-      this.form.graduationYear.trim() &&
-      this.form.message.trim() &&
+      Boolean(this.form.name.trim()) &&
+      Boolean(this.form.email.trim()) &&
+      Boolean(this.form.phone.trim()) &&
+      Boolean(this.form.graduationYear.trim()) &&
+      Boolean(this.form.message.trim()) &&
       this.form.message.length <= 400
     );
   }
 
-  submit() {
-    if (!this.canSubmit()) return;
-    const newMsg: CommunityMessage = {
-      id: `local-${Date.now()}`,
-      author: this.form.name.trim(),
-      location: `Class of ${this.form.graduationYear.trim()}`,
-      avatar: '/images/reading-room.jpg',
-      message: this.form.message.trim(),
-      date: new Date().toISOString(),
-      likes: 0,
-    };
-    this.messages.update((m) => [newMsg, ...m]);
-    this.form = { name: '', email: '', phone: '', graduationYear: '', message: '' };
-    this.toast.show('Thank you — your note has been sent for review.');
+  async submit() {
+    if (!this.canSubmit() || this.submitting()) return;
+    this.submitting.set(true);
+    try {
+      await this.cmsApi.postCommunityMessage({
+        author: this.form.name.trim(),
+        email: this.form.email.trim(),
+        phone: this.form.phone.trim(),
+        graduationYear: this.form.graduationYear.trim(),
+        location: `Class of ${this.form.graduationYear.trim()}`,
+        message: this.form.message.trim(),
+        page: 'community',
+      });
+      this.form = { name: '', email: '', phone: '', graduationYear: '', message: '' };
+      this.toast.show('Thank you! Your note has been submitted for moderation.');
+      await this.loadMessages();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Could not submit message. Please try again.');
+    } finally {
+      this.submitting.set(false);
+    }
   }
 
-  like(id: string) {
-    this.messages.update((list) =>
-      list.map((m) => (m.id === id ? { ...m, likes: m.likes + 1, liked: true } : m))
-    );
+  async like(id: string) {
+    try {
+      const res = await this.cmsApi.likeCommunityMessage(id);
+      this.messages.update((list) =>
+        list.map((m) => (m.id === id ? { ...m, likes: res.likes } : m))
+      );
+    } catch {
+      this.messages.update((list) =>
+        list.map((m) => (m.id === id ? { ...m, likes: (m.likes || 0) + 1 } : m))
+      );
+    }
   }
 
-    onAvatarImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/avatar-fallback.jpg';
-}
+  onAvatarImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'images/empty/avatar-fallback.jpg';
+  }
 }

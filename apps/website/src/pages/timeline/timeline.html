@@ -43,15 +43,15 @@
           </div>
           <article class="t-card">
             <div class="t-media">
-              <img [src]="m.image" [alt]="m.title" class="photo-vintage" />
+              <img [src]="m.image || m.url" [alt]="m.title" class="photo-vintage" />
               @if (m.hasVideo) {
-                <span class="t-video">▶</span>
+                <span class="t-video"><i class="ri-movie-line"></i></span>
               }
             </div>
             <div class="t-body">
               <span class="eyebrow">{{ m.year }}</span>
               <h3>{{ m.title }}</h3>
-              <p>{{ m.story }}</p>
+              <p>{{ m.story || m.description }}</p>
               @if (m.quote) {
                 <blockquote class="t-quote">
                   "{{ m.quote }}"

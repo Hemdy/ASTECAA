@@ -1,10 +1,11 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DecimalPipe } from '@angular/common';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
-import { ADMIN_STORIES, AdminStory } from '../../admin-data';
 import { ToastService } from '@astec/ui';
+import { CmsApiService } from '@astec/api-client';
+import type { CmsStory } from '@astec/types';
 
 @Component({
   selector: 'app-admin-stories',
@@ -12,19 +13,29 @@ import { ToastService } from '@astec/ui';
   imports: [FormsModule, DecimalPipe, AdmModal, AdmConfirm],
   templateUrl: './admin-stories.html',
 })
-export class AdminStories {
+export class AdminStories implements OnInit {
+  private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
-  stories = signal<AdminStory[]>(ADMIN_STORIES);
+
+  stories = signal<CmsStory[]>([]);
+  loading = signal(false);
   tab = signal<'all' | 'published' | 'draft' | 'archived'>('all');
   query = signal('');
   catFilter = signal('');
   showModal = signal(false);
   editing = signal(false);
-  deleteTarget = signal<AdminStory | null>(null);
+  deleteTarget = signal<CmsStory | null>(null);
 
-  categories = [...new Set(ADMIN_STORIES.map((s) => s.category))];
+  categories = ['History', 'Reunion', 'Spotlight', 'Legacy', 'Culture', 'Education'];
 
-  form: Partial<AdminStory> & { body?: string } = { title: '', excerpt: '', category: 'History', status: 'draft', body: '' };
+  form: Partial<CmsStory> = {
+    title: '',
+    excerpt: '',
+    category: 'History',
+    status: 'draft',
+    body: '',
+    cover: '/images/ASTECAA.jpg',
+  };
 
   counts = computed(() => ({
     all: this.stories().length,
@@ -39,17 +50,35 @@ export class AdminStories {
     const c = this.catFilter();
     return this.stories().filter((s) => {
       const mt = t === 'all' || s.status === t;
-      const mq = !q || s.title.toLowerCase().includes(q) || s.excerpt.toLowerCase().includes(q);
+      const mq = !q || s.title.toLowerCase().includes(q) || (s.excerpt && s.excerpt.toLowerCase().includes(q));
       const mc = !c || s.category === c;
       return mt && mq && mc;
     });
   });
 
-  shortDate(iso: string): string {
+  ngOnInit() {
+    void this.loadStories();
+  }
+
+  async loadStories() {
+    this.loading.set(true);
+    try {
+      const data = await this.cmsApi.adminListStories();
+      this.stories.set(data);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to load stories');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  shortDate(iso?: string | null): string {
+    if (!iso) return '';
     return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
-  truncate(s: string): string {
+  truncate(s?: string | null): string {
+    if (!s) return '';
     return s.length > 60 ? s.slice(0, 60) + '…' : s;
   }
 
@@ -59,72 +88,110 @@ export class AdminStories {
 
   openCreate() {
     this.editing.set(false);
-    this.form = { title: '', excerpt: '', category: 'History', status: 'draft', body: '' };
+    this.form = {
+      title: '',
+      excerpt: '',
+      category: 'History',
+      status: 'draft',
+      body: '',
+      cover: '/images/ASTECAA.jpg',
+    };
     this.showModal.set(true);
   }
 
-  openEdit(s: AdminStory) {
+  openEdit(s: CmsStory) {
     this.editing.set(true);
-    this.form = { ...s, body: '<p>' + s.excerpt + '</p>' };
+    this.form = { ...s };
     this.showModal.set(true);
   }
 
-  save(asDraft: boolean) {
-    if (!this.form.title) {
+  async save(asDraft: boolean) {
+    if (!this.form.title?.trim()) {
       this.toast.show('Please give the story a title.');
       return;
     }
-    const status = asDraft ? 'draft' : 'published';
-    if (this.editing() && this.form.id) {
-      this.stories.update((list) => list.map((s) => (s.id === this.form.id ? { ...s, ...this.form, status } as AdminStory : s)));
-      this.toast.show(asDraft ? 'Draft saved.' : 'Story published.');
-    } else {
-      const newStory: AdminStory = {
-        id: 's' + Date.now(),
-        title: this.form.title || '',
-        excerpt: this.form.excerpt || '',
-        author: 'Marlene Whitfield',
-        authorAvatar: '/images/avatar-marlene.jpg',
-        category: this.form.category || 'History',
-        status,
-        date: new Date().toISOString().slice(0, 10),
-        views: 0,
-        comments: 0,
-        cover: '/images/ASTECAA.jpg',
-      };
-      this.stories.update((list) => [newStory, ...list]);
-      this.toast.show(asDraft ? 'Draft created.' : 'Story published.');
+    const status: 'draft' | 'published' = asDraft ? 'draft' : 'published';
+    const payload: Partial<CmsStory> = {
+      title: this.form.title.trim(),
+      slug: this.form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      excerpt: this.form.excerpt || '',
+      body: this.form.body || '',
+      category: this.form.category || 'History',
+      cover: this.form.cover || '/images/ASTECAA.jpg',
+      status,
+      author: this.form.author || 'ASTECAA Editorial',
+      authorAvatar: this.form.authorAvatar || '/images/avatar-marlene.jpg',
+    };
+
+    try {
+      if (this.editing() && this.form.id) {
+        await this.cmsApi.updateStory(this.form.id, payload);
+        this.toast.show(asDraft ? 'Draft updated.' : 'Story published.');
+      } else {
+        await this.cmsApi.createStory(payload);
+        this.toast.show(asDraft ? 'Draft created.' : 'Story published.');
+      }
+      this.showModal.set(false);
+      await this.loadStories();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to save story');
     }
-    this.showModal.set(false);
   }
 
-  toggleArchive(s: AdminStory) {
-    this.stories.update((list) =>
-      list.map((x) => (x.id === s.id ? { ...x, status: x.status === 'archived' ? 'draft' : 'archived' } : x))
-    );
-    this.toast.show(s.status === 'archived' ? 'Story restored.' : 'Story archived.');
+  async toggleArchive(s: CmsStory) {
+    const nextStatus = s.status === 'archived' ? 'published' : 'archived';
+    try {
+      await this.cmsApi.updateStory(s.id, { status: nextStatus });
+      this.toast.show(nextStatus === 'archived' ? 'Story archived.' : 'Story restored.');
+      await this.loadStories();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to update status');
+    }
   }
 
-  askDelete(s: AdminStory) {
+  askDelete(s: CmsStory) {
     this.deleteTarget.set(s);
   }
 
-  confirmDelete() {
+  async confirmDelete() {
     const t = this.deleteTarget();
-    if (t) {
-      this.stories.update((list) => list.filter((s) => s.id !== t.id));
+    if (!t) return;
+    try {
+      await this.cmsApi.deleteStory(t.id);
       this.toast.show('Story deleted.');
+      this.deleteTarget.set(null);
+      await this.loadStories();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to delete story');
     }
-    this.deleteTarget.set(null);
+  }
+
+  async onCoverSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const base64 = e.target?.result as string;
+          const media = await this.cmsApi.adminUploadMedia(base64, file.name, file.type, 'stories');
+          this.form.cover = media.url;
+          this.toast.show('Story cover uploaded.');
+        } catch (err: any) {
+          this.toast.show(err.message || 'Failed to upload cover');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   }
 
   onImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/image-fallback.jpg';
-}
+    const img = event.target as HTMLImageElement;
+    img.src = 'images/empty/image-fallback.jpg';
+  }
 
-      onAvatarImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/avatar-fallback.jpg';
-}
+  onAvatarImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'images/empty/avatar-fallback.jpg';
+  }
 }

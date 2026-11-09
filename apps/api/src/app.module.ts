@@ -5,6 +5,8 @@ import { UsersModule } from './users/users.module.js';
 import { EventsModule } from './events/events.module.js';
 import { VotingModule } from './voting/voting.module.js';
 import { DashboardModule } from './dashboard/dashboard.module.js';
+import { StorageModule } from './storage/storage.module.js';
+import { CmsModule } from './cms/cms.module.js';
 import { HealthModule } from './health/health.module.js';
 
 @Module({
@@ -15,6 +17,8 @@ import { HealthModule } from './health/health.module.js';
     EventsModule,
     VotingModule,
     DashboardModule,
+    StorageModule,
+    CmsModule,
     HealthModule,
   ],
 })

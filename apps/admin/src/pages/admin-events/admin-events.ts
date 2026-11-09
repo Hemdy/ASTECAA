@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
 import { ToastService } from '@astec/ui';
-import { EventsApiService } from '@astec/api-client';
+import { EventsApiService, CmsApiService } from '@astec/api-client';
 import type { CmsEvent, EventInput, EventScheduleItem, EventStatus } from '@astec/types';
 
 interface EventEditor {
@@ -63,6 +63,7 @@ const blankEditor = (): EventEditor => ({
 export class AdminEvents {
   private toast = inject(ToastService);
   private eventsApi = inject(EventsApiService);
+  private cmsApi = inject(CmsApiService);
 
   events = signal<CmsEvent[]>([]);
   loading = signal(true);
@@ -313,6 +314,44 @@ export class AdminEvents {
       status: editor.status,
       featured: editor.featured,
     };
+  }
+
+  async onPosterSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const base64 = e.target?.result as string;
+          const media = await this.cmsApi.adminUploadMedia(base64, file.name, file.type, 'events');
+          this.form.poster = media.url;
+          this.toast.show('Poster uploaded to R2.');
+        } catch (err: any) {
+          this.toast.show(err.message || 'Upload failed');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  async onBannerSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const base64 = e.target?.result as string;
+          const media = await this.cmsApi.adminUploadMedia(base64, file.name, file.type, 'events');
+          this.form.banner = media.url;
+          this.toast.show('Banner uploaded to R2.');
+        } catch (err: any) {
+          this.toast.show(err.message || 'Upload failed');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }
 

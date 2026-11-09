@@ -18,8 +18,8 @@ export class AdminRoles {
   loading = signal(true);
 
   audit = [
-    { id: 'al1', user: 'Super Administrator', action: 'initialized system RBAC permissions', time: 'Recently', icon: '🛡' },
-    { id: 'al2', user: 'System', action: 'verified role permissions against Neon database', time: 'Recently', icon: '⚙' },
+    { id: 'al1', user: 'Super Administrator', action: 'initialized system RBAC permissions', time: 'Recently', icon: 'ri-shield-check-line' },
+    { id: 'al2', user: 'System', action: 'verified role permissions against Neon database', time: 'Recently', icon: 'ri-settings-3-line' },
   ];
 
   constructor() {

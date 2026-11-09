@@ -45,7 +45,11 @@
               [attr.aria-pressed]="showPw()"
               (click)="showPw.set(!showPw())"
             >
-              {{ showPw() ? '🙈' : '👁' }}
+              @if (showPw()) {
+                <i class="ri-eye-off-line"></i>
+              } @else {
+                <i class="ri-eye-line"></i>
+              }
             </button>
           </div>
         </div>
@@ -70,9 +74,9 @@
       </form>
 
       <div class="adm-login-foot">
-        <a routerLink="/" class="adm-back-link">← Back to ASTECAA website</a>
+        <a routerLink="/" class="adm-back-link"><i class="ri-arrow-left-line"></i> Back to ASTECAA website</a>
       </div>
   </div>
 
-  <p class="adm-login-secure">🔒 Secured by ASTECAA authentication · Administrative access only</p>
+  <p class="adm-login-secure"><i class="ri-shield-check-line"></i> Secured by ASTECAA authentication · Administrative access only</p>
 </div>

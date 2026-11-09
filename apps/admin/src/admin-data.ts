@@ -731,7 +731,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'updated the event',
     target: 'ASTECAA Annual Alumni Reunion 2026',
     time: '12 min ago',
-    icon: '📅',
+    icon: 'ri-calendar-event-line',
   },
   {
     id: 'a2',
@@ -740,7 +740,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'registered for',
     target: 'ASTECAA Career & Networking Forum',
     time: '47 min ago',
-    icon: '✓',
+    icon: 'ri-checkbox-circle-line',
   },
   {
     id: 'a3',
@@ -749,7 +749,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'uploaded photos to',
     target: 'Alumni Gallery',
     time: '2 hr ago',
-    icon: '🖼',
+    icon: 'ri-image-line',
   },
   {
     id: 'a4',
@@ -758,7 +758,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'approved a community message by',
     target: 'Esther Chukwu',
     time: '3 hr ago',
-    icon: '✓',
+    icon: 'ri-checkbox-circle-line',
   },
   {
     id: 'a5',
@@ -767,7 +767,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'published a story',
     target: 'Remembering Our School Days',
     time: '5 hr ago',
-    icon: '✎',
+    icon: 'ri-article-line',
   },
   {
     id: 'a6',
@@ -776,7 +776,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'pinned a message on',
     target: 'Alumni Community Wall',
     time: 'yesterday',
-    icon: '★',
+    icon: 'ri-star-line',
   },
   {
     id: 'a7',
@@ -785,7 +785,7 @@ export const ADMIN_ACTIVITY: AdminActivity[] = [
     action: 'registered for',
     target: 'ASTECAA Annual General Meeting 2026',
     time: 'yesterday',
-    icon: '📅',
+    icon: 'ri-calendar-event-line',
   },
 ];
 
@@ -968,40 +968,40 @@ export const ADMIN_NAV = [
   {
     section: 'Overview',
     items: [
-      { label: 'Dashboard', path: '/admin/dashboard', icon: '◈' },
+      { label: 'Dashboard', path: '/admin/dashboard', icon: 'ri-dashboard-line' },
     ],
   },
   {
     section: 'Content',
     items: [
-      { label: 'Events', path: '/admin/events', icon: '📅', badge: 6 },
-      { label: 'Gallery', path: '/admin/gallery', icon: '🖼' },
-      { label: 'Stories', path: '/admin/stories', icon: '✎' },
-      { label: 'Comments', path: '/admin/comments', icon: '💬', badge: 4 },
-      { label: 'Announcements', path: '/admin/announcements', icon: '📢' },
+      { label: 'Events', path: '/admin/events', icon: 'ri-calendar-event-line', badge: 6 },
+      { label: 'Gallery', path: '/admin/gallery', icon: 'ri-image-line' },
+      { label: 'Stories', path: '/admin/stories', icon: 'ri-article-line' },
+      { label: 'Comments', path: '/admin/comments', icon: 'ri-chat-3-line', badge: 4 },
+      { label: 'Announcements', path: '/admin/announcements', icon: 'ri-notification-badge-line' },
     ],
   },
   {
     section: 'People',
     items: [
-      { label: 'Users', path: '/admin/users', icon: '👥' },
-      { label: 'Contact', path: '/admin/contact', icon: '✉', badge: 1 },
+      { label: 'Users', path: '/admin/users', icon: 'ri-group-line' },
+      { label: 'Contact', path: '/admin/contact', icon: 'ri-mail-line', badge: 1 },
     ],
   },
   {
     section: 'Voting',
     items: [
-      { label: 'Elections', path: '/admin/voting', icon: '🗳' },
-      { label: 'Results', path: '/admin/voting-results', icon: '📊' },
+      { label: 'Elections', path: '/admin/voting', icon: 'ri-survey-line' },
+      { label: 'Results', path: '/admin/voting-results', icon: 'ri-bar-chart-box-line' },
     ],
   },
   {
     section: 'System',
     items: [
-      { label: 'Homepage', path: '/admin/homepage', icon: '⌂' },
-      { label: 'Media Library', path: '/admin/media', icon: '🗂' },
-      { label: 'Settings', path: '/admin/settings', icon: '⚙' },
-      { label: 'Roles', path: '/admin/roles', icon: '🛡' },
+      { label: 'Homepage', path: '/admin/homepage', icon: 'ri-home-4-line' },
+      { label: 'Media Library', path: '/admin/media', icon: 'ri-folder-image-line' },
+      { label: 'Settings', path: '/admin/settings', icon: 'ri-settings-3-line' },
+      { label: 'Roles', path: '/admin/roles', icon: 'ri-shield-check-line' },
     ],
   },
 ];

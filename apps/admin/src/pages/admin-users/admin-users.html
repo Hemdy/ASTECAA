@@ -4,15 +4,15 @@
     <div class="adm-section-sub">Manage administrators, community members, roles, and account status.</div>
   </div>
   <div style="margin-left: auto; display: flex; gap: 10px">
-    <button class="adm-btn adm-btn-outline" (click)="exportCsv()">⬇ Export CSV</button>
-    <button class="adm-btn adm-btn-primary" (click)="inviteModal.set(true)">+ Invite User</button>
+    <button class="adm-btn adm-btn-outline" (click)="exportCsv()"><i class="ri-download-2-line"></i> Export CSV</button>
+    <button class="adm-btn adm-btn-primary" (click)="inviteModal.set(true)"><i class="ri-user-add-line"></i> Invite User</button>
   </div>
 </div>
 
 <div class="adm-grid-3" style="margin-bottom: 20px">
-  <div class="adm-stat"><div class="adm-stat-top"><div><div class="adm-stat-label">Total Users</div><div class="adm-stat-value">{{ users().length }}</div></div><div class="adm-stat-ico">👥</div></div></div>
-  <div class="adm-stat forest"><div class="adm-stat-top"><div><div class="adm-stat-label">Active</div><div class="adm-stat-value">{{ countStatus('active') }}</div></div><div class="adm-stat-ico">✓</div></div></div>
-  <div class="adm-stat burgundy"><div class="adm-stat-top"><div><div class="adm-stat-label">Pending Approval</div><div class="adm-stat-value">{{ countStatus('pending') }}</div></div><div class="adm-stat-ico">⏳</div></div></div>
+  <div class="adm-stat"><div class="adm-stat-top"><div><div class="adm-stat-label">Total Users</div><div class="adm-stat-value">{{ users().length }}</div></div><div class="adm-stat-ico"><i class="ri-group-line"></i></div></div></div>
+  <div class="adm-stat forest"><div class="adm-stat-top"><div><div class="adm-stat-label">Active</div><div class="adm-stat-value">{{ countStatus('active') }}</div></div><div class="adm-stat-ico"><i class="ri-check-line"></i></div></div></div>
+  <div class="adm-stat burgundy"><div class="adm-stat-top"><div><div class="adm-stat-label">Pending Approval</div><div class="adm-stat-value">{{ countStatus('pending') }}</div></div><div class="adm-stat-ico"><i class="ri-time-line"></i></div></div></div>
 </div>
 
 <div class="adm-card adm-card-pad" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end">
@@ -98,10 +98,16 @@
             <td>
               <div class="adm-table-actions">
                 @if (u.status === 'pending') {
-                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(u)" title="Approve">✓</button>
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(u)" title="Approve"><i class="ri-check-line"></i></button>
                 }
-                <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEdit(u)" title="Edit role">✎</button>
-                <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="toggleSuspend(u)" title="Suspend/Activate">{{ u.status === 'suspended' ? '↑' : '⊘' }}</button>
+                <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEdit(u)" title="Edit role"><i class="ri-edit-line"></i></button>
+                <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="toggleSuspend(u)" title="Suspend/Activate">
+                  @if (u.status === 'suspended') {
+                    <i class="ri-refresh-line"></i>
+                  } @else {
+                    <i class="ri-forbid-line"></i>
+                  }
+                </button>
               </div>
             </td>
           </tr>
@@ -112,9 +118,9 @@
   <div class="adm-card-head" style="border-top: 1px solid var(--ad-border); border-bottom: none">
     <span class="adm-card-sub">{{ filtered().length }} users</span>
     <div class="adm-pagination">
-      <button class="adm-page-btn" [disabled]="true">‹</button>
+      <button class="adm-page-btn" [disabled]="true"><i class="ri-arrow-left-s-line"></i></button>
       <button class="adm-page-btn active">1</button>
-      <button class="adm-page-btn">›</button>
+      <button class="adm-page-btn"><i class="ri-arrow-right-s-line"></i></button>
     </div>
   </div>
 </div>

@@ -4,9 +4,9 @@
     <div class="adm-section-sub">Create, schedule, and manage all community gatherings.</div>
   </div>
   <div style="margin-left: auto; display: flex; gap: 10px">
-    <button class="adm-btn adm-btn-outline" [class.adm-btn-active]="view() === 'calendar'" (click)="view.set('calendar')">📅 Calendar</button>
-    <button class="adm-btn adm-btn-outline" [class.adm-btn-active]="view() === 'list'" (click)="view.set('list')">☰ List</button>
-    <button class="adm-btn adm-btn-primary" (click)="openCreate()">+ New Event</button>
+    <button class="adm-btn adm-btn-outline" [class.adm-btn-active]="view() === 'calendar'" (click)="view.set('calendar')"><i class="ri-calendar-line"></i> Calendar</button>
+    <button class="adm-btn adm-btn-outline" [class.adm-btn-active]="view() === 'list'" (click)="view.set('list')"><i class="ri-list-check"></i> List</button>
+    <button class="adm-btn adm-btn-primary" (click)="openCreate()"><i class="ri-add-line"></i> New Event</button>
   </div>
 </div>
 
@@ -84,16 +84,22 @@
               </td>
               <td>
                 @if (e.featured) {
-                  <span class="adm-badge adm-badge-gold">★ Featured</span>
+                  <span class="adm-badge adm-badge-gold"><i class="ri-star-fill"></i> Featured</span>
                 } @else {
                   <span class="adm-badge adm-badge-muted">—</span>
                 }
               </td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEdit(e)" title="Edit">✎</button>
-                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="togglePublish(e)" title="Publish/Unpublish">{{ e.status === 'published' ? '⊘' : '↑' }}</button>
-                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDelete(e)" title="Delete">🗑</button>
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEdit(e)" title="Edit"><i class="ri-edit-line"></i></button>
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="togglePublish(e)" title="Publish/Unpublish">
+                    @if (e.status === 'published') {
+                      <i class="ri-forbid-line"></i>
+                    } @else {
+                      <i class="ri-upload-2-line"></i>
+                    }
+                  </button>
+                  <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDelete(e)" title="Delete"><i class="ri-delete-bin-line"></i></button>
                 </div>
               </td>
             </tr>
@@ -104,10 +110,9 @@
     <div class="adm-card-head" style="border-top: 1px solid var(--ad-border); border-bottom: none">
       <span class="adm-card-sub">{{ filtered().length }} events</span>
       <div class="adm-pagination">
-        <button class="adm-page-btn" [disabled]="true">‹</button>
+        <button class="adm-page-btn" [disabled]="true"><i class="ri-arrow-left-s-line"></i></button>
         <button class="adm-page-btn active">1</button>
-        <button class="adm-page-btn">2</button>
-        <button class="adm-page-btn">›</button>
+        <button class="adm-page-btn"><i class="ri-arrow-right-s-line"></i></button>
       </div>
     </div>
     }
@@ -118,8 +123,8 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
       <strong style="font-family: var(--font-display); font-size: 1.1rem">{{ monthLabel() }}</strong>
       <div style="display: flex; gap: 6px">
-        <button class="adm-page-btn" (click)="prevMonth()">‹</button>
-        <button class="adm-page-btn" (click)="nextMonth()">›</button>
+        <button class="adm-page-btn" (click)="prevMonth()"><i class="ri-arrow-left-s-line"></i></button>
+        <button class="adm-page-btn" (click)="nextMonth()"><i class="ri-arrow-right-s-line"></i></button>
       </div>
     </div>
     <div class="adm-cal">
@@ -195,12 +200,24 @@
         <input class="adm-input" type="date" [(ngModel)]="form.endDate" />
       </div>
       <div class="adm-field">
-        <label class="adm-field-label">Poster image URL</label>
-        <input class="adm-input" [(ngModel)]="form.poster" placeholder="/images/event.jpg" />
+        <label class="adm-field-label">Poster image (URL or upload)</label>
+        <div style="display: flex; gap: 8px">
+          <input class="adm-input" [(ngModel)]="form.poster" placeholder="/images/event.jpg" style="flex: 1" />
+          <input type="file" #eventPosterInput (change)="onPosterSelected($event)" accept="image/*" style="display: none" />
+          <button type="button" class="adm-btn adm-btn-outline" (click)="eventPosterInput.click()" title="Upload from computer">
+            <i class="ri-upload-cloud-2-line"></i>
+          </button>
+        </div>
       </div>
       <div class="adm-field">
-        <label class="adm-field-label">Banner image URL</label>
-        <input class="adm-input" [(ngModel)]="form.banner" placeholder="/images/event.jpg" />
+        <label class="adm-field-label">Banner image (URL or upload)</label>
+        <div style="display: flex; gap: 8px">
+          <input class="adm-input" [(ngModel)]="form.banner" placeholder="/images/event.jpg" style="flex: 1" />
+          <input type="file" #eventBannerInput (change)="onBannerSelected($event)" accept="image/*" style="display: none" />
+          <button type="button" class="adm-btn adm-btn-outline" (click)="eventBannerInput.click()" title="Upload from computer">
+            <i class="ri-upload-cloud-2-line"></i>
+          </button>
+        </div>
       </div>
       <div class="adm-field">
         <label class="adm-field-label">Gallery image URLs (one per line)</label>

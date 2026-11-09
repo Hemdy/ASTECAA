@@ -1,9 +1,11 @@
 <div class="adm-toolbar">
   <div>
     <div class="adm-section-title">Media Library</div>
-    <div class="adm-section-sub">Centralized management of all images, videos, and files across the platform.</div>
+    <div class="adm-section-sub">Centralized Cloudflare R2 object storage for images, videos, and documents across the platform.</div>
   </div>
-  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="upload()">+ Upload File</button>
+  <button class="adm-btn adm-btn-primary" style="margin-left: auto" (click)="openUpload()">
+    <i class="ri-upload-cloud-2-line"></i> Upload File
+  </button>
 </div>
 
 <div style="display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: flex-start">
@@ -12,18 +14,18 @@
     <div class="adm-field-label" style="margin-bottom: 10px">Folders</div>
     <div style="display: flex; flex-direction: column; gap: 2px">
       <button class="folder-btn" [class.active]="folder() === 'all'" (click)="folder.set('all')">
-        <span>🗂</span> All files <span class="adm-cell-user-sub" style="margin-left: auto">{{ items().length }}</span>
+        <span><i class="ri-folder-open-line"></i></span> All files <span class="adm-cell-user-sub" style="margin-left: auto">{{ items().length }}</span>
       </button>
-      @for (f of folders; track f) {
+      @for (f of folders(); track f) {
         <button class="folder-btn" [class.active]="folder() === f" (click)="folder.set(f)">
-          <span>📁</span> {{ f }} <span class="adm-cell-user-sub" style="margin-left: auto">{{ countFolder(f) }}</span>
+          <span><i class="ri-folder-line"></i></span> {{ f }} <span class="adm-cell-user-sub" style="margin-left: auto">{{ countFolder(f) }}</span>
         </button>
       }
     </div>
     <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--ad-border)">
       <div class="adm-field-label" style="margin-bottom: 8px">Storage</div>
-      <div class="adm-progress"><div class="adm-progress-bar" style="width: 48%"></div></div>
-      <div class="adm-cell-user-sub" style="margin-top: 6px">4.8 GB of 10 GB used</div>
+      <div class="adm-progress"><div class="adm-progress-bar" style="width: 25%"></div></div>
+      <div class="adm-cell-user-sub" style="margin-top: 6px">{{ totalStorageFormatted() }} in Cloudflare R2</div>
     </div>
   </div>
 
@@ -31,7 +33,7 @@
   <div class="adm-card">
     <div class="adm-card-pad" style="display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; border-bottom: 1px solid var(--ad-border)">
       <div class="adm-search" style="flex: 1; width: auto; max-width: none">
-        <span class="adm-search-ico">⌕</span>
+        <span class="adm-search-ico"><i class="ri-search-line"></i></span>
         <input type="search" [ngModel]="query()" (ngModelChange)="query.set($event)" placeholder="Search media by name or tag…" />
       </div>
       <select class="adm-select" style="width: auto" [ngModel]="typeFilter()" (ngModelChange)="typeFilter.set($event)">
@@ -41,18 +43,28 @@
       </select>
     </div>
     <div class="adm-card-pad">
-      @if (filtered().length === 0) {
-        <div class="adm-empty"><div class="adm-empty-ico">🗂</div><p>No files found.</p></div>
+      @if (loading()) {
+        <div class="adm-empty">
+          <div class="adm-empty-ico"><i class="ri-loader-4-line ri-spin"></i></div>
+          <p>Loading files from storage…</p>
+        </div>
+      } @else if (filtered().length === 0) {
+        <div class="adm-empty">
+          <div class="adm-empty-ico"><i class="ri-folder-open-line"></i></div>
+          <p>No files found.</p>
+        </div>
       } @else {
         <div class="adm-gallery-grid">
           @for (m of filtered(); track m.id) {
             <div class="adm-gallery-item" (click)="select(m)">
-              @if (m.type === 'video') {
-                <span class="adm-badge adm-badge-info" style="position: absolute; top: 8px; right: 8px; z-index: 2">▶</span>
+              @if (m.type === 'video' || m.type.startsWith('video/')) {
+                <span class="adm-badge adm-badge-info" style="position: absolute; top: 8px; right: 8px; z-index: 2">
+                  <i class="ri-movie-line"></i>
+                </span>
               }
               <img [src]="m.url" [alt]="m.name" />
               <div class="adm-gallery-item-overlay">
-                <span class="adm-badge adm-badge-muted" style="font-size: 0.62rem">{{ m.size }}</span>
+                <span class="adm-badge adm-badge-muted" style="font-size: 0.62rem">{{ m.size || 'R2' }}</span>
               </div>
             </div>
           }
@@ -62,32 +74,77 @@
   </div>
 </div>
 
-@if (selected(); as m) {
-  <div class="adm-modal-backdrop" (click)="selected.set(null)">
+<!-- Upload Modal -->
+@if (uploadModal()) {
+  <div class="adm-modal-backdrop" (click)="uploadModal.set(false)">
     <div class="adm-modal" (click)="$event.stopPropagation()">
       <div class="adm-modal-head">
-        <h3 class="adm-modal-title">{{ m.name }}</h3>
-        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selected.set(null)">✕</button>
+        <h3 class="adm-modal-title">Upload File to Cloudflare R2</h3>
+        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="uploadModal.set(false)"><i class="ri-close-line"></i></button>
       </div>
       <div class="adm-modal-body">
-        <img [src]="m.url" [alt]="m.name" style="width: 100%; border-radius: var(--ad-radius-sm); margin-bottom: 16px" />
-        <div class="adm-grid-2" style="gap: 12px">
-          <div><span class="adm-field-label">Type</span><div>{{ m.type }}</div></div>
-          <div><span class="adm-field-label">Size</span><div>{{ m.size }}</div></div>
-          <div><span class="adm-field-label">Folder</span><div>{{ m.folder }}</div></div>
-          <div><span class="adm-field-label">Uploaded</span><div>{{ m.date }}</div></div>
+        <input type="file" #mediaFileInput (change)="onFilesSelected($event)" multiple accept="image/*,video/*,application/pdf" style="display: none" />
+        <div class="adm-dropzone" (click)="mediaFileInput.click()" (drop)="onDrop($event)" (dragover)="onDragOver($event)" style="cursor: pointer">
+          <div class="adm-dropzone-ico"><i class="ri-upload-cloud-2-line"></i></div>
+          @if (selectedFiles().length > 0) {
+            <div><strong>{{ selectedFiles().length }} file(s) selected</strong></div>
+            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click to change selection</div>
+          } @else {
+            <div><strong>Click or drag & drop files here</strong></div>
+            <div style="font-size: 0.8rem; margin-top: 4px">Supports images, videos, and PDFs up to 50MB</div>
+          }
         </div>
-        <div style="margin-top: 14px">
-          <span class="adm-field-label">Tags</span>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px">
-            @for (t of m.tags; track t) { <span class="adm-badge adm-badge-muted">{{ t }}</span> }
+        <div style="margin-top: 16px">
+          <div class="adm-field">
+            <label class="adm-field-label">Target Folder</label>
+            <select class="adm-select" [ngModel]="uploadFolder()" (ngModelChange)="uploadFolder.set($event)">
+              @for (f of folders(); track f) { <option [value]="f">{{ f }}</option> }
+            </select>
           </div>
         </div>
       </div>
       <div class="adm-modal-foot">
-        <button class="adm-btn adm-btn-ghost" (click)="remove(m)">🗑 Delete</button>
-        <button class="adm-btn adm-btn-outline">Copy URL</button>
-        <button class="adm-btn adm-btn-primary">Insert into page</button>
+        <button class="adm-btn adm-btn-outline" (click)="uploadModal.set(false)" [disabled]="uploading()">Cancel</button>
+        <button class="adm-btn adm-btn-primary" (click)="confirmUpload()" [disabled]="uploading() || selectedFiles().length === 0">
+          @if (uploading()) {
+            <i class="ri-loader-4-line ri-spin"></i> Uploading…
+          } @else {
+            <i class="ri-upload-2-line"></i> Upload to R2
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (selected(); as m) {
+  <div class="adm-modal-backdrop" (click)="selected.set(null)">
+    <div class="adm-modal" (click)="$event.stopPropagation()">
+      <div class="adm-modal-head">
+        <h3 class="adm-modal-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ m.name }}</h3>
+        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selected.set(null)"><i class="ri-close-line"></i></button>
+      </div>
+      <div class="adm-modal-body">
+        <img [src]="m.url" [alt]="m.name" style="width: 100%; max-height: 280px; object-fit: contain; border-radius: var(--ad-radius-sm); margin-bottom: 16px; background: #000" />
+        <div class="adm-grid-2" style="gap: 12px">
+          <div><span class="adm-field-label">Type</span><div>{{ m.type }}</div></div>
+          <div><span class="adm-field-label">Size</span><div>{{ m.size || 'Standard' }}</div></div>
+          <div><span class="adm-field-label">Folder</span><div>{{ m.folder }}</div></div>
+          <div><span class="adm-field-label">Uploaded</span><div>{{ m.createdAt | date:'mediumDate' }}</div></div>
+        </div>
+        @if (m.tags && m.tags.length > 0) {
+          <div style="margin-top: 14px">
+            <span class="adm-field-label">Tags</span>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px">
+              @for (t of m.tags; track t) { <span class="adm-badge adm-badge-muted">{{ t }}</span> }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="adm-modal-foot">
+        <button class="adm-btn adm-btn-ghost" (click)="remove(m)"><i class="ri-delete-bin-line"></i> Delete</button>
+        <button class="adm-btn adm-btn-outline" (click)="copyUrl(m.url)"><i class="ri-file-copy-line"></i> Copy URL</button>
+        <button class="adm-btn adm-btn-primary" (click)="selected.set(null)">Done</button>
       </div>
     </div>
   </div>

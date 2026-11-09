@@ -75,7 +75,7 @@
     <div class="adm-feed">
       @for (log of audit; track log.id) {
         <div class="adm-feed-item">
-          <div class="adm-feed-ico">{{ log.icon }}</div>
+          <div class="adm-feed-ico"><i [class]="log.icon"></i></div>
           <div style="flex: 1">
             <div class="adm-feed-text"><strong>{{ log.user }}</strong> {{ log.action }}</div>
             <div class="adm-feed-time">{{ log.time }}</div>

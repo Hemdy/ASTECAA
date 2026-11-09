@@ -3,7 +3,11 @@
     <span class="eyebrow">ASTECAA member voice</span>
     <h1>Shape our next chapter.</h1>
     <p class="lede">Secure, transparent alumni elections. Choose the leaders who will carry our community forward.</p>
-    <div class="vote-hero-meta"><span>✓ One vote per position</span><span>✓ Verified by OTP</span><span>✓ Anonymous ballot</span></div>
+    <div class="vote-hero-meta">
+      <span><i class="ri-check-line"></i> One vote per position</span>
+      <span><i class="ri-shield-keyhole-line"></i> Verified by OTP</span>
+      <span><i class="ri-lock-line"></i> Anonymous ballot</span>
+    </div>
   </div>
 </section>
 
@@ -13,18 +17,18 @@
       <div class="vote-skeleton-grid">@for (item of [1,2,3]; track item) { <div class="vote-skeleton paper"></div> }</div>
     } @else if (selectedElection()) {
       @if (hasVoted()) {
-        <div class="vote-state paper"><div class="vote-seal">✓</div><span class="eyebrow">Ballot received</span><h2>You've already voted</h2><p>Your vote in <strong>{{ selectedElection()!.title }}</strong> has been recorded. Thank you for taking part.</p><button class="btn btn-outline" (click)="backToList()">Back to elections</button></div>
+        <div class="vote-state paper"><div class="vote-seal"><i class="ri-check-line"></i></div><span class="eyebrow">Ballot received</span><h2>You've already voted</h2><p>Your vote in <strong>{{ selectedElection()!.title }}</strong> has been recorded. Thank you for taking part.</p><button class="btn btn-outline" (click)="backToList()">Back to elections</button></div>
       } @else if (closedElection()) {
-        <div class="vote-state paper"><div class="vote-state-icon">⌛</div><span class="eyebrow">Election closed</span><h2>This ballot is no longer accepting votes</h2><p>Voting closed on {{ formatDate(selectedElection()!.end_date) }}. Results will be shared by the association.</p><button class="btn btn-outline" (click)="backToList()">View elections</button></div>
+        <div class="vote-state paper"><div class="vote-state-icon"><i class="ri-time-line"></i></div><span class="eyebrow">Election closed</span><h2>This ballot is no longer accepting votes</h2><p>Voting closed on {{ formatDate(selectedElection()!.end_date) }}. Results will be shared by the association.</p><button class="btn btn-outline" (click)="backToList()">View elections</button></div>
       } @else if (showReview()) {
-        <div class="vote-review paper"><a class="vote-back" (click)="showReview.set(false)">← Edit selections</a><span class="eyebrow">Final review</span><h2>Confirm your ballot</h2><p class="text-muted">Your choices are final once submitted.</p><div class="vote-review-list">@for (pos of selectedElection()!.positions; track pos.id) { <div class="vote-review-item"><span>{{ pos.title }}</span><strong>{{ candidateName(pos.id) }}</strong></div> }</div><button class="btn btn-gold" (click)="submitVotes()" [disabled]="submitting()">{{ submitting() ? 'Submitting ballot…' : 'Submit my ballot' }}</button></div>
+        <div class="vote-review paper"><a class="vote-back" (click)="showReview.set(false)"><i class="ri-arrow-left-line"></i> Edit selections</a><span class="eyebrow">Final review</span><h2>Confirm your ballot</h2><p class="text-muted">Your choices are final once submitted.</p><div class="vote-review-list">@for (pos of selectedElection()!.positions; track pos.id) { <div class="vote-review-item"><span>{{ pos.title }}</span><strong>{{ candidateName(pos.id) }}</strong></div> }</div><button class="btn btn-gold" (click)="submitVotes()" [disabled]="submitting()">{{ submitting() ? 'Submitting ballot…' : 'Submit my ballot' }}</button></div>
       } @else {
-        <div class="vote-detail-head"><a class="vote-back" (click)="backToList()">← All elections</a><span class="eyebrow">{{ formatDate(selectedElection()!.start_date) }} — {{ formatDate(selectedElection()!.end_date) }}</span><h2>{{ selectedElection()!.title }}</h2><p class="lede">{{ selectedElection()!.description }}</p></div>
+        <div class="vote-detail-head"><a class="vote-back" (click)="backToList()"><i class="ri-arrow-left-line"></i> All elections</a><span class="eyebrow">{{ formatDate(selectedElection()!.start_date) }} — {{ formatDate(selectedElection()!.end_date) }}</span><h2>{{ selectedElection()!.title }}</h2><p class="lede">{{ selectedElection()!.description }}</p></div>
         @for (pos of selectedElection()!.positions; track pos.id) {
           <div class="vote-position paper"><div class="vote-position-head"><span class="eyebrow">Position {{ pos.sort_order }}</span><h3>{{ pos.title }}</h3><p class="text-muted">{{ pos.description }}</p></div><div class="vote-candidates">
             @for (c of pos.candidates; track c.id) {
               <button class="vote-candidate" [class.selected]="selections()[pos.id] === c.id" (click)="selectCandidate(pos.id, c.id)">
-                <div class="vote-candidate-photo">@if (c.photo_url) { <img [src]="c.photo_url" [alt]="c.full_name" /> } @else { <span>{{ c.full_name.charAt(0) }}</span> }</div><div class="vote-candidate-info"><strong>{{ c.full_name }}</strong><span>{{ c.department }} · Class of {{ c.graduation_year }}</span><p>{{ c.biography }}</p><details (click)="$event.stopPropagation()"><summary>Read manifesto</summary><p>{{ c.manifesto }}</p></details></div><span class="vote-radio">✓</span>
+                <div class="vote-candidate-photo">@if (c.photo_url) { <img [src]="c.photo_url" [alt]="c.full_name" /> } @else { <span>{{ c.full_name.charAt(0) }}</span> }</div><div class="vote-candidate-info"><strong>{{ c.full_name }}</strong><span>{{ c.department }} · Class of {{ c.graduation_year }}</span><p>{{ c.biography }}</p><details (click)="$event.stopPropagation()"><summary>Read manifesto</summary><p>{{ c.manifesto }}</p></details></div><span class="vote-radio"><i class="ri-check-line"></i></span>
               </button>
             }
           </div></div>
@@ -35,7 +39,7 @@
       <div class="vote-section-head"><div><span class="eyebrow">The ballot room</span><h2>Current elections</h2></div><span class="vote-demo-note">Demo mode · OTP: 123456</span></div>
       <div class="vote-election-list">
         @for (e of activeElections(); track e.id) {
-          <button class="vote-election-card paper" (click)="openElection(e)"><div class="vote-card-top"><span class="vote-status" [class.closed]="statusLabel(e) === 'Closed'"></span><span class="tag" [class.tag-forest]="statusLabel(e) === 'Open'">{{ statusLabel(e) }}</span><span class="type">{{ formatDate(e.start_date) }} — {{ formatDate(e.end_date) }}</span></div><h3>{{ e.title }}</h3><p>{{ e.description }}</p><div class="vote-card-foot"><span>View candidates</span><span>→</span></div></button>
+          <button class="vote-election-card paper" (click)="openElection(e)"><div class="vote-card-top"><span class="vote-status" [class.closed]="statusLabel(e) === 'Closed'"></span><span class="tag" [class.tag-forest]="statusLabel(e) === 'Open'">{{ statusLabel(e) }}</span><span class="type">{{ formatDate(e.start_date) }} — {{ formatDate(e.end_date) }}</span></div><h3>{{ e.title }}</h3><p>{{ e.description }}</p><div class="vote-card-foot"><span>View candidates</span><span><i class="ri-arrow-right-line"></i></span></div></button>
         } @empty { <div class="vote-state paper"><h3>No elections available</h3><p>Check back soon for the next alumni ballot.</p></div> }
       </div>
     }

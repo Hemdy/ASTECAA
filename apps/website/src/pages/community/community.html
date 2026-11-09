@@ -76,7 +76,7 @@
         All messages
       </button>
       <button class="filter-chip" [class.active]="filter() === 'pinned'" (click)="filter.set('pinned')">
-        ★ Pinned
+        <i class="ri-pushpin-line"></i> Pinned
       </button>
       <span class="type wall-count">{{ visible().length }} notes on the wall</span>
     </div>
@@ -91,17 +91,17 @@
           [style.transform]="'rotate(' + rot(i) + 'deg)'"
         >
           @if (msg.pinned) {
-            <span class="note-pin">★ Featured</span>
+            <span class="note-pin"><i class="ri-star-fill"></i> Featured</span>
           }
           <p class="note-body">"{{ msg.message }}"</p>
           <div class="note-foot">
-            <img [src]="msg.avatar" [alt]="msg.author" class="note-avatar" (error)="onAvatarImageError($event)"  />
+            <img [src]="msg.avatar || '/images/reading-room.jpg'" [alt]="msg.author" class="note-avatar" (error)="onAvatarImageError($event)"  />
             <div class="note-author">
               <strong>{{ msg.author }}</strong>
               <span class="type note-loc">{{ msg.location }}</span>
             </div>
             <button class="note-like" (click)="like(msg.id)">
-              ♥ <span>{{ msg.likes }}</span>
+              <i class="ri-heart-line"></i> <span>{{ msg.likes }}</span>
             </button>
           </div>
           <div class="note-tape"></div>

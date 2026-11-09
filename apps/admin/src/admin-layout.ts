@@ -56,11 +56,11 @@ export class AdminLayout {
 
   notifIcon(type: string): string {
     switch (type) {
-      case 'user': return '👤';
-      case 'event': return '📅';
-      case 'comment': return '💬';
-      case 'gallery': return '🖼';
-      default: return '⚙';
+      case 'user': return 'ri-user-line';
+      case 'event': return 'ri-calendar-line';
+      case 'comment': return 'ri-chat-3-line';
+      case 'gallery': return 'ri-image-line';
+      default: return 'ri-settings-line';
     }
   }
 

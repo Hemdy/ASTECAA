@@ -88,8 +88,12 @@ async function bootstrap(): Promise<void> {
     next();
   });
 
+  // Static uploads directory
+  app.use('/uploads', express.static(resolve(process.cwd(), 'uploads')));
+
   // JSON Body Parser with limit and error handling
-  app.use(express.json({ limit: '1mb' }));
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use((error: unknown, _request: Request, response: Response, next: NextFunction) => {
     if (response.headersSent) {
       next(error);

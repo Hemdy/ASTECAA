@@ -28,8 +28,8 @@
         </div>
         <div class="adm-table-actions">
           <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="openCreateCandidate(pos.id)">+ Candidate</button>
-          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditPosition(pos)" title="Edit">✎</button>
-          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeletePosition(pos)" title="Delete">🗑</button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditPosition(pos)" title="Edit"><i class="ri-edit-line"></i></button>
+          <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeletePosition(pos)" title="Delete"><i class="ri-delete-bin-line"></i></button>
         </div>
       </div>
       @if (candidatesByPosition()[pos.id].length === 0) {
@@ -67,8 +67,8 @@
                   </td>
                   <td>
                     <div class="adm-table-actions">
-                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditCandidate(c, pos.id)" title="Edit">✎</button>
-                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteCandidate(c)" title="Delete">🗑</button>
+                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditCandidate(c, pos.id)" title="Edit"><i class="ri-edit-line"></i></button>
+                      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteCandidate(c)" title="Delete"><i class="ri-delete-bin-line"></i></button>
                     </div>
                   </td>
                 </tr>
@@ -150,9 +150,9 @@
                 </td>
                 <td>
                   <div class="adm-table-actions">
-                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selectElection(e)" title="Manage positions & candidates">→</button>
-                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditElection(e)" title="Edit">✎</button>
-                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteElection(e)" title="Delete">🗑</button>
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="selectElection(e)" title="Manage positions & candidates"><i class="ri-arrow-right-line"></i></button>
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="openEditElection(e)" title="Edit"><i class="ri-edit-line"></i></button>
+                    <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="askDeleteElection(e)" title="Delete"><i class="ri-delete-bin-line"></i></button>
                   </div>
                 </td>
               </tr>

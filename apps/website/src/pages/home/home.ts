@@ -1,12 +1,18 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { RevealDirective } from '../../reveal.directive';
 import { Countdown } from '../../components/countdown/countdown';
-import { MEMORIES, TIMELINE, MESSAGES, ORGANIZERS } from '../../data';
+import { ORGANIZERS } from '../../data';
 import { UiState } from '../../ui-state';
-import { EventsApiService } from '@astec/api-client';
-import type { PublicEvent } from '@astec/types';
+import { EventsApiService, CmsApiService } from '@astec/api-client';
+import type {
+  PublicEvent,
+  CmsGalleryItem,
+  CmsTimelineMilestone,
+  CmsCommunityMessage,
+  CmsHomepageSettings,
+} from '@astec/types';
 
 @Component({
   selector: 'app-home',
@@ -15,27 +21,48 @@ import type { PublicEvent } from '@astec/types';
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home {
+export class Home implements OnInit {
   private eventsApi = inject(EventsApiService);
+  private cmsApi = inject(CmsApiService);
+
   ui = new UiState();
   events = signal<PublicEvent[]>([]);
-  featured = computed(() => this.events().find((event) => event.featured) ?? this.events()[0] ?? null);
-  featuredBanner = computed(() => this.featured()?.banner || '/images/empty/image-fallback.jpg');
+  homepage = signal<CmsHomepageSettings | null>(null);
+
+  featured = computed(() => {
+    const list = this.events();
+    const featId = this.homepage()?.featured?.eventId;
+    if (featId) {
+      const match = list.find((e) => e.id === featId);
+      if (match) return match;
+    }
+    return list.find((event) => event.featured) ?? list[0] ?? null;
+  });
+
+  featuredBanner = computed(() => {
+    return this.featured()?.banner || this.homepage()?.hero?.bgImage || '/images/empty/image-fallback.jpg';
+  });
+
   upcoming = computed(() =>
     this.events()
       .filter((event) => event.id !== this.featured()?.id && event.date >= new Date().toISOString().slice(0, 10))
       .slice(0, 4)
   );
+
   eventsError = signal<string | null>(null);
-  latestMemories = MEMORIES.slice(0, 4);
-  galleryPreview = MEMORIES.slice(4, 11);
-  timelinePreview = TIMELINE.filter((_, i) => i % 2 === 0).slice(0, 4);
-  messagesPreview = MESSAGES.slice(0, 3);
+  latestMemories = signal<CmsGalleryItem[]>([]);
+  galleryPreview = signal<CmsGalleryItem[]>([]);
+  timelinePreview = signal<CmsTimelineMilestone[]>([]);
+  messagesPreview = signal<CmsCommunityMessage[]>([]);
   organizers = ORGANIZERS;
   rotations = [-3, 2, -1.5, 3, -2.5, 1.8, -2, 2.5];
 
-  constructor() {
-    void this.loadEvents();
+  ngOnInit() {
+    void this.loadAll();
+  }
+
+  private async loadAll(): Promise<void> {
+    await Promise.allSettled([this.loadEvents(), this.loadCmsContent()]);
   }
 
   private async loadEvents(): Promise<void> {
@@ -46,19 +73,43 @@ export class Home {
     }
   }
 
+  private async loadCmsContent(): Promise<void> {
+    try {
+      const [hp, gallery, timeline, messages] = await Promise.all([
+        this.cmsApi.getHomepage().catch(() => null),
+        this.cmsApi.getGallery().catch(() => []),
+        this.cmsApi.getTimeline().catch(() => []),
+        this.cmsApi.getCommunityMessages('community', 'approved').catch(() => []),
+      ]);
+
+      if (hp) this.homepage.set(hp);
+      if (gallery && gallery.length > 0) {
+        this.latestMemories.set(gallery.slice(0, 4));
+        this.galleryPreview.set(gallery.slice(4, 11));
+      }
+      if (timeline && timeline.length > 0) {
+        this.timelinePreview.set(timeline.slice(0, 4));
+      }
+      if (messages && messages.length > 0) {
+        this.messagesPreview.set(messages.slice(0, 3));
+      }
+    } catch {
+      // Empty arrays handled by signals
+    }
+  }
+
   dateMonthYear(iso: string): string {
     const d = new Date(iso);
     return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
   }
 
   onAvatarImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/avatar-fallback.jpg';
-}
+    const img = event.target as HTMLImageElement;
+    img.src = 'images/empty/avatar-fallback.jpg';
+  }
 
-onImageError(event: Event): void {
-  const img = event.target as HTMLImageElement;
-  img.src = 'images/empty/image-fallback.jpg';
-}
-
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = 'images/empty/image-fallback.jpg';
+  }
 }

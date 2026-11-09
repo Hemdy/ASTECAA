@@ -30,7 +30,7 @@
             class="adm-nav-item"
             (click)="closeMobile()"
           >
-            <span class="adm-nav-ico">{{ item.icon }}</span>
+            <i [class]="'adm-nav-ico ' + item.icon"></i>
             <span>{{ item.label }}</span>
             @if (item.badge) {
               <span class="adm-nav-badge">{{ item.badge }}</span>
@@ -47,7 +47,7 @@
           <div class="adm-user-name">{{ user.name }}</div>
           <div class="adm-user-role">{{ auth.userEmail() || user.role }}</div>
         </div>
-        <button class="adm-logout-btn" (click)="logout()" title="Sign out">⏻</button>
+        <button class="adm-logout-btn" (click)="logout()" title="Sign out"><i class="ri-logout-box-r-line"></i></button>
       </div>
     </div>
   </aside>
@@ -56,7 +56,7 @@
   <div class="adm-main">
     <header class="adm-topbar">
       <button class="adm-icon-btn adm-menu-btn" (click)="state.toggleMobile()" [attr.aria-label]="state.mobileOpen() ? 'Close navigation menu' : 'Open navigation menu'" [attr.aria-expanded]="state.mobileOpen()">
-        {{ state.mobileOpen() ? '×' : '☰' }}
+        <i [class]="state.mobileOpen() ? 'ri-close-line' : 'ri-menu-line'"></i>
       </button>
       <div class="adm-breadcrumb">
         @for (crumb of crumbs(); track crumb; let last = $last) {
@@ -70,7 +70,7 @@
       </div>
 
       <div class="adm-search">
-        <span class="adm-search-ico">⌕</span>
+        <i class="ri-search-line adm-search-ico"></i>
         <input
           type="search"
           placeholder="Search events, users, stories…  (⌘K)"
@@ -80,13 +80,13 @@
       </div>
 
       <button class="adm-icon-btn" (click)="toggleNotif($event)" aria-label="Notifications">
-        🔔
+        <i class="ri-notification-3-line"></i>
         @if (unreadCount() > 0) {
           <span class="adm-icon-btn-dot"></span>
         }
       </button>
       <button class="adm-theme-toggle" (click)="state.toggleTheme()" aria-label="Toggle theme">
-        {{ state.theme() === 'light' ? '☾' : '☀' }}
+        <i [class]="state.theme() === 'light' ? 'ri-moon-line' : 'ri-sun-line'"></i>
       </button>
 
       @if (state.notifOpen()) {
@@ -98,7 +98,7 @@
           <div class="adm-notif-list">
             @for (n of notifications; track n.id) {
               <div class="adm-notif-item" [class.unread]="n.unread">
-                <div class="adm-notif-ico">{{ notifIcon(n.type) }}</div>
+                <div class="adm-notif-ico"><i [class]="notifIcon(n.type)"></i></div>
                 <div>
                   <div class="adm-notif-text">{{ n.text }}</div>
                   <div class="adm-notif-time">{{ n.time }}</div>

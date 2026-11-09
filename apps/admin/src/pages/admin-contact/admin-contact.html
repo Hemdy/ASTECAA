@@ -6,9 +6,9 @@
 </div>
 
 <div class="adm-grid-3" style="margin-bottom: 20px">
-  <div class="adm-stat"><div class="adm-stat-top"><div><div class="adm-stat-label">New</div><div class="adm-stat-value">{{ countStatus('new') }}</div></div><div class="adm-stat-ico">✉</div></div></div>
-  <div class="adm-stat forest"><div class="adm-stat-top"><div><div class="adm-stat-label">Awaiting Reply</div><div class="adm-stat-value">{{ countStatus('read') }}</div></div><div class="adm-stat-ico">⏳</div></div></div>
-  <div class="adm-stat info"><div class="adm-stat-top"><div><div class="adm-stat-label">Replied</div><div class="adm-stat-value">{{ countStatus('replied') }}</div></div><div class="adm-stat-ico">↩</div></div></div>
+  <div class="adm-stat"><div class="adm-stat-top"><div><div class="adm-stat-label">New</div><div class="adm-stat-value">{{ countStatus('new') }}</div></div><div class="adm-stat-ico"><i class="ri-mail-line"></i></div></div></div>
+  <div class="adm-stat forest"><div class="adm-stat-top"><div><div class="adm-stat-label">Awaiting Reply</div><div class="adm-stat-value">{{ countStatus('read') }}</div></div><div class="adm-stat-ico"><i class="ri-time-line"></i></div></div></div>
+  <div class="adm-stat info"><div class="adm-stat-top"><div><div class="adm-stat-label">Replied</div><div class="adm-stat-value">{{ countStatus('replied') }}</div></div><div class="adm-stat-ico"><i class="ri-reply-line"></i></div></div></div>
 </div>
 
 <div class="adm-tabs">
@@ -37,7 +37,7 @@
           <div class="adm-cell-user-sub" style="margin-top: 2px">{{ shortDate(m.date) }} · {{ m.email }}</div>
         </div>
       } @empty {
-        <div class="adm-empty"><div class="adm-empty-ico">✉</div><p>No messages in this view.</p></div>
+        <div class="adm-empty"><div class="adm-empty-ico"><i class="ri-mail-line"></i></div><p>No messages in this view.</p></div>
       }
     </div>
   </div>
@@ -65,7 +65,7 @@
         </div>
       </div>
     } @else {
-      <div class="adm-empty"><div class="adm-empty-ico">✉</div><p>Select a message to read and reply.</p></div>
+      <div class="adm-empty"><div class="adm-empty-ico"><i class="ri-mail-open-line"></i></div><p>Select a message to read and reply.</p></div>
     }
   </div>
 </div>

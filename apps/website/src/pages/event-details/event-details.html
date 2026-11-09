@@ -11,9 +11,9 @@
       <h1 appReveal delay="80">{{ e.title }}</h1>
       <p class="lede banner-lede" appReveal delay="140">{{ e.subtitle }}</p>
       <div class="banner-meta" appReveal delay="200">
-        <span>📅 {{ ui.formatDate(e.date) }}</span>
-        <span>🕕 {{ e.time }}</span>
-        <span>📍 {{ e.venue }}, {{ e.city }}</span>
+        <span><i class="ri-calendar-line"></i> {{ ui.formatDate(e.date) }}</span>
+        <span><i class="ri-time-line"></i> {{ e.time }}</span>
+        <span><i class="ri-map-pin-2-line"></i> {{ e.venue }}, {{ e.city }}</span>
       </div>
     </div>
   </section>
@@ -27,7 +27,7 @@
       <app-countdown [target]="e.date" />
       <div class="cd-bar-actions">
         <button class="btn btn-gold btn-sm" (click)="register()">Register</button>
-        <button class="btn btn-outline btn-sm" (click)="share()">Share ↗</button>
+        <button class="btn btn-outline btn-sm" (click)="share()">Share <i class="ri-share-forward-line"></i></button>
       </div>
     </div>
   </section>
@@ -145,7 +145,7 @@
                     <span class="type comment-date">{{ c.location }}</span>
                   </div>
                   <p>{{ c.message }}</p>
-                  <button class="comment-like" (click)="like(c.id)">♥ {{ c.likes }}</button>
+                  <button class="comment-like" (click)="like(c.id)"><i class="ri-heart-line"></i> {{ c.likes }}</button>
                 </div>
               </article>
             }
@@ -253,7 +253,7 @@
     </h4>
 
     <div class="map">
-      <div class="map-pin">📍</div>
+      <div class="map-pin"><i class="ri-map-pin-2-fill"></i></div>
 
       <span class="type map-label">
         {{ e.city }}

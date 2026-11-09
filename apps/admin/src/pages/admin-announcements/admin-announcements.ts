@@ -1,17 +1,9 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
-
-interface Announcement {
-  id: string;
-  title: string;
-  body: string;
-  date: string;
-  status: 'published' | 'scheduled' | 'draft';
-  pinned: boolean;
-  channel: 'email' | 'push' | 'site';
-}
+import { CmsApiService } from '@astec/api-client';
+import type { CmsAnnouncement } from '@astec/types';
 
 @Component({
   selector: 'app-admin-announcements',
@@ -19,200 +11,112 @@ interface Announcement {
   imports: [FormsModule, AdmModal],
   templateUrl: './admin-announcements.html',
 })
-export class AdminAnnouncements {
+export class AdminAnnouncements implements OnInit {
+  private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
 
-  items = signal<Announcement[]>([
-    {
-      id: 'an1',
-      title: 'ASTECAA Annual Alumni Reunion 2026 registration is open',
-      body:
-        'Registration for the ASTECAA Annual Alumni Reunion 2026 is now open. Join fellow alumni for a weekend of reconnection, networking, recognition, celebration, and fellowship at the ASTEC Campus on December 19–20, 2026.',
-      date: '2026-09-01',
-      status: 'published',
-      pinned: true,
-      channel: 'email',
-    },
-
-    {
-      id: 'an2',
-      title: 'ASTECAA Career & Networking Forum registration',
-      body:
-        'The ASTECAA Career & Networking Forum takes place on September 26, 2026, at the ASTEC Alumni Hall. Alumni professionals, entrepreneurs, young alumni, and recent graduates are invited to connect, learn, and build meaningful professional relationships.',
-      date: '2026-09-10',
-      status: 'published',
-      pinned: false,
-      channel: 'site',
-    },
-
-    {
-      id: 'an3',
-      title: 'Reminder: ASTECAA Annual General Meeting 2026',
-      body:
-        'A reminder to all ASTECAA members that the Annual General Meeting will hold on November 28, 2026, at the ASTECAA Secretariat. Members will receive updates on association activities, projects, finances, welfare initiatives, and priorities for the coming year.',
-      date: '2026-11-20',
-      status: 'scheduled',
-      pinned: false,
-      channel: 'push',
-    },
-
-    {
-      id: 'an4',
-      title: 'ASTECAA Legacy & Fundraising Dinner 2027',
-      body:
-        'Save the date for the ASTECAA Legacy & Fundraising Dinner on February 27, 2027. The evening will celebrate the achievements of our alumni community while raising support for approved ASTECAA projects and initiatives.',
-      date: '2027-02-01',
-      status: 'scheduled',
-      pinned: false,
-      channel: 'email',
-    },
-
-    {
-      id: 'an5',
-      title: 'Draft: ASTECAA Alumni Sports & Family Day',
-      body:
-        'A draft announcement inviting alumni and their families to the ASTECAA Alumni Sports & Family Day on April 17, 2027. The programme will include football, family games, friendly competitions, awards, and fellowship.',
-      date: '',
-      status: 'draft',
-      pinned: false,
-      channel: 'site',
-    },
-
-    {
-      id: 'an6',
-      title: 'Draft: ASTECAA Mentorship & Scholarship Day',
-      body:
-        'A draft announcement for the ASTECAA Mentorship & Scholarship Day on June 12, 2027. The programme will connect students and young graduates with alumni professionals while supporting scholarship and educational opportunities.',
-      date: '',
-      status: 'draft',
-      pinned: false,
-      channel: 'site',
-    },
-  ]);
-
+  items = signal<CmsAnnouncement[]>([]);
+  loading = signal(false);
   showModal = signal(false);
   editing = signal(false);
 
-  form: Partial<Announcement> = {
+  form: Partial<CmsAnnouncement> = {
     title: '',
     body: '',
-    date: '',
+    date: new Date().toISOString().slice(0, 10),
     channel: 'site',
     pinned: false,
-    status: 'draft',
+    status: 'published',
   };
 
-  shortDate(iso: string): string {
-    if (!iso) return 'Not scheduled';
-
-    return new Date(iso).toLocaleDateString('en-NG', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
+  ngOnInit() {
+    void this.loadAnnouncements();
   }
 
-  channelLabel(c: string): string {
-    return c === 'email'
-      ? 'Email'
-      : c === 'push'
-        ? 'Push'
-        : 'Website';
+  async loadAnnouncements() {
+    this.loading.set(true);
+    try {
+      const list = await this.cmsApi.adminListAnnouncements();
+      this.items.set(list);
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to load announcements');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  shortDate(d?: string | null): string {
+    if (!d) return 'Draft';
+    return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  channelLabel(ch?: string | null): string {
+    switch (ch) {
+      case 'email':
+        return 'Email newsletter';
+      case 'push':
+        return 'Push notification';
+      default:
+        return 'Website';
+    }
   }
 
   openCreate() {
     this.editing.set(false);
-
     this.form = {
       title: '',
       body: '',
-      date: '',
+      date: new Date().toISOString().slice(0, 10),
       channel: 'site',
       pinned: false,
-      status: 'draft',
+      status: 'published',
     };
-
     this.showModal.set(true);
   }
 
-  edit(a: Announcement) {
+  edit(a: CmsAnnouncement) {
     this.editing.set(true);
     this.form = { ...a };
     this.showModal.set(true);
   }
 
-  save(asDraft: boolean) {
-    if (!this.form.title) {
-      this.toast.show('Please give the announcement a title.');
+  async save() {
+    if (!this.form.title?.trim()) {
+      this.toast.show('Please provide a title.');
       return;
     }
-
-    const status = asDraft
-      ? 'draft'
-      : this.form.date
-        ? 'scheduled'
-        : 'published';
-
-    if (this.editing() && this.form.id) {
-      this.items.update((list) =>
-        list.map((a) =>
-          a.id === this.form.id
-            ? {
-                ...a,
-                ...this.form,
-                status,
-              } as Announcement
-            : a
-        )
-      );
-
-      this.toast.show('Announcement updated.');
-    } else {
-      const newA: Announcement = {
-        id: 'an' + Date.now(),
-        title: this.form.title || '',
-        body: this.form.body || '',
-        date: this.form.date || '',
-        status,
-        pinned: !!this.form.pinned,
-        channel:
-          (this.form.channel as Announcement['channel']) || 'site',
-      };
-
-      this.items.update((list) => [newA, ...list]);
-
-      this.toast.show(
-        asDraft
-          ? 'Draft saved.'
-          : status === 'scheduled'
-            ? 'Announcement scheduled.'
-            : 'Announcement published.'
-      );
+    try {
+      if (this.editing() && this.form.id) {
+        await this.cmsApi.updateAnnouncement(this.form.id, this.form);
+        this.toast.show('Announcement updated.');
+      } else {
+        await this.cmsApi.createAnnouncement(this.form);
+        this.toast.show('Announcement published.');
+      }
+      this.showModal.set(false);
+      await this.loadAnnouncements();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to save announcement');
     }
-
-    this.showModal.set(false);
   }
 
-  togglePin(a: Announcement) {
-    this.items.update((list) =>
-      list.map((x) =>
-        x.id === a.id
-          ? {
-              ...x,
-              pinned: !x.pinned,
-            }
-          : x
-      )
-    );
-
-    this.toast.show(a.pinned ? 'Unpinned.' : 'Pinned to top.');
+  async togglePin(a: CmsAnnouncement) {
+    try {
+      await this.cmsApi.updateAnnouncement(a.id, { pinned: !a.pinned });
+      this.toast.show(a.pinned ? 'Announcement unpinned.' : 'Announcement pinned to top.');
+      await this.loadAnnouncements();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to toggle pin');
+    }
   }
 
-  remove(a: Announcement) {
-    this.items.update((list) =>
-      list.filter((x) => x.id !== a.id)
-    );
-
-    this.toast.show('Announcement deleted.');
+  async remove(a: CmsAnnouncement) {
+    try {
+      await this.cmsApi.deleteAnnouncement(a.id);
+      this.toast.show('Announcement deleted.');
+      await this.loadAnnouncements();
+    } catch (err: any) {
+      this.toast.show(err.message || 'Failed to delete announcement');
+    }
   }
 }

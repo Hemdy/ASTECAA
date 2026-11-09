@@ -13,20 +13,22 @@
 
   <div class="container hero-inner">
     <div class="hero-content">
-      <span class="eyebrow hero-eyebrow">Est. 1993. ASTEC</span>
+      <span class="eyebrow hero-eyebrow">{{ homepage()?.hero?.tagline || 'Est. 1993. ASTEC' }}</span>
       <h1 class="hero-title">
-        Where memories live<br />
-        and new <em>stories</em> begin.
+        @if (homepage()?.hero?.headline) {
+          {{ homepage()?.hero?.headline }}
+        } @else {
+          Where memories live<br />
+          and new <em>stories</em> begin.
+        }
       </h1>
       <p class="hero-lede lede">
-        A living archive of a community's gatherings — the songs, the suppers,
-        the lantern-lit walks through the old orchard. Step inside, and add your
-        chapter.
+        {{ homepage()?.hero?.subheadline || "A living archive of a community's gatherings — the songs, the suppers, the lantern-lit walks through the old orchard. Step inside, and add your chapter." }}
       </p>
       <div class="hero-actions">
-        <a routerLink="/events" class="btn btn-gold">Upcoming Gatherings</a>
+        <a routerLink="/events" class="btn btn-gold">{{ homepage()?.hero?.primaryBtn || 'Upcoming Gatherings' }}</a>
         <a routerLink="/timeline" class="btn btn-outline hero-outline"
-          >Walk the Timeline</a
+          >{{ homepage()?.hero?.secondaryBtn || 'Walk the Timeline' }}</a
         >
       </div>
     </div>
@@ -55,8 +57,8 @@
         <p class="hero-card-sub">{{ event.subtitle }}</p>
 
         <div class="hero-card-meta">
-          <span>📍 {{ event.venue }}</span>
-          <span>🕕 {{ event.time }}</span>
+          <span><i class="ri-map-pin-2-line"></i> {{ event.venue }}</span>
+          <span><i class="ri-time-line"></i> {{ event.time }}</span>
         </div>
 
 
@@ -121,7 +123,7 @@
         <a [routerLink]="['/events', event.id]" class="btn btn-primary"
           >Read & Register</a
         >
-        <button class="btn btn-ghost">Share ↗</button>
+        <button class="btn btn-ghost">Share <i class="ri-share-forward-line"></i></button>
       </div>
     </div>
   </div>
@@ -147,12 +149,12 @@
       </p>
     </div>
     <div class="mem-grid">
-      @for (m of latestMemories; track m.id) {
+      @for (m of latestMemories(); track m.id) {
       <figure class="mem-card" appReveal>
         <div class="mem-media">
           <img
-            [src]="m.image"
-            [alt]="m.caption"
+            [src]="m.thumb || m.url"
+            [alt]="m.title"
             (error)="onImageError($event)"
           />
 
@@ -161,11 +163,13 @@
           <span class="mem-year"> {{ m.year }} </span>
 
           <figcaption class="mem-content">
-            <span class="mem-label">Memory</span>
-            <span class="mem-caption">{{ m.caption }}</span>
+            <span class="mem-label">{{ m.album }}</span>
+            <span class="mem-caption">{{ m.caption || m.title }}</span>
           </figcaption>
 
-          <span class="mem-arrow" aria-hidden="true"> ↗ </span>
+          <span class="mem-arrow" aria-hidden="true">
+            <i class="ri-arrow-right-up-line"></i>
+          </span>
         </div>
       </figure>
       }
@@ -209,17 +213,17 @@
 
           <p class="event-card-sub">{{ ev.subtitle }}</p>
 
-          <!-- <div class="event-card-meta">
-      <span>
-        <span aria-hidden="true">📅</span>
-        {{ ui.shortDate(ev.date) }}
-      </span>
+          <div class="event-card-meta">
+            <span>
+              <i class="ri-calendar-line"></i>
+              {{ ui.shortDate(ev.date) }}
+            </span>
 
-      <span>
-        <span aria-hidden="true">📍</span>
-        {{ ev.venue }}
-      </span>
-    </div> -->
+            <span>
+              <i class="ri-map-pin-2-line"></i>
+              {{ ev.venue }}
+            </span>
+          </div>
 
           <div class="event-card-foot">
             <a [routerLink]="['/events', ev.id]" class="link-arrow">
@@ -254,15 +258,15 @@
     </div>
 
     <div class="tl-preview" appReveal>
-      @for (m of timelinePreview; track m.id; let i = $index) {
+      @for (m of timelinePreview(); track m.id; let i = $index) {
       <div class="tl-prev-item" [class.right]="i % 2 === 1" routerLink="/timeline">
         <div class="tl-prev-year">{{ m.year }}</div>
         <div class="tl-prev-dot"></div>
         <div class="tl-prev-card">
-          <img [src]="m.image" alt="" class="photo-vintage" />
+          <img [src]="m.image || m.url" alt="" class="photo-vintage" />
           <div class="tl-prev-text">
             <h4>{{ m.title }}</h4>
-            <p>{{ m.story }}</p>
+            <p>{{ m.story || m.description }}</p>
           </div>
         </div>
       </div>
@@ -288,10 +292,10 @@
 
     <div class="filmstrip" appReveal>
       <div class="filmstrip-track">
-        @for (m of galleryPreview; track m.id) {
+        @for (m of galleryPreview(); track m.id) {
         <figure class="film-frame">
-          <img [src]="m.image" [alt]="m.caption" class="photo-vintage" />
-          <figcaption class="type">{{ m.year }} · {{ m.event }}</figcaption>
+          <img [src]="m.thumb || m.url" [alt]="m.caption || m.title" class="photo-vintage" />
+          <figcaption class="type">{{ m.year }} · {{ m.album }}</figcaption>
         </figure>
         }
       </div>
@@ -316,17 +320,17 @@
     </div>
 
     <div class="msg-grid">
-      @for (msg of messagesPreview; track msg.id) {
+      @for (msg of messagesPreview(); track msg.id) {
       <article class="card msg-card" appReveal [class.pinned]="msg.pinned">
         @if (msg.pinned) {
-        <span class="msg-pin">★ Featured Story</span>
+        <span class="msg-pin"><i class="ri-star-fill"></i> Featured Story</span>
         }
 
         <p class="msg-body">"{{ msg.message }}"</p>
 
         <div class="msg-foot">
           <img
-            [src]="msg.avatar"
+            [src]="msg.avatar || '/images/reading-room.jpg'"
             [alt]="msg.author"
             class="msg-avatar"
             (error)="onAvatarImageError($event)"

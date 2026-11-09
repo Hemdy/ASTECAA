@@ -1,7 +1,7 @@
 <div class="adm-toolbar">
   <div>
     <div class="adm-section-title">Comments & Engagement</div>
-    <div class="adm-section-sub">Moderate community messages, approve pending notes, and handle reported content.</div>
+    <div class="adm-section-sub">Moderate community wall messages, approve pending notes, and handle reported content.</div>
   </div>
 </div>
 
@@ -30,56 +30,68 @@
 
 <!-- Comments list -->
 <div style="display: flex; flex-direction: column; gap: 12px">
-  @for (c of filtered(); track c.id) {
-    <div class="adm-card adm-card-pad" style="display: flex; gap: 16px; align-items: flex-start">          <img class="adm-avatar" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
-      <div style="flex: 1; min-width: 0">
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
-          <strong>{{ c.author }}</strong>
-          <span class="adm-cell-user-sub">on {{ c.page }}</span>
-          <span class="adm-badge" [class.adm-badge-success]="c.status === 'approved'" [class.adm-badge-warning]="c.status === 'pending'" [class.adm-badge-danger]="c.status === 'reported'" [class.adm-badge-muted]="c.status === 'spam'">{{ c.status }}</span>
-          @if (c.reports > 0) {
-            <span class="adm-badge adm-badge-danger">⚠ {{ c.reports }} reports</span>
-          }
-          <span style="margin-left: auto" class="adm-card-sub">{{ shortDate(c.date) }}</span>
-        </div>
-        <p style="color: var(--ad-text-soft); margin: 0 0 12px; line-height: 1.5; font-style: italic">"{{ c.message }}"</p>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap">
-          @if (c.status !== 'approved') {
-            <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="approve(c.id)">✓ Approve</button>
-          }
-          @if (c.status !== 'spam') {
-            <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="markSpam(c.id)">⊘ Spam</button>
-          }
-          <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="openReply(c)">↩ Reply</button>
-          <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="deleteComment(c.id)">🗑 Delete</button>
-          <span style="margin-left: auto; align-self: center" class="adm-card-sub">♥ {{ c.likes }}</span>
+  @if (loading()) {
+    <div class="adm-card adm-card-pad adm-empty">
+      <div class="adm-empty-ico"><i class="ri-loader-4-line ri-spin"></i></div>
+      <p>Loading messages from database…</p>
+    </div>
+  } @else {
+    @for (c of filtered(); track c.id) {
+      <div class="adm-card adm-card-pad" style="display: flex; gap: 16px; align-items: flex-start">
+        <img class="adm-avatar" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
+        <div style="flex: 1; min-width: 0">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 6px">
+            <strong>{{ c.author }}</strong>
+            <span class="adm-cell-user-sub">on {{ c.page }}</span>
+            <span class="adm-badge" [class.adm-badge-success]="c.status === 'approved'" [class.adm-badge-warning]="c.status === 'pending'" [class.adm-badge-danger]="c.status === 'reported'" [class.adm-badge-muted]="c.status === 'spam'">{{ c.status }}</span>
+            @if (c.reports > 0) {
+              <span class="adm-badge adm-badge-danger"><i class="ri-alert-line"></i> {{ c.reports }} reports</span>
+            }
+            <span style="margin-left: auto" class="adm-card-sub">{{ shortDate(c.createdAt) }}</span>
+          </div>
+          <p style="color: var(--ad-text-soft); margin: 0 0 12px; line-height: 1.5; font-style: italic">"{{ c.message }}"</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center">
+            @if (c.status !== 'approved') {
+              <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="approve(c.id)">
+                <i class="ri-check-line"></i> Approve
+              </button>
+            }
+            @if (c.status !== 'spam') {
+              <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="markSpam(c.id)">
+                <i class="ri-forbid-line"></i> Spam
+              </button>
+            }
+            <button class="adm-btn adm-btn-outline adm-btn-sm" (click)="openReply(c)">
+              <i class="ri-reply-line"></i> Reply
+            </button>
+            <button class="adm-btn adm-btn-ghost adm-btn-sm" (click)="deleteComment(c.id)">
+              <i class="ri-delete-bin-line"></i> Delete
+            </button>
+            <span style="margin-left: auto; align-self: center" class="adm-card-sub">
+              <i class="ri-heart-line" style="color: var(--ad-burgundy)"></i> {{ c.likes }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  } @empty {
-    <div class="adm-card adm-card-pad adm-empty">
-      <div class="adm-empty-ico">💬</div>
-      <p>No comments in this view.</p>
-    </div>
+    } @empty {
+      <div class="adm-card adm-card-pad adm-empty">
+        <div class="adm-empty-ico"><i class="ri-chat-1-line"></i></div>
+        <p>No messages match your filters.</p>
+      </div>
+    }
   }
 </div>
 
 @if (replyTarget()) {
-  <app-adm-modal title="Reply to Comment" (close)="replyTarget.set(null)">
-    <div style="display: flex; gap: 12px; margin-bottom: 16px; padding: 12px; background: var(--ad-surface-2); border-radius: var(--ad-radius-sm)">
-      <img class="adm-avatar adm-avatar-sm" [src]="replyTarget()!.avatar" [alt]="replyTarget()!.author" />
-      <div>
-        <strong>{{ replyTarget()!.author }}</strong>
-        <p style="font-size: 0.85rem; color: var(--ad-text-soft); margin: 4px 0 0; font-style: italic">"{{ replyTarget()!.message }}"</p>
-      </div>
-    </div>
+  <app-adm-modal title="Reply to Message" (close)="replyTarget.set(null)">
+    <p style="margin-bottom: 12px; font-style: italic; color: var(--ad-text-soft)">"{{ replyTarget()!.message }}"</p>
     <div class="adm-field">
-      <label class="adm-field-label">Your reply</label>
-      <textarea class="adm-textarea" [(ngModel)]="replyText" placeholder="Write a reply as a moderator…"></textarea>
+      <label class="adm-field-label">Your Reply</label>
+      <textarea class="adm-textarea" [(ngModel)]="replyText" placeholder="Write a response from the ASTECAA leadership…" style="min-height: 100px"></textarea>
     </div>
     <div foot>
       <button class="adm-btn adm-btn-outline" (click)="replyTarget.set(null)">Cancel</button>
-      <button class="adm-btn adm-btn-primary" (click)="sendReply()">Post reply</button>
+      <button class="adm-btn adm-btn-primary" (click)="sendReply()">Send response</button>
     </div>
   </app-adm-modal>
 }

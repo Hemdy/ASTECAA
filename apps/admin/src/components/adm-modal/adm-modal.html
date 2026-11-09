@@ -2,7 +2,7 @@
   <div class="adm-modal" [class.adm-modal-lg]="size === 'lg'" (click)="$event.stopPropagation()">
     <div class="adm-modal-head">
       <h3 class="adm-modal-title">{{ title }}</h3>
-      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="close.emit()" aria-label="Close">✕</button>
+      <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="close.emit()" aria-label="Close"><i class="ri-close-line"></i></button>
     </div>
     <div class="adm-modal-body">
       <ng-content />
