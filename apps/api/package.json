@@ -1,12 +1,15 @@
-{
+c:\Users\USER\Pictures\ASTECAA Responsive Header Mockup.png{
   "name": "@astec/api",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "prebuild": "pnpm --filter @astec/types --filter @astec/config --filter @astec/database --filter @astec/validation build",
+    "build:dependencies": "pnpm --filter @astec/types run build && pnpm --filter @astec/config run build && pnpm --filter @astec/database run build && pnpm --filter @astec/validation run build",
+    "prebuild": "pnpm run build:dependencies",
     "build": "tsc",
+    "prestart": "pnpm run build:dependencies",
     "start": "node dist/main.js",
+    "prestart:dev": "pnpm run build:dependencies",
     "start:dev": "tsc && node --watch dist/main.js",
     "test": "node --env-file=../../.env ./node_modules/tsx/dist/cli.mjs test/api-smoke.ts"
   },

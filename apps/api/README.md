@@ -20,7 +20,7 @@ ASTEC_API_HOST=127.0.0.1
 
 Run development commands from the repository root:
 ```bash
-# Start API in watch mode
+# Build the API's workspace dependencies, then start in watch mode
 pnpm run start:api
 
 # Run smoke test against Neon
@@ -30,9 +30,11 @@ pnpm --filter @astec/api test
 pnpm run build:api
 ```
 
+The API's workspace dependencies are built automatically before starting the API directly with `pnpm run start` or in watch mode.
+
 ## Production Deployment
 
-Start the compiled service:
+Build the API with `pnpm run build:api` before starting the compiled service:
 ```bash
 node apps/api/dist/main.js
 ```

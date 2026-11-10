@@ -43,7 +43,7 @@ export class Navbar implements OnDestroy {
 
   @HostListener('window:resize')
   onResize() {
-    if (window.innerWidth > 1080 && this.open()) {
+    if (window.innerWidth > 1279 && this.open()) {
       this.close();
     }
   }
