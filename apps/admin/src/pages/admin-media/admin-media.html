@@ -73,8 +73,10 @@
                 <span class="adm-badge adm-badge-info" style="position: absolute; top: 8px; right: 8px; z-index: 2">
                   <i class="ri-movie-line"></i>
                 </span>
+                <video [src]="m.url" muted playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover"></video>
+              } @else {
+                <img [src]="m.url" [alt]="m.name" (error)="onImageError($event)" />
               }
-              <img [src]="m.url" [alt]="m.name" />
               <div class="adm-gallery-item-overlay">
                 <span class="adm-badge adm-badge-muted" style="font-size: 0.62rem">{{ m.size || 'R2' }}</span>
               </div>

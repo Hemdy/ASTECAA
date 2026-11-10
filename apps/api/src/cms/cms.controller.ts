@@ -8,10 +8,11 @@ import {
   Post,
   Put,
   Query,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import type { Response } from 'express';
+import type { Request, Response } from 'express';
 import { CmsService } from './cms.service.js';
 import { AdminGuard } from '../auth/admin.guard.js';
 import { AppError } from '../core/app-error.js';
@@ -20,10 +21,24 @@ import { AppError } from '../core/app-error.js';
 export class CmsController {
   constructor(private readonly cms: CmsService) {}
 
+  private getRequestOrigin(req?: Request): string | undefined {
+    if (!req) return undefined;
+    const forwardedProto = req.headers['x-forwarded-proto'];
+    const proto = Array.isArray(forwardedProto)
+      ? forwardedProto[0]
+      : forwardedProto?.split(',')[0]?.trim() || req.protocol || 'https';
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const host = Array.isArray(forwardedHost)
+      ? forwardedHost[0]
+      : forwardedHost?.split(',')[0]?.trim() || req.get('host');
+    return host ? `${proto}://${host}` : undefined;
+  }
+
   // ==================== PUBLIC ENDPOINTS ====================
 
   @Get('v1/gallery')
   async getGallery(
+    @Req() req: Request,
     @Query('album') album?: string,
     @Query('year') year?: string,
     @Query('featured') featured?: string
@@ -31,7 +46,8 @@ export class CmsController {
     return this.cms.listGallery(
       album,
       year ? parseInt(year, 10) : undefined,
-      featured !== undefined ? featured === 'true' : undefined
+      featured !== undefined ? featured === 'true' : undefined,
+      this.getRequestOrigin(req),
     );
   }
 
@@ -156,6 +172,8 @@ export class CmsController {
     }
     res.setHeader('Content-Type', obj.contentType);
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.send(obj.buffer);
   }
 
@@ -164,20 +182,20 @@ export class CmsController {
   // Gallery
   @Get('admin/v1/gallery')
   @UseGuards(AdminGuard)
-  async adminListGallery(@Query('album') album?: string) {
-    return this.cms.listGallery(album);
+  async adminListGallery(@Req() req: Request, @Query('album') album?: string) {
+    return this.cms.listGallery(album, undefined, undefined, this.getRequestOrigin(req));
   }
 
   @Post('admin/v1/gallery')
   @UseGuards(AdminGuard)
-  async adminCreateGalleryItem(@Body() body: any) {
-    return this.cms.createGalleryItem(body);
+  async adminCreateGalleryItem(@Req() req: Request, @Body() body: any) {
+    return this.cms.createGalleryItem(body, this.getRequestOrigin(req));
   }
 
   @Patch('admin/v1/gallery/:id')
   @UseGuards(AdminGuard)
-  async adminUpdateGalleryItem(@Param('id') id: string, @Body() body: any) {
-    return this.cms.updateGalleryItem(id, body);
+  async adminUpdateGalleryItem(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
+    return this.cms.updateGalleryItem(id, body, this.getRequestOrigin(req));
   }
 
   @Delete('admin/v1/gallery/:id')
@@ -296,13 +314,14 @@ export class CmsController {
   // Media
   @Get('admin/v1/media')
   @UseGuards(AdminGuard)
-  async adminListMedia(@Query('folder') folder?: string) {
-    return this.cms.listMedia(folder);
+  async adminListMedia(@Req() req: Request, @Query('folder') folder?: string) {
+    return this.cms.listMedia(folder, this.getRequestOrigin(req));
   }
 
   @Post('admin/v1/media/upload')
   @UseGuards(AdminGuard)
   async adminUploadMedia(
+    @Req() req: Request,
     @Body()
     body: {
       file: string; // base64 or data URL
@@ -332,7 +351,13 @@ export class CmsController {
     if (buffer.length === 0) {
       throw new AppError(400, 'Uploaded file payload is empty.', 'INVALID_INPUT');
     }
-    return this.cms.saveMedia(buffer, body.name, mimeType, body.folder || 'General');
+    return this.cms.saveMedia(
+      buffer,
+      body.name,
+      mimeType,
+      body.folder || 'General',
+      this.getRequestOrigin(req),
+    );
   }
 
   @Delete('admin/v1/media/:id')

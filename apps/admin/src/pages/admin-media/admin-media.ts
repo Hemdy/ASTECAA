@@ -213,4 +213,9 @@ export class AdminMedia implements OnInit {
       () => this.toast.show('Failed to copy URL.')
     );
   }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/empty/image-fallback.jpg';
+  }
 }

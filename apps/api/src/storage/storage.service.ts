@@ -28,6 +28,8 @@ export class StorageService {
   private readonly apiPublicUrl: string;
   private readonly localStorageDir: string;
   private readonly isR2Configured: boolean;
+  private readonly publicReachabilityCache = new Map<string, { ok: boolean; checkedAt: number }>();
+  private readonly publicReachabilityInFlight = new Map<string, Promise<boolean>>();
 
   constructor() {
     const accountId = process.env.R2_ACCOUNT_ID;
@@ -80,11 +82,108 @@ export class StorageService {
     return cleaned || 'media';
   }
 
+  private resolveApiOrigin(requestOrigin?: string): string {
+    return (requestOrigin || this.apiPublicUrl || '').replace(/\/$/, '');
+  }
+
+  buildProxyUrl(key: string, requestOrigin?: string): string {
+    const cleanKey = key.replace(/^\/+/, '');
+    const origin = this.resolveApiOrigin(requestOrigin);
+    return origin ? `${origin}/api/v1/media/file/${cleanKey}` : `/api/v1/media/file/${cleanKey}`;
+  }
+
+  private async isPublicObjectReachable(baseUrl: string, key: string): Promise<boolean> {
+    const normalizedBase = baseUrl.replace(/\/$/, '');
+    const cached = this.publicReachabilityCache.get(normalizedBase);
+    const now = Date.now();
+    // Recheck every 5 minutes (or every 60s when unreachable) so enabling R2 public access takes effect promptly
+    const ttlMs = cached?.ok ? 5 * 60 * 1000 : 60 * 1000;
+    if (cached && now - cached.checkedAt < ttlMs) {
+      return cached.ok;
+    }
+
+    const existing = this.publicReachabilityInFlight.get(normalizedBase);
+    if (existing) {
+      return existing;
+    }
+
+    const probe = (async () => {
+      try {
+        const res = await fetch(`${normalizedBase}/${key.replace(/^\/+/, '')}`, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(2500),
+        });
+        const ok = res.ok;
+        this.publicReachabilityCache.set(normalizedBase, { ok, checkedAt: Date.now() });
+        if (!ok) {
+          this.logger.warn(
+            `R2 public base URL "${normalizedBase}" returned HTTP ${res.status}; serving media via /api/v1/media/file proxy instead.`,
+          );
+        }
+        return ok;
+      } catch (err: any) {
+        this.publicReachabilityCache.set(normalizedBase, { ok: false, checkedAt: Date.now() });
+        this.logger.warn(
+          `R2 public base URL "${normalizedBase}" probe failed (${err?.message || err}); serving media via /api/v1/media/file proxy.`,
+        );
+        return false;
+      } finally {
+        this.publicReachabilityInFlight.delete(normalizedBase);
+      }
+    })();
+
+    this.publicReachabilityInFlight.set(normalizedBase, probe);
+    return probe;
+  }
+
+  async normalizeMediaUrl(
+    url: string | null | undefined,
+    storageKey?: string | null,
+    requestOrigin?: string,
+  ): Promise<string> {
+    if (!url) return '';
+
+    if (url.startsWith('/api/v1/media/file/')) {
+      const origin = this.resolveApiOrigin(requestOrigin);
+      return origin ? `${origin}${url}` : url;
+    }
+
+    if (url.startsWith('/uploads/')) {
+      const origin = this.resolveApiOrigin(requestOrigin);
+      return origin ? `${origin}${url}` : url;
+    }
+
+    let publicBase: string | null = null;
+    let extractedKey: string | null = null;
+
+    if (this.publicUrl && url.startsWith(`${this.publicUrl}/`)) {
+      publicBase = this.publicUrl;
+      extractedKey = url.slice(this.publicUrl.length + 1);
+    } else {
+      const r2DevMatch = url.match(/^(https:\/\/pub-[a-z0-9]+\.r2\.dev)\/(.+)$/i);
+      if (r2DevMatch) {
+        publicBase = r2DevMatch[1];
+        extractedKey = r2DevMatch[2];
+      }
+    }
+
+    if (publicBase && (storageKey || extractedKey)) {
+      const key = (storageKey || extractedKey)!.replace(/^\/+/, '');
+      const reachable = await this.isPublicObjectReachable(publicBase, key);
+      if (!reachable) {
+        return this.buildProxyUrl(key, requestOrigin);
+      }
+    }
+
+    return url;
+  }
+
   async upload(
     buffer: Buffer,
     originalName: string,
     mimeType: string,
-    folder: string = 'media'
+    folder: string = 'media',
+    requestOrigin?: string,
   ): Promise<UploadResult> {
     const ext = extname(originalName) || '.bin';
     const cleanName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -126,13 +225,13 @@ export class StorageService {
       }
 
       if (this.publicUrl) {
-        url = `${this.publicUrl}/${uniqueKey}`;
-      } else if (this.apiPublicUrl) {
-        url = `${this.apiPublicUrl}/api/v1/media/file/${uniqueKey}`;
+        const directUrl = `${this.publicUrl}/${uniqueKey}`;
+        const reachable = await this.isPublicObjectReachable(this.publicUrl, uniqueKey);
+        url = reachable ? directUrl : this.buildProxyUrl(uniqueKey, requestOrigin);
       } else {
-        url = `/api/v1/media/file/${uniqueKey}`;
+        url = this.buildProxyUrl(uniqueKey, requestOrigin);
       }
-      this.logger.log(`Uploaded to Cloudflare R2: ${uniqueKey}`);
+      this.logger.log(`Uploaded to Cloudflare R2: ${uniqueKey} -> ${url}`);
     } else {
       const targetPath = resolve(this.localStorageDir, uniqueKey);
       const targetDir = resolve(targetPath, '..');
@@ -145,7 +244,8 @@ export class StorageService {
         this.logger.error(`Could not save file locally to ${targetPath}: ${err?.message || err}`);
         throw new AppError(500, 'Failed to store uploaded file locally.', 'STORAGE_LOCAL_FAILED');
       }
-      url = this.apiPublicUrl ? `${this.apiPublicUrl}/uploads/${uniqueKey}` : `/uploads/${uniqueKey}`;
+      const origin = this.resolveApiOrigin(requestOrigin);
+      url = origin ? `${origin}/uploads/${uniqueKey}` : `/uploads/${uniqueKey}`;
       this.logger.log(`Stored locally: ${targetPath}`);
     }
 

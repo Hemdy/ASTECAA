@@ -31,14 +31,15 @@ export class CmsService {
 
   // ==================== GALLERY ====================
 
-  private formatGalleryItem(r: typeof galleryItems.$inferSelect) {
+  private async formatGalleryItem(r: typeof galleryItems.$inferSelect, requestOrigin?: string) {
+    const resolvedUrl = await this.storage.normalizeMediaUrl(r.url, null, requestOrigin);
     return {
       id: r.id,
       title: r.title,
       caption: r.description,
       description: r.description,
-      url: r.url,
-      thumb: r.url,
+      url: resolvedUrl,
+      thumb: resolvedUrl,
       album: r.album,
       year: r.year,
       type: r.mediaType as 'photo' | 'video',
@@ -50,7 +51,7 @@ export class CmsService {
     };
   }
 
-  async listGallery(album?: string, year?: number, featured?: boolean) {
+  async listGallery(album?: string, year?: number, featured?: boolean, requestOrigin?: string) {
     const db = this.database.db;
     const conditions = [];
     if (album) conditions.push(eq(galleryItems.album, album));
@@ -61,7 +62,7 @@ export class CmsService {
       ? await db.select().from(galleryItems).where(and(...conditions)).orderBy(desc(galleryItems.createdAt))
       : await db.select().from(galleryItems).orderBy(desc(galleryItems.createdAt));
 
-    return rows.map((r) => this.formatGalleryItem(r));
+    return Promise.all(rows.map((r) => this.formatGalleryItem(r, requestOrigin)));
   }
 
   async createGalleryItem(data: {
@@ -75,17 +76,18 @@ export class CmsService {
     mediaType?: 'photo' | 'video';
     featured?: boolean;
     size?: string;
-  }) {
+  }, requestOrigin?: string) {
     const db = this.database.db;
     const description = data.description ?? data.caption ?? null;
     const mediaType = (data.mediaType ?? data.type) === 'video' ? 'video' : 'photo';
+    const normalizedUrl = await this.storage.normalizeMediaUrl(data.url, null, requestOrigin);
 
     const [created] = await db
       .insert(galleryItems)
       .values({
         title: data.title,
         description,
-        url: data.url,
+        url: normalizedUrl || data.url,
         album: data.album,
         year: data.year,
         mediaType,
@@ -93,7 +95,7 @@ export class CmsService {
         size: data.size,
       })
       .returning();
-    return this.formatGalleryItem(created);
+    return this.formatGalleryItem(created, requestOrigin);
   }
 
   async updateGalleryItem(
@@ -109,7 +111,8 @@ export class CmsService {
       mediaType: 'photo' | 'video';
       featured: boolean;
       size: string;
-    }>
+    }>,
+    requestOrigin?: string,
   ) {
     const db = this.database.db;
     const updates: Partial<typeof galleryItems.$inferInsert> = {
@@ -119,7 +122,9 @@ export class CmsService {
     if (data.description !== undefined || data.caption !== undefined) {
       updates.description = data.description ?? data.caption ?? null;
     }
-    if (data.url !== undefined) updates.url = data.url;
+    if (data.url !== undefined) {
+      updates.url = await this.storage.normalizeMediaUrl(data.url, null, requestOrigin);
+    }
     if (data.album !== undefined) updates.album = data.album;
     if (data.year !== undefined) updates.year = data.year;
     if (data.mediaType !== undefined || data.type !== undefined) {
@@ -134,7 +139,7 @@ export class CmsService {
       .where(eq(galleryItems.id, id))
       .returning();
     if (!updated) throw new AppError(404, 'Gallery item not found.', 'NOT_FOUND');
-    return this.formatGalleryItem(updated);
+    return this.formatGalleryItem(updated, requestOrigin);
   }
 
   async getMediaObject(key: string) {
@@ -835,31 +840,40 @@ export class CmsService {
 
   // ==================== MEDIA MANAGEMENT ====================
 
-  async listMedia(folder?: string) {
+  async listMedia(folder?: string, requestOrigin?: string) {
     const db = this.database.db;
     const rows = folder && folder !== 'all'
       ? await db.select().from(mediaFiles).where(eq(mediaFiles.folder, folder)).orderBy(desc(mediaFiles.createdAt))
       : await db.select().from(mediaFiles).orderBy(desc(mediaFiles.createdAt));
 
-    return rows.map((r) => ({
-      id: r.id,
-      name: r.name,
-      url: r.url,
-      type: r.mediaType as 'image' | 'video',
-      size: r.sizeFormatted || '1.0 MB',
-      folder: r.folder,
-      storageKey: r.storageKey,
-      date: r.createdAt.toISOString().slice(0, 10),
-    }));
+    return Promise.all(
+      rows.map(async (r) => ({
+        id: r.id,
+        name: r.name,
+        url: await this.storage.normalizeMediaUrl(r.url, r.storageKey, requestOrigin),
+        type: r.mediaType as 'image' | 'video',
+        size: r.sizeFormatted || '1.0 MB',
+        folder: r.folder,
+        storageKey: r.storageKey,
+        date: r.createdAt.toISOString().slice(0, 10),
+      })),
+    );
   }
 
   async saveMedia(
     buffer: Buffer,
     originalName: string,
     mimeType: string,
-    folder: string = 'General'
+    folder: string = 'General',
+    requestOrigin?: string,
   ) {
-    const uploadResult = await this.storage.upload(buffer, originalName, mimeType, folder);
+    const uploadResult = await this.storage.upload(
+      buffer,
+      originalName,
+      mimeType,
+      folder,
+      requestOrigin,
+    );
     const mediaType = mimeType.startsWith('video') ? 'video' : 'image';
 
     const db = this.database.db;

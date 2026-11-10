@@ -313,7 +313,7 @@
       <div class="filmstrip-track">
         @for (m of galleryPreview(); track m.id) {
         <figure class="film-frame">
-          <img [src]="m.thumb || m.url" [alt]="m.caption || m.title" class="photo-vintage" loading="lazy" decoding="async" />
+          <img [src]="m.thumb || m.url" [alt]="m.caption || m.title" class="photo-vintage" loading="lazy" decoding="async" (error)="onImageError($event)" />
           <figcaption class="type">{{ m.year }} · {{ m.album }}</figcaption>
         </figure>
         }
