@@ -45,6 +45,8 @@ export class AdminGallery implements OnInit {
   bulkModal = signal(false);
   confirmDelete = signal(false);
   uploading = signal(false);
+  uploadError = signal<string | null>(null);
+  bulkError = signal<string | null>(null);
 
   // Single Upload Form State
   selectedFile = signal<File | null>(null);
@@ -206,6 +208,7 @@ export class AdminGallery implements OnInit {
   openBulkUpload() {
     this.clearBulkEntries();
     this.bulkProgress.set(null);
+    this.bulkError.set(null);
     this.bulkFeatured.set(false);
     this.bulkModal.set(true);
   }
@@ -215,6 +218,7 @@ export class AdminGallery implements OnInit {
     this.bulkModal.set(false);
     this.clearBulkEntries();
     this.bulkProgress.set(null);
+    this.bulkError.set(null);
   }
 
   onFileSelected(event: Event) {
@@ -238,9 +242,12 @@ export class AdminGallery implements OnInit {
 
   private setSingleFile(file: File) {
     if (!isSupportedMediaFile(file)) {
-      this.toast.show(`Unsupported file "${file.name}". Choose an image or video file.`);
+      const msg = `Unsupported file "${file.name}". Choose an image or video file.`;
+      this.uploadError.set(msg);
+      this.toast.show(msg);
       return;
     }
+    this.uploadError.set(null);
     this.revokePreview(this.selectedFilePreview());
     this.selectedFile.set(file);
     if (!this.uploadTitle()) {
@@ -260,6 +267,7 @@ export class AdminGallery implements OnInit {
       this.toast.show('Please select an image or video file to upload.');
       return;
     }
+    this.uploadError.set(null);
     this.uploading.set(true);
     try {
       await this.uploadGalleryEntry(file, {
@@ -275,7 +283,9 @@ export class AdminGallery implements OnInit {
       this.resetUploadForm();
       await this.loadGallery();
     } catch (err: any) {
-      this.toast.show(err.message || 'Upload failed');
+      const message = err?.message || 'Upload failed';
+      this.uploadError.set(message);
+      this.toast.show(message);
     } finally {
       this.uploading.set(false);
     }
@@ -359,6 +369,7 @@ export class AdminGallery implements OnInit {
     }
 
     this.uploading.set(true);
+    this.bulkError.set(null);
     this.bulkProgress.set({ current: 0, total: queue.length });
 
     let succeeded = 0;
@@ -397,11 +408,13 @@ export class AdminGallery implements OnInit {
         this.bulkModal.set(false);
         this.clearBulkEntries();
       } else if (succeeded > 0) {
-        this.toast.show(
-          `Uploaded ${succeeded} file(s); ${failed} failed (${firstError}). Retry the remaining items.`,
-        );
+        const msg = `Uploaded ${succeeded} file(s); ${failed} failed (${firstError}). Retry the remaining items.`;
+        this.bulkError.set(msg);
+        this.toast.show(msg);
       } else {
-        this.toast.show(firstError || 'Bulk upload failed.');
+        const msg = firstError || 'Bulk upload failed.';
+        this.bulkError.set(msg);
+        this.toast.show(msg);
       }
     } finally {
       this.uploading.set(false);
@@ -462,6 +475,7 @@ export class AdminGallery implements OnInit {
     this.uploadTitle.set('');
     this.uploadCaption.set('');
     this.uploadFeatured.set(false);
+    this.uploadError.set(null);
   }
 
   private revokePreview(url: string | null) {

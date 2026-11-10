@@ -121,7 +121,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.updateCommentStatus(id, 'approved');
       this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'approved' } : c)));
       this.toast.show('Comment approved and published.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -132,7 +132,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.updateCommentStatus(id, 'spam');
       this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'spam' } : c)));
       this.toast.show('Comment marked as spam.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -143,7 +143,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.deleteComment(id);
       this.comments.update((list) => list.filter((c) => c.id !== id));
       this.toast.show('Comment deleted.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }

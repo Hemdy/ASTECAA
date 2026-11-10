@@ -85,7 +85,6 @@ export class AdminDashboard {
     try {
       const data = await this.dashboardApi.getStats(this.growthPeriod());
       this.stats.set(data);
-      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load dashboard metrics.');
     }
@@ -129,6 +128,7 @@ export class AdminDashboard {
       await this.cmsApi.updateCommentStatus(id, 'approved');
       this.toast.show('Note approved and published to the wall.');
       await this.loadStats();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Could not approve note.');
     }
@@ -139,6 +139,7 @@ export class AdminDashboard {
       await this.cmsApi.updateCommentStatus(id, 'reported');
       this.toast.show('Note rejected and removed.');
       await this.loadStats();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Could not reject note.');
     }

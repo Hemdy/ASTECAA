@@ -184,6 +184,9 @@
               <span class="adm-switch-slider"></span>
             </label>
           </div>
+          @if (uploadError(); as err) {
+            <div class="adm-login-error" style="margin: 0">{{ err }}</div>
+          }
         </div>
       </div>
       <div class="adm-modal-foot">
@@ -302,6 +305,9 @@
             <span class="adm-switch-slider"></span>
           </label>
         </div>
+        @if (bulkError(); as err) {
+          <div class="adm-login-error" style="margin-top: 12px; margin-bottom: 0">{{ err }}</div>
+        }
       </div>
       <div class="adm-modal-foot">
         <button type="button" class="adm-btn adm-btn-outline" (click)="closeBulkUpload()" [disabled]="uploading()">Cancel</button>

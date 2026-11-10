@@ -89,7 +89,7 @@ export class AdminUsers {
       await this.usersApi.updateUserStatus(u.id, 'active');
       this.users.update((list) => list.map((x) => (x.id === u.id ? { ...x, status: 'active' } : x)));
       this.toast.show(`${u.name} approved.`);
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to approve user.');
     }
@@ -103,7 +103,7 @@ export class AdminUsers {
         list.map((x) => (x.id === u.id ? { ...x, status: nextStatus } : x))
       );
       this.toast.show(u.status === 'suspended' ? `${u.name} reactivated.` : `${u.name} suspended.`);
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to change status.');
     }

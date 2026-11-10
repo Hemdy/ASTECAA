@@ -7,6 +7,7 @@ import type { AdminSidebarCounts, DashboardStatsItem } from '@astec/types';
 export class DashboardApiService {
   readonly sidebarCounts = signal<AdminSidebarCounts | null>(null);
   private inFlightCounts: Promise<AdminSidebarCounts> | null = null;
+  private lastCountsFetchedAt = 0;
 
   async getStats(period?: string): Promise<DashboardStatsItem> {
     const qs = period ? `?period=${encodeURIComponent(period)}` : '';
@@ -18,6 +19,7 @@ export class DashboardApiService {
       this.inFlightCounts = this.request<AdminSidebarCounts>('/api/admin/v1/dashboard/sidebar-counts')
         .then((counts) => {
           this.sidebarCounts.set(counts);
+          this.lastCountsFetchedAt = Date.now();
           return counts;
         })
         .finally(() => {
@@ -27,7 +29,10 @@ export class DashboardApiService {
     return this.inFlightCounts;
   }
 
-  async refreshSidebarCounts(): Promise<void> {
+  async refreshSidebarCounts(force = false): Promise<void> {
+    if (!force && !this.inFlightCounts && Date.now() - this.lastCountsFetchedAt < 1500) {
+      return;
+    }
     try {
       await this.getSidebarCounts();
     } catch {

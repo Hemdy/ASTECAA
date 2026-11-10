@@ -65,7 +65,7 @@ export class AdminContact implements OnInit {
         const updated = await this.cmsApi.adminUpdateContactStatus(m.id, 'read');
         this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
         this.selected.set(updated);
-        void this.dashboardApi.refreshSidebarCounts();
+        void this.dashboardApi.refreshSidebarCounts(true);
       } catch {}
     }
   }
@@ -76,7 +76,7 @@ export class AdminContact implements OnInit {
       this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
       this.selected.set(updated);
       this.toast.show('Marked as read.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -94,7 +94,7 @@ export class AdminContact implements OnInit {
       this.selected.set(updated);
       this.toast.show(`Reply saved and sent to ${m.name}.`);
       this.replyText = '';
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to send reply');
     }
@@ -106,7 +106,7 @@ export class AdminContact implements OnInit {
       this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
       this.selected.set(updated);
       this.toast.show('Ticket closed.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }

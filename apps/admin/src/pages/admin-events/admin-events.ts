@@ -281,7 +281,7 @@ export class AdminEvents {
       );
       this.showModal.set(false);
       this.toast.show(this.editingId ? 'Event updated.' : 'Event created.');
-      void this.dashboardApi.refreshSidebarCounts();
+      void this.dashboardApi.refreshSidebarCounts(true);
     } catch (error) {
       this.toast.show(errorMessage(error, 'Could not save event.'));
     } finally {
@@ -302,7 +302,7 @@ export class AdminEvents {
         await this.eventsApi.delete(target.id);
         this.events.update((items) => items.filter((event) => event.id !== target.id));
         this.toast.show('Event deleted.');
-        void this.dashboardApi.refreshSidebarCounts();
+        void this.dashboardApi.refreshSidebarCounts(true);
       } catch (error) {
         this.toast.show(errorMessage(error, 'Could not delete event.'));
       }
