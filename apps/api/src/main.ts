@@ -25,21 +25,8 @@ import { NestFactory } from '@nestjs/core';
 import { LOCAL_PORTS } from '@astec/config';
 import { AppModule } from './app.module.js';
 import { AuthService } from './auth/auth.service.js';
+import { isOriginAllowed } from './auth/origin-policy.js';
 import { ApiExceptionFilter } from './core/api-exception.filter.js';
-
-function isOriginAllowed(origin: string, allowedOrigins: ReadonlySet<string>): boolean {
-  if (allowedOrigins.has(origin)) return true;
-  try {
-    const url = new URL(origin);
-    if (url.hostname === 'astecaa.vercel.app' || url.hostname.endsWith('.astecaa.vercel.app')) return true;
-    if (url.hostname === 'astecaa-admin.vercel.app' || url.hostname.endsWith('.astecaa-admin.vercel.app')) return true;
-    if (url.hostname === 'astecaa-api.vercel.app') return true;
-    if (url.hostname.endsWith('.vercel.app')) return true;
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return true;
-    if (url.hostname === 'astecaa.org' || url.hostname.endsWith('.astecaa.org')) return true;
-  } catch {}
-  return false;
-}
 
 let cachedExpress: Express | null = null;
 

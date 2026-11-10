@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { appUsers, astecSchema, authIdentities, invitations, roles, userRoles } from '@astec/database';
 import { getAppConfig } from '@astec/config';
 import { DatabaseService } from '../database/database.service.js';
+import { buildTrustedOrigins } from './origin-policy.js';
 
 @Injectable()
 export class AuthService implements OnModuleDestroy {
@@ -46,7 +47,7 @@ export class AuthService implements OnModuleDestroy {
         expiresIn: 60 * 60 * 24 * 7,
         updateAge: 60 * 60 * 24,
       },
-      trustedOrigins: [...this.allowedOrigins],
+      trustedOrigins: buildTrustedOrigins(this.allowedOrigins),
       database: drizzleAdapter(this.database.db, {
         provider: 'pg',
         schema: astecSchema,
