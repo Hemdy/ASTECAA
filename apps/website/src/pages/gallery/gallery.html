@@ -60,10 +60,14 @@
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
           >
-            <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
-            <figcaption class="caption">{{ m.caption || m.title }}</figcaption>
+            @if ((m.type || m.mediaType) === 'video') {
+              <video [src]="m.url" controls playsinline preload="metadata" class="photo-vintage"></video>
+            } @else {
+              <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+            }
+            <figcaption class="caption">{{ m.caption || m.description || m.title }}</figcaption>
             <span class="sb-year">{{ m.year }}</span>
-            @if (m.type === 'video') {
+            @if ((m.type || m.mediaType) === 'video') {
               <span class="sb-video"><i class="ri-movie-line"></i></span>
             }
           </figure>
@@ -80,8 +84,12 @@
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
           >
-            <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
-            <figcaption class="caption">{{ m.caption || m.title }}</figcaption>
+            @if ((m.type || m.mediaType) === 'video') {
+              <video [src]="m.url" controls playsinline preload="metadata" class="photo-vintage"></video>
+            } @else {
+              <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+            }
+            <figcaption class="caption">{{ m.caption || m.description || m.title }}</figcaption>
             <span class="pw-meta type">{{ m.album }} · {{ m.year }}</span>
           </figure>
         }

@@ -85,6 +85,7 @@ export class AdminDashboard {
     try {
       const data = await this.dashboardApi.getStats(this.growthPeriod());
       this.stats.set(data);
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load dashboard metrics.');
     }

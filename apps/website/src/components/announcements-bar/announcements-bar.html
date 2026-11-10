@@ -1,0 +1,60 @@
+@if (announcements().length > 0 && currentAnnouncement(); as ann) {
+  <section
+    class="announcements-bar"
+    appReveal
+    (mouseenter)="pause()"
+    (mouseleave)="resume()"
+    (focusin)="pause()"
+    (focusout)="resume()"
+    (touchstart)="onTouchStart($event)"
+    (touchend)="onTouchEnd($event)"
+    (mousedown)="onMouseDown($event)"
+    (mouseup)="onMouseUp($event)"
+  >
+    <div class="container announcements-bar-inner">
+      <div class="announcements-badge">
+        <i class="ri-notification-3-line"></i>
+        <span>Official Notices</span>
+      </div>
+      <div class="announcements-carousel">
+        <div class="announcement-slide">
+          <span class="announcement-tag">{{ ann.pinned ? '📌 Pinned' : 'Notice' }}</span>
+          <strong class="announcement-title">{{ ann.title }}</strong>
+          <span class="announcement-body">{{ ann.body }}</span>
+          <span class="announcement-date">{{ ann.date }}</span>
+        </div>
+      </div>
+      @if (announcements().length > 1) {
+        <div class="announcements-controls">
+          <button
+            type="button"
+            class="announcement-arrow-btn"
+            (click)="prev()"
+            aria-label="Previous announcement"
+          >
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+          <div class="announcement-dots">
+            @for (item of announcements(); track item.id; let idx = $index) {
+              <button
+                type="button"
+                class="announcement-dot"
+                [class.active]="idx === activeIndex()"
+                (click)="goTo(idx)"
+                [attr.aria-label]="'Go to notice ' + (idx + 1)"
+              ></button>
+            }
+          </div>
+          <button
+            type="button"
+            class="announcement-arrow-btn"
+            (click)="next()"
+            aria-label="Next announcement"
+          >
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+}

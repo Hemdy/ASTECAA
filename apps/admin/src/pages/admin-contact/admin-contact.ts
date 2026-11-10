@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ToastService } from '@astec/ui';
-import { CmsApiService } from '@astec/api-client';
+import { CmsApiService, DashboardApiService } from '@astec/api-client';
 import type { ContactSubmission } from '@astec/types';
 
 @Component({
@@ -14,6 +14,7 @@ import type { ContactSubmission } from '@astec/types';
 export class AdminContact implements OnInit {
   private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
+  private dashboardApi = inject(DashboardApiService);
 
   messages = signal<ContactSubmission[]>([]);
   loading = signal(false);
@@ -39,6 +40,7 @@ export class AdminContact implements OnInit {
         const updated = data.find((m) => m.id === this.selected()!.id);
         if (updated) this.selected.set(updated);
       }
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load contact messages');
     } finally {
@@ -63,6 +65,7 @@ export class AdminContact implements OnInit {
         const updated = await this.cmsApi.adminUpdateContactStatus(m.id, 'read');
         this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
         this.selected.set(updated);
+        void this.dashboardApi.refreshSidebarCounts();
       } catch {}
     }
   }
@@ -73,6 +76,7 @@ export class AdminContact implements OnInit {
       this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
       this.selected.set(updated);
       this.toast.show('Marked as read.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -90,6 +94,7 @@ export class AdminContact implements OnInit {
       this.selected.set(updated);
       this.toast.show(`Reply saved and sent to ${m.name}.`);
       this.replyText = '';
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to send reply');
     }
@@ -101,6 +106,7 @@ export class AdminContact implements OnInit {
       this.messages.update((list) => list.map((x) => (x.id === m.id ? updated : x)));
       this.selected.set(updated);
       this.toast.show('Ticket closed.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }

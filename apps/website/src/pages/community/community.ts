@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RevealDirective } from '../../reveal.directive';
+import { AnnouncementsBar } from '../../components/announcements-bar/announcements-bar';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
 import { MemberAuthService } from '../../services/member-auth';
@@ -11,7 +12,7 @@ import type { CmsCommunityMessage, CommunityReply, CmsAnnouncement } from '@aste
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [FormsModule, RevealDirective, DatePipe, RouterLink],
+  imports: [FormsModule, RevealDirective, AnnouncementsBar, DatePipe, RouterLink],
   templateUrl: './community.html',
   styleUrl: './community.css',
 })

@@ -325,4 +325,11 @@ export interface AdminNotificationItem {
   createdAt: string;
 }
 
+export interface AdminSidebarCounts {
+  users: number;
+  events: number;
+  pendingComments: number;
+  newContacts: number;
+}
+
 

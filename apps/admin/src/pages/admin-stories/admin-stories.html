@@ -42,8 +42,8 @@
     </div>
   } @else {
     @if (selected().length > 0) {
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(139, 29, 39, 0.08); border-bottom: 1px solid rgba(139, 29, 39, 0.2)">
-        <span style="font-weight: 600; color: var(--ad-burgundy)">{{ selected().length }} story(s) selected</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--ad-danger-soft); border-bottom: 1px solid var(--ad-border)">
+        <span style="font-weight: 600; color: var(--ad-danger)">{{ selected().length }} story(s) selected</span>
         <button class="adm-btn adm-btn-danger adm-btn-sm" (click)="bulkDelete()">
           <i class="ri-delete-bin-line"></i> Delete Selected
         </button>

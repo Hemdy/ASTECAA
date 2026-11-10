@@ -19,7 +19,7 @@
   <button class="adm-tab" [class.active]="tab() === 'closed'" (click)="tab.set('closed')">Closed</button>
 </div>
 
-<div style="display: flex; gap: 20px; align-items: flex-start">
+<div class="adm-contact-split">
   <!-- List -->
   <div class="adm-card" style="flex: 1; min-width: 0">
     @if (loading()) {
@@ -61,14 +61,14 @@
       </div>
       <div class="adm-card-pad">
         <div class="adm-field-label" style="margin-bottom: 6px">Original Message</div>
-        <p style="color: var(--ad-text); line-height: 1.6; margin-bottom: 20px; padding: 12px; background: rgba(0, 0, 0, 0.02); border-radius: 6px">{{ m.message }}</p>
+        <p style="color: var(--ad-text); line-height: 1.6; margin-bottom: 20px; padding: 12px; background: var(--ad-surface-2); border: 1px solid var(--ad-border); border-radius: 6px">{{ m.message }}</p>
 
         @if (m.replies && m.replies.length > 0) {
           <div style="margin-bottom: 20px">
             <div class="adm-field-label" style="margin-bottom: 8px">Response History ({{ m.replies.length }})</div>
             <div style="display: flex; flex-direction: column; gap: 10px">
               @for (r of m.replies; track r.id) {
-                <div style="padding: 12px 14px; background: rgba(0, 0, 0, 0.03); border-radius: 6px; border-left: 3px solid var(--ad-burgundy)">
+                <div style="padding: 12px 14px; background: var(--ad-surface-2); border: 1px solid var(--ad-border); border-radius: 6px; border-left: 3px solid var(--ad-burgundy)">
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 0.85rem">
                     <strong>{{ r.sender }}</strong>
                     <span class="adm-cell-user-sub">{{ shortDate(r.sentAt) }}</span>

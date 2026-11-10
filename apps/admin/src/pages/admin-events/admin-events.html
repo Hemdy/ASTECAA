@@ -43,8 +43,8 @@
       <div class="adm-card-pad">No events found. Create an event to publish content to the website.</div>
     } @else {
     @if (selectedIds().length > 0) {
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(139, 29, 39, 0.08); border-bottom: 1px solid rgba(139, 29, 39, 0.2)">
-        <span style="font-weight: 600; color: var(--ad-burgundy)">{{ selectedIds().length }} event(s) selected</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--ad-danger-soft); border-bottom: 1px solid var(--ad-border)">
+        <span style="font-weight: 600; color: var(--ad-danger)">{{ selectedIds().length }} event(s) selected</span>
         <button class="adm-btn adm-btn-danger adm-btn-sm" (click)="batchDelete()">
           <i class="ri-delete-bin-line"></i> Delete Selected
         </button>
@@ -127,26 +127,32 @@
   </div>
 } @else {
   <!-- Calendar view -->
-  <div class="adm-card adm-card-pad">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
-      <strong style="font-family: var(--font-display); font-size: 1.1rem">{{ monthLabel() }}</strong>
+  <div class="adm-card">
+    <div class="adm-card-head">
+      <div class="adm-card-title">{{ monthLabel() }}</div>
       <div style="display: flex; gap: 6px">
-        <button class="adm-page-btn" (click)="prevMonth()"><i class="ri-arrow-left-s-line"></i></button>
-        <button class="adm-page-btn" (click)="nextMonth()"><i class="ri-arrow-right-s-line"></i></button>
+        <button type="button" class="adm-page-btn" aria-label="Previous month" (click)="prevMonth()"><i class="ri-arrow-left-s-line"></i></button>
+        <button type="button" class="adm-page-btn" aria-label="Next month" (click)="nextMonth()"><i class="ri-arrow-right-s-line"></i></button>
       </div>
     </div>
-    <div class="adm-cal">
-      @for (d of weekDays; track d) {
-        <div class="adm-cal-head">{{ d }}</div>
-      }
-      @for (cell of calendarCells(); track cell.key) {
-        <div class="adm-cal-cell" [class.muted]="!cell.inMonth" [class.today]="cell.isToday">
-          <span class="adm-cal-cell-num">{{ cell.day }}</span>
-          @for (ev of cell.events; track ev.id) {
-            <span class="adm-cal-event">{{ ev.title }}</span>
+    <div class="adm-card-pad">
+      <div class="adm-cal-wrap">
+        <div class="adm-cal">
+          @for (d of weekDays; track d) {
+            <div class="adm-cal-head">{{ d }}</div>
+          }
+          @for (cell of calendarCells(); track cell.key) {
+            <div class="adm-cal-cell" [class.muted]="!cell.inMonth" [class.today]="cell.isToday">
+              <span class="adm-cal-cell-num">{{ cell.day }}</span>
+              <div class="adm-cal-events">
+                @for (ev of cell.events; track ev.id) {
+                  <span class="adm-cal-event" [title]="ev.title">{{ ev.title }}</span>
+                }
+              </div>
+            </div>
           }
         </div>
-      }
+      </div>
     </div>
   </div>
 }

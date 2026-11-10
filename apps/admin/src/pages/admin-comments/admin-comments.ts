@@ -2,7 +2,7 @@ import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { ToastService } from '@astec/ui';
-import { CmsApiService } from '@astec/api-client';
+import { CmsApiService, DashboardApiService } from '@astec/api-client';
 import { AdminAuthService } from '../../auth.service';
 
 export interface AdminCommentView {
@@ -42,6 +42,7 @@ export class AdminComments implements OnInit {
   private cmsApi = inject(CmsApiService);
   private auth = inject(AdminAuthService);
   private toast = inject(ToastService);
+  private dashboardApi = inject(DashboardApiService);
 
   comments = signal<AdminCommentView[]>([]);
   loading = signal(false);
@@ -102,6 +103,7 @@ export class AdminComments implements OnInit {
           createdAt: c.createdAt || new Date().toISOString(),
         }))
       );
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load comments');
     } finally {
@@ -119,6 +121,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.updateCommentStatus(id, 'approved');
       this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'approved' } : c)));
       this.toast.show('Comment approved and published.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -129,6 +132,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.updateCommentStatus(id, 'spam');
       this.comments.update((list) => list.map((c) => (c.id === id ? { ...c, status: 'spam' } : c)));
       this.toast.show('Comment marked as spam.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }
@@ -139,6 +143,7 @@ export class AdminComments implements OnInit {
       await this.cmsApi.deleteComment(id);
       this.comments.update((list) => list.filter((c) => c.id !== id));
       this.toast.show('Comment deleted.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Action failed');
     }

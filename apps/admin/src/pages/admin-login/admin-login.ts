@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AdminAuthService } from '../../auth.service';
+import { AdminState } from '../../admin-state';
 
 @Component({
   selector: 'app-admin-login',
@@ -11,6 +12,7 @@ import { AdminAuthService } from '../../auth.service';
 })
 export class AdminLogin {
   auth = inject(AdminAuthService);
+  state = inject(AdminState);
   router = inject(Router);
 
   email = '';

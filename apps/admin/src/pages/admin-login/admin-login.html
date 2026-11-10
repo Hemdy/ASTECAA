@@ -6,6 +6,15 @@
         <div class="adm-login-name">ASTECAA</div>
         <div class="adm-login-sub">Admin Console</div>
       </div>
+      <button
+        type="button"
+        class="adm-theme-toggle"
+        style="margin-left: auto"
+        (click)="state.toggleTheme()"
+        [attr.aria-label]="state.theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'"
+      >
+        <i [class]="state.theme() === 'light' ? 'ri-moon-line' : 'ri-sun-line'"></i>
+      </button>
     </div>
 
     <h1 class="adm-login-title">Welcome back</h1>

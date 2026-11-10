@@ -11,5 +11,10 @@ export class DashboardController {
   async getStats(@Query('period') period?: string) {
     return this.dashboard.getStats(period || '6m');
   }
+
+  @Get('sidebar-counts')
+  async getSidebarCounts() {
+    return this.dashboard.getSidebarCounts();
+  }
 }
 

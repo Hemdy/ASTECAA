@@ -1,9 +1,27 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, DestroyRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
 import type { CmsGalleryItem } from '@astec/types';
+import {
+  formatFileSize,
+  inferMediaMimeType,
+  isSupportedMediaFile,
+  prepareMediaUploadPayload,
+  titleFromFilename,
+} from '../../shared/media-upload.util';
+
+export interface BulkUploadEntry {
+  id: string;
+  file: File;
+  title: string;
+  isVideo: boolean;
+  sizeLabel: string;
+  previewUrl: string | null;
+  status: 'pending' | 'uploading' | 'done' | 'error';
+  error?: string;
+}
 
 @Component({
   selector: 'app-admin-gallery',
@@ -12,8 +30,9 @@ import type { CmsGalleryItem } from '@astec/types';
   templateUrl: './admin-gallery.html',
 })
 export class AdminGallery implements OnInit {
-  private cmsApi = inject(CmsApiService);
-  private toast = inject(ToastService);
+  private readonly cmsApi = inject(CmsApiService);
+  private readonly toast = inject(ToastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   items = signal<CmsGalleryItem[]>([]);
   loading = signal(false);
@@ -27,7 +46,7 @@ export class AdminGallery implements OnInit {
   confirmDelete = signal(false);
   uploading = signal(false);
 
-  // Upload Form State
+  // Single Upload Form State
   selectedFile = signal<File | null>(null);
   selectedFilePreview = signal<string | null>(null);
   uploadTitle = signal('');
@@ -37,13 +56,27 @@ export class AdminGallery implements OnInit {
   uploadFeatured = signal(false);
 
   // Bulk Upload State
-  bulkFiles = signal<File[]>([]);
+  bulkEntries = signal<BulkUploadEntry[]>([]);
   bulkAlbum = signal('Annual Reunions');
   bulkYear = signal(new Date().getFullYear());
+  bulkFeatured = signal(false);
+  bulkProgress = signal<{ current: number; total: number } | null>(null);
+
+  pendingBulkCount = computed(
+    () => this.bulkEntries().filter((entry) => entry.status !== 'done').length,
+  );
+
+  featuredCount = computed(() => this.items().filter((item) => item.featured).length);
 
   albums = computed(() => {
     const fromItems = [...new Set(this.items().map((g) => g.album).filter(Boolean))];
-    const defaultAlbums = ['Annual Reunions', 'Campus Life', 'Sports & Culture', 'Milestones', 'Voices & History'];
+    const defaultAlbums = [
+      'Annual Reunions',
+      'Campus Life',
+      'Sports & Culture',
+      'Milestones',
+      'Voices & History',
+    ];
     return [...new Set([...defaultAlbums, ...fromItems])];
   });
 
@@ -64,7 +97,7 @@ export class AdminGallery implements OnInit {
   storageFormatted = computed(() => {
     const mb = this.totalStorage();
     if (mb > 1024) return `${(mb / 1024).toFixed(1)} GB`;
-    return `${Math.max(mb, 12).toFixed(1)} MB`;
+    return `${mb.toFixed(1)} MB`;
   });
 
   filtered = computed(() => {
@@ -73,13 +106,23 @@ export class AdminGallery implements OnInit {
     const t = this.typeFilter();
     const f = this.featFilter();
     return this.items().filter((item) => {
-      const mq = !q || item.title.toLowerCase().includes(q) || (item.caption && item.caption.toLowerCase().includes(q));
+      const caption = item.caption || item.description || '';
+      const kind = item.type || item.mediaType || 'photo';
+      const mq =
+        !q || item.title.toLowerCase().includes(q) || caption.toLowerCase().includes(q);
       const ma = !a || item.album === a;
-      const mt = !t || item.type === t;
+      const mt = !t || kind === t;
       const mf = f === '' || (f === 'true' ? item.featured : !item.featured);
       return mq && ma && mt && mf;
     });
   });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.revokePreview(this.selectedFilePreview());
+      this.revokeBulkPreviews(this.bulkEntries());
+    });
+  }
 
   ngOnInit() {
     void this.loadGallery();
@@ -95,6 +138,10 @@ export class AdminGallery implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  itemType(item: CmsGalleryItem): 'photo' | 'video' {
+    return (item.type || item.mediaType) === 'video' ? 'video' : 'photo';
   }
 
   toggleSelect(id: string) {
@@ -145,11 +192,37 @@ export class AdminGallery implements OnInit {
     }
   }
 
+  openSingleUpload() {
+    this.resetUploadForm();
+    this.uploadModal.set(true);
+  }
+
+  closeSingleUpload() {
+    if (this.uploading()) return;
+    this.uploadModal.set(false);
+    this.resetUploadForm();
+  }
+
+  openBulkUpload() {
+    this.clearBulkEntries();
+    this.bulkProgress.set(null);
+    this.bulkFeatured.set(false);
+    this.bulkModal.set(true);
+  }
+
+  closeBulkUpload() {
+    if (this.uploading()) return;
+    this.bulkModal.set(false);
+    this.clearBulkEntries();
+    this.bulkProgress.set(null);
+  }
+
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       this.setSingleFile(input.files[0]);
     }
+    input.value = '';
   }
 
   onDrop(event: DragEvent) {
@@ -164,15 +237,18 @@ export class AdminGallery implements OnInit {
   }
 
   private setSingleFile(file: File) {
+    if (!isSupportedMediaFile(file)) {
+      this.toast.show(`Unsupported file "${file.name}". Choose an image or video file.`);
+      return;
+    }
+    this.revokePreview(this.selectedFilePreview());
     this.selectedFile.set(file);
     if (!this.uploadTitle()) {
-      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
-      this.uploadTitle.set(nameWithoutExt.charAt(0).toUpperCase() + nameWithoutExt.slice(1));
+      this.uploadTitle.set(titleFromFilename(file.name));
     }
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => this.selectedFilePreview.set(e.target?.result as string);
-      reader.readAsDataURL(file);
+    const mime = inferMediaMimeType(file);
+    if (mime.startsWith('image/')) {
+      this.selectedFilePreview.set(URL.createObjectURL(file));
     } else {
       this.selectedFilePreview.set(null);
     }
@@ -181,26 +257,17 @@ export class AdminGallery implements OnInit {
   async confirmUpload() {
     const file = this.selectedFile();
     if (!file) {
-      this.toast.show('Please select a file to upload from your computer.');
+      this.toast.show('Please select an image or video file to upload.');
       return;
     }
     this.uploading.set(true);
     try {
-      const base64 = await this.readFileAsDataUrl(file);
-      const media = await this.cmsApi.adminUploadMedia(base64, file.name, file.type, 'gallery');
-
-      const isVideo = file.type.startsWith('video');
-      await this.cmsApi.createGalleryItem({
-        title: this.uploadTitle().trim() || file.name,
+      await this.uploadGalleryEntry(file, {
+        title: this.uploadTitle().trim() || titleFromFilename(file.name),
         caption: this.uploadCaption().trim() || null,
-        album: this.uploadAlbum() || 'General',
+        album: this.uploadAlbum() || 'Annual Reunions',
         year: Number(this.uploadYear()) || new Date().getFullYear(),
-        type: isVideo ? 'video' : 'photo',
-        url: media.url,
-        thumb: media.url,
-        size: media.size || `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
         featured: this.uploadFeatured(),
-        sortOrder: 0,
       });
 
       this.toast.show('Media uploaded successfully to gallery.');
@@ -216,58 +283,180 @@ export class AdminGallery implements OnInit {
 
   onBulkFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
-      this.bulkFiles.set(Array.from(input.files));
+    if (input.files && input.files.length > 0) {
+      this.appendBulkFiles(input.files);
     }
+    input.value = '';
   }
 
   onBulkDrop(event: DragEvent) {
     event.preventDefault();
-    if (event.dataTransfer?.files) {
-      this.bulkFiles.set(Array.from(event.dataTransfer.files));
+    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
+      this.appendBulkFiles(event.dataTransfer.files);
     }
   }
 
+  private appendBulkFiles(fileList: FileList) {
+    const existing = this.bulkEntries();
+    const seen = new Set(existing.map((e) => e.id));
+    const additions: BulkUploadEntry[] = [];
+    let skipped = 0;
+
+    for (const file of Array.from(fileList)) {
+      if (!isSupportedMediaFile(file)) {
+        skipped++;
+        continue;
+      }
+      const id = `${file.name}:${file.size}:${file.lastModified}`;
+      if (seen.has(id)) continue;
+      seen.add(id);
+
+      const mime = inferMediaMimeType(file);
+      const isVideo = mime.startsWith('video/');
+      additions.push({
+        id,
+        file,
+        title: titleFromFilename(file.name),
+        isVideo,
+        sizeLabel: formatFileSize(file.size),
+        previewUrl: !isVideo ? URL.createObjectURL(file) : null,
+        status: 'pending',
+      });
+    }
+
+    if (skipped > 0) {
+      this.toast.show(`Skipped ${skipped} unsupported file(s). Only images and videos are supported.`);
+    }
+    if (additions.length > 0) {
+      this.bulkEntries.update((list) => [...list, ...additions]);
+    }
+  }
+
+  updateBulkTitle(id: string, title: string) {
+    this.bulkEntries.update((list) =>
+      list.map((entry) => (entry.id === id ? { ...entry, title } : entry)),
+    );
+  }
+
+  removeBulkEntry(id: string) {
+    if (this.uploading()) return;
+    const target = this.bulkEntries().find((e) => e.id === id);
+    if (target) this.revokePreview(target.previewUrl);
+    this.bulkEntries.update((list) => list.filter((e) => e.id !== id));
+  }
+
+  clearBulkEntries() {
+    if (this.uploading()) return;
+    this.revokeBulkPreviews(this.bulkEntries());
+    this.bulkEntries.set([]);
+  }
+
   async confirmBulkUpload() {
-    const files = this.bulkFiles();
-    if (files.length === 0) {
-      this.toast.show('Please choose files to upload.');
+    const queue = this.bulkEntries().filter((e) => e.status !== 'done');
+    if (queue.length === 0) {
+      this.toast.show('Please choose at least one image or video file to upload.');
       return;
     }
-    this.uploading.set(true);
-    try {
-      let count = 0;
-      for (const file of files) {
-        const base64 = await this.readFileAsDataUrl(file);
-        const media = await this.cmsApi.adminUploadMedia(base64, file.name, file.type, 'gallery');
-        const isVideo = file.type.startsWith('video');
-        const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
 
-        await this.cmsApi.createGalleryItem({
-          title: nameWithoutExt.charAt(0).toUpperCase() + nameWithoutExt.slice(1),
-          album: this.bulkAlbum() || 'General',
-          year: Number(this.bulkYear()) || new Date().getFullYear(),
-          type: isVideo ? 'video' : 'photo',
-          url: media.url,
-          thumb: media.url,
-          size: media.size || `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          featured: false,
-          sortOrder: 0,
-        });
-        count++;
+    this.uploading.set(true);
+    this.bulkProgress.set({ current: 0, total: queue.length });
+
+    let succeeded = 0;
+    let failed = 0;
+    let firstError = '';
+
+    try {
+      for (let i = 0; i < queue.length; i++) {
+        const entry = queue[i];
+        this.bulkProgress.set({ current: i + 1, total: queue.length });
+        this.setBulkEntryStatus(entry.id, 'uploading');
+
+        try {
+          await this.uploadGalleryEntry(entry.file, {
+            title: entry.title.trim() || titleFromFilename(entry.file.name),
+            album: this.bulkAlbum() || 'Annual Reunions',
+            year: Number(this.bulkYear()) || new Date().getFullYear(),
+            featured: this.bulkFeatured(),
+          });
+          this.setBulkEntryStatus(entry.id, 'done');
+          succeeded++;
+        } catch (err: any) {
+          const message = err?.message || 'Upload failed';
+          if (!firstError) firstError = message;
+          this.setBulkEntryStatus(entry.id, 'error', message);
+          failed++;
+        }
       }
-      this.toast.show(`${count} file(s) uploaded successfully.`);
-      this.bulkModal.set(false);
-      this.bulkFiles.set([]);
-      await this.loadGallery();
-    } catch (err: any) {
-      this.toast.show(err.message || 'Bulk upload failed');
+
+      if (succeeded > 0) {
+        await this.loadGallery();
+      }
+
+      if (failed === 0) {
+        this.toast.show(`${succeeded} file(s) uploaded successfully to gallery.`);
+        this.bulkModal.set(false);
+        this.clearBulkEntries();
+      } else if (succeeded > 0) {
+        this.toast.show(
+          `Uploaded ${succeeded} file(s); ${failed} failed (${firstError}). Retry the remaining items.`,
+        );
+      } else {
+        this.toast.show(firstError || 'Bulk upload failed.');
+      }
     } finally {
       this.uploading.set(false);
+      this.bulkProgress.set(null);
+    }
+  }
+
+  private setBulkEntryStatus(
+    id: string,
+    status: BulkUploadEntry['status'],
+    error?: string,
+  ) {
+    this.bulkEntries.update((list) =>
+      list.map((entry) => (entry.id === id ? { ...entry, status, error } : entry)),
+    );
+  }
+
+  private async uploadGalleryEntry(
+    file: File,
+    meta: { title: string; caption?: string | null; album: string; year: number; featured: boolean },
+  ): Promise<CmsGalleryItem> {
+    const prepared = await prepareMediaUploadPayload(file);
+    const media = await this.cmsApi.adminUploadMedia(
+      prepared.dataUrl,
+      prepared.name,
+      prepared.mimeType,
+      'gallery',
+    );
+    const isVideo = prepared.mimeType.startsWith('video/');
+    const caption = meta.caption?.trim() || null;
+
+    try {
+      return await this.cmsApi.createGalleryItem({
+        title: meta.title.trim() || titleFromFilename(file.name),
+        caption,
+        description: caption,
+        album: meta.album || 'Annual Reunions',
+        year: Number(meta.year) || new Date().getFullYear(),
+        type: isVideo ? 'video' : 'photo',
+        mediaType: isVideo ? 'video' : 'photo',
+        url: media.url,
+        thumb: media.url,
+        size: media.size || prepared.sizeFormatted,
+        featured: meta.featured,
+        sortOrder: 0,
+      });
+    } catch (err) {
+      // Avoid orphaned storage objects / media records if gallery metadata insert fails
+      await this.cmsApi.adminDeleteMedia(media.id).catch(() => {});
+      throw err;
     }
   }
 
   private resetUploadForm() {
+    this.revokePreview(this.selectedFilePreview());
     this.selectedFile.set(null);
     this.selectedFilePreview.set(null);
     this.uploadTitle.set('');
@@ -275,12 +464,20 @@ export class AdminGallery implements OnInit {
     this.uploadFeatured.set(false);
   }
 
-  private readFileAsDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
+  private revokePreview(url: string | null) {
+    if (url && url.startsWith('blob:')) {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  private revokeBulkPreviews(entries: BulkUploadEntry[]) {
+    for (const entry of entries) {
+      this.revokePreview(entry.previewUrl);
+    }
+  }
+
+  onThumbError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/empty/image-fallback.jpg';
   }
 }

@@ -8,6 +8,7 @@
 /* Global fallback so login page (outside :host) gets the tokens */
 :root,
 :host {
+  color-scheme: light dark;
   /* ---------- Brand bridge tokens (light default) ---------- */
   --ad-bg: #f6f1e6;
   --ad-surface: #fdfaf3;
@@ -45,8 +46,13 @@
 }
 
 /* ---------- Dark theme ---------- */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root:has(> head > meta[name="color-scheme"][content="dark"]),
 :root[data-theme="dark"],
 :host-context([data-theme="dark"]) {
+  color-scheme: dark;
   --ad-bg: #1c1612;
   --ad-surface: #261e18;
   --ad-surface-2: #2e251e;
@@ -76,6 +82,53 @@
   --ad-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --ad-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
   --ad-shadow-lg: 0 18px 44px rgba(0, 0, 0, 0.5);
+
+  /* Override shared website palette tokens so inherited UI primitives adapt in dark mode */
+  --c-bg: var(--ad-bg);
+  --c-bg-50: var(--ad-surface);
+  --c-bg-100: var(--ad-bg);
+  --c-bg-200: var(--ad-surface-2);
+  --c-paper: var(--ad-surface-2);
+  --c-paper-100: var(--ad-surface-2);
+  --c-paper-200: var(--ad-surface-3);
+  --c-ink: var(--ad-text);
+  --c-ink-soft: var(--ad-text-soft);
+  --c-muted: var(--ad-text-muted);
+  --surface: var(--ad-bg);
+  --surface-raised: var(--ad-surface);
+  --surface-paper: var(--ad-surface-2);
+}
+
+/* Override public website base rules loaded before admin.css */
+html,
+body {
+  background-color: var(--ad-bg);
+  color: var(--ad-text);
+}
+body {
+  background-image: none;
+  background-attachment: initial;
+}
+h1,
+h2,
+h3,
+h4 {
+  color: var(--ad-text);
+}
+a {
+  color: var(--ad-primary);
+}
+::-webkit-scrollbar-track {
+  background: var(--ad-surface-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ad-border-strong);
+  border-color: var(--ad-surface-2);
+}
+:root[data-theme="dark"] .toast {
+  background: var(--ad-surface-3);
+  color: var(--ad-text);
+  border: 1px solid var(--ad-border-strong);
 }
 
 /* ============================================================
@@ -89,13 +142,13 @@
   font-family: var(--font-ui);
   color: var(--ad-text);
   background: var(--ad-bg);
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
-  grid-template-columns: 264px 1fr;
+  grid-template-columns: 264px minmax(0, 1fr);
   transition: grid-template-columns var(--ad-transition);
 }
 .admin.collapsed {
-  grid-template-columns: 76px 1fr;
+  grid-template-columns: 76px minmax(0, 1fr);
 }
 
 /* ---------- Sidebar ---------- */
@@ -106,9 +159,12 @@
   flex-direction: column;
   position: sticky;
   top: 0;
-  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
-  transition: width var(--ad-transition);
+  transition: width var(--ad-transition), transform var(--ad-transition);
+}
+.adm-mobile-backdrop {
+  display: none;
 }
 .adm-brand {
   position: relative;
@@ -422,10 +478,12 @@
 .adm-content {
   padding: 28px;
   flex: 1;
+  min-width: 0;
+  overflow-x: clip;
 }
 @media (max-width: 768px) {
   .adm-content {
-    padding: 18px;
+    padding: 16px;
   }
 }
 
@@ -437,6 +495,8 @@
   border: 1px solid var(--ad-border);
   border-radius: var(--ad-radius);
   box-shadow: var(--ad-shadow-sm);
+  min-width: 0;
+  overflow: hidden;
 }
 .adm-card-pad {
   padding: 20px;
@@ -659,6 +719,10 @@
 .adm-textarea::placeholder {
   color: var(--ad-text-muted);
 }
+.adm-select option {
+  background: var(--ad-surface);
+  color: var(--ad-text);
+}
 .adm-switch {
   position: relative;
   display: inline-block;
@@ -741,7 +805,10 @@
    TABLES
    ============================================================ */
 .adm-table-wrap {
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .adm-table {
   width: 100%;
@@ -883,7 +950,7 @@
   box-shadow: var(--ad-shadow-lg);
   width: 100%;
   max-width: 560px;
-  max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   animation: admPop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -901,6 +968,7 @@
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 700;
+  color: var(--ad-text);
 }
 .adm-modal-body {
   padding: 22px;
@@ -1081,8 +1149,11 @@
    ============================================================ */
 .adm-quick {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
+}
+.adm-quick > * {
+  min-width: 0;
 }
 .adm-quick-item {
   display: flex;
@@ -1158,18 +1229,23 @@
 }
 .adm-grid-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
 }
 .adm-grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
 .adm-grid-2 {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+}
+.adm-grid-stats > *,
+.adm-grid-3 > *,
+.adm-grid-2 > * {
+  min-width: 0;
 }
 .adm-thumb {
   width: 56px;
@@ -1265,12 +1341,88 @@
   left: 8px;
   z-index: 2;
 }
+.adm-bulk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+.adm-bulk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.adm-bulk-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--ad-surface-2);
+  border: 1px solid var(--ad-border);
+  border-radius: var(--ad-radius-sm);
+}
+.adm-bulk-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: var(--ad-radius-sm);
+  border: 1px solid var(--ad-border);
+  flex-shrink: 0;
+}
+.adm-bulk-thumb-ico {
+  display: grid;
+  place-items: center;
+  background: var(--ad-surface-3);
+  color: var(--ad-text-soft);
+  font-size: 1.1rem;
+}
+.adm-bulk-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.adm-bulk-title-input {
+  padding: 5px 8px;
+  font-size: 0.82rem;
+}
+.adm-bulk-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
+  color: var(--ad-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-bulk-err {
+  color: var(--ad-danger);
+  font-weight: 500;
+}
+.adm-bulk-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
 
 /* Calendar */
+.adm-cal-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .adm-cal {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+  width: 100%;
 }
 .adm-cal-head {
   font-family: var(--font-cinzel);
@@ -1280,6 +1432,10 @@
   color: var(--ad-text-muted);
   text-align: center;
   padding: 6px 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .adm-cal-cell {
   aspect-ratio: 1 / 1;
@@ -1294,6 +1450,8 @@
   transition: background var(--ad-transition);
   cursor: pointer;
   min-height: 56px;
+  min-width: 0;
+  overflow: hidden;
 }
 .adm-cal-cell:hover {
   background: var(--ad-surface-2);
@@ -1308,8 +1466,20 @@
 .adm-cal-cell-num {
   font-weight: 600;
   color: var(--ad-text);
+  line-height: 1.2;
+}
+.adm-cal-events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 .adm-cal-event {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
   font-size: 0.66rem;
   background: var(--ad-primary-soft);
   color: var(--ad-primary);
@@ -1392,6 +1562,7 @@
   place-items: center;
   border-radius: 50%;
   background: var(--ad-surface-2);
+  color: var(--ad-text-soft);
   flex-shrink: 0;
   font-size: 0.9rem;
 }
@@ -1474,15 +1645,22 @@
   outline: none;
 }
 
+/* Contact split layout */
+.adm-contact-split {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 1100px) {
   .adm-grid-stats {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .adm-quick {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .adm-card-head {
     align-items: flex-start;
@@ -1490,21 +1668,38 @@
 }
 @media (max-width: 1024px) {
   .admin {
-    grid-template-columns: 264px 1fr;
+    grid-template-columns: 264px minmax(0, 1fr);
+  }
+}
+@media (max-width: 900px) {
+  .adm-contact-split {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 @media (max-width: 768px) {
   .admin {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .adm-sidebar {
     position: fixed;
     left: 0;
     top: 0;
     width: 264px;
+    height: 100dvh;
+    max-height: 100dvh;
     z-index: 50;
     transform: translateX(-100%);
     transition: transform var(--ad-transition);
+    box-shadow: var(--ad-shadow-lg);
+  }
+  .admin.mobile-open .adm-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 11, 8, 0.55);
+    z-index: 45;
+    backdrop-filter: blur(2px);
   }
   .admin.mobile-open .adm-sidebar {
     transform: translateX(0);
@@ -1518,11 +1713,15 @@
   .admin.mobile-open .adm-brand-sub,
   .admin.mobile-open .adm-nav-item span,
   .admin.mobile-open .adm-nav-section,
-  .admin.mobile-open .adm-nav-badge,
   .admin.mobile-open .adm-user-name,
   .admin.mobile-open .adm-user-role,
   .admin.mobile-open .adm-collapse-btn {
     display: block;
+  }
+  .admin.mobile-open .adm-nav-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .admin.mobile-open .adm-brand {
     justify-content: flex-start;
@@ -1532,11 +1731,10 @@
   .admin.mobile-open .adm-user-chip {
     justify-content: flex-start;
   }
-  .adm-grid-3 {
-    grid-template-columns: 1fr;
-  }
+  .adm-grid-stats,
+  .adm-grid-3,
   .adm-grid-2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .adm-topbar {
     padding: 12px 16px;
@@ -1558,6 +1756,14 @@
   .adm-breadcrumb .sep {
     display: none;
   }
+  .adm-notif-panel {
+    position: fixed;
+    top: 62px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    max-width: none;
+  }
   .adm-card-head {
     flex-wrap: wrap;
   }
@@ -1568,9 +1774,10 @@
     width: 100% !important;
   }
   .admin [style*='grid-template-columns: 1fr 1fr'],
+  .admin [style*='grid-template-columns: 1fr 1fr 1fr'],
   .admin [style*='grid-template-columns: repeat(3, 1fr)'],
   .admin [style*='grid-template-columns: repeat(6, 1fr)'] {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: minmax(0, 1fr) !important;
   }
   .admin [style*='grid-column: 1 / -1'] {
     grid-column: auto !important;
@@ -1605,6 +1812,27 @@
   .adm-card-pad {
     padding: 16px;
   }
+  .adm-cal {
+    gap: 4px;
+  }
+  .adm-cal-head {
+    font-size: 0.6rem;
+    letter-spacing: 0.04em;
+    padding: 4px 0;
+  }
+  .adm-cal-cell {
+    aspect-ratio: auto;
+    min-height: 58px;
+    padding: 4px;
+    gap: 3px;
+  }
+  .adm-cal-cell-num {
+    font-size: 0.72rem;
+  }
+  .adm-cal-event {
+    font-size: 0.58rem;
+    padding: 1px 3px;
+  }
   .adm-toggle-row {
     align-items: flex-start;
   }
@@ -1626,8 +1854,8 @@
     min-width: 680px;
   }
   .adm-modal {
-    width: calc(100vw - 24px);
-    max-height: calc(100vh - 24px);
+    width: calc(100dvw - 24px);
+    max-height: calc(100dvh - 24px);
   }
 }
 
@@ -1635,7 +1863,7 @@
    ADMIN LOGIN PAGE
    ============================================================ */
 .adm-login-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1645,6 +1873,14 @@
     radial-gradient(circle at 80% 70%, rgba(122, 62, 62, 0.06) 0%, transparent 45%),
     var(--ad-bg);
   padding: 24px;
+}
+@media (max-width: 768px) {
+  .adm-login-page {
+    padding: 16px;
+  }
+  .adm-login-card {
+    padding: 26px 20px;
+  }
 }
 .adm-login-card {
   width: 100%;
@@ -1703,13 +1939,15 @@
   transform: translateY(-50%);
   background: none;
   border: none;
+  color: var(--ad-text-muted);
   cursor: pointer;
   font-size: 1rem;
   padding: 4px;
-  opacity: 0.6;
-  transition: opacity var(--ad-transition);
+  opacity: 0.75;
+  transition: opacity var(--ad-transition), color var(--ad-transition);
 }
 .adm-pw-toggle:hover {
+  color: var(--ad-text);
   opacity: 1;
 }
 .adm-login-row {

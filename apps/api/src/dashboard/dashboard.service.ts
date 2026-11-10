@@ -9,6 +9,7 @@ import {
   communityMessages,
   communityReplies,
   communityReactions,
+  contactSubmissions,
   session,
 } from '@astec/database';
 import { DatabaseService } from '../database/database.service.js';
@@ -16,6 +17,29 @@ import { DatabaseService } from '../database/database.service.js';
 @Injectable()
 export class DashboardService {
   constructor(private readonly database: DatabaseService) {}
+
+  async getSidebarCounts() {
+    const db = this.database.db;
+    const [[usersRow], [eventsRow], [commentsRow], [contactsRow]] = await Promise.all([
+      db.select({ count: sql<number>`count(*)::int` }).from(appUsers),
+      db.select({ count: sql<number>`count(*)::int` }).from(events),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(communityMessages)
+        .where(eq(communityMessages.status, 'pending')),
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(contactSubmissions)
+        .where(eq(contactSubmissions.status, 'new')),
+    ]);
+
+    return {
+      users: usersRow?.count ?? 0,
+      events: eventsRow?.count ?? 0,
+      pendingComments: commentsRow?.count ?? 0,
+      newContacts: contactsRow?.count ?? 0,
+    };
+  }
 
   async getStats(period: string = '6m') {
     const db = this.database.db;

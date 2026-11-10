@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { RevealDirective } from '../../reveal.directive';
 import { Countdown } from '../../components/countdown/countdown';
+import { AnnouncementsBar } from '../../components/announcements-bar/announcements-bar';
 import { ORGANIZERS } from '../../data';
 import { UiState } from '../../ui-state';
 import { EventsApiService, CmsApiService } from '@astec/api-client';
@@ -18,11 +19,11 @@ import type {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, RevealDirective, Countdown, DecimalPipe],
+  imports: [RouterLink, RevealDirective, Countdown, AnnouncementsBar, DecimalPipe],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
-export class Home implements OnInit, OnDestroy {
+export class Home implements OnInit {
   private eventsApi = inject(EventsApiService);
   private cmsApi = inject(CmsApiService);
 
@@ -56,97 +57,12 @@ export class Home implements OnInit, OnDestroy {
   timelinePreview = signal<CmsTimelineMilestone[]>([]);
   messagesPreview = signal<CmsCommunityMessage[]>([]);
   announcements = signal<CmsAnnouncement[]>([]);
-  currentAnnouncementIndex = signal(0);
-  isAnnouncementPaused = signal(false);
-  private announcementInterval: any = null;
-  private touchStartX = 0;
-  private mouseStartX = 0;
-  private isMouseDown = false;
-
-  currentAnnouncement = computed(() => {
-    const list = this.announcements();
-    if (list.length === 0) return null;
-    return list[this.currentAnnouncementIndex() % list.length];
-  });
 
   organizers = ORGANIZERS;
   rotations = [-3, 2, -1.5, 3, -2.5, 1.8, -2, 2.5];
 
   ngOnInit() {
     void this.loadAll();
-    this.startAnnouncementRotation();
-  }
-
-  ngOnDestroy() {
-    this.stopAnnouncementRotation();
-  }
-
-  startAnnouncementRotation() {
-    this.stopAnnouncementRotation();
-    this.announcementInterval = setInterval(() => {
-      if (!this.isAnnouncementPaused() && this.announcements().length > 1) {
-        this.nextAnnouncement();
-      }
-    }, 5000);
-  }
-
-  stopAnnouncementRotation() {
-    if (this.announcementInterval) {
-      clearInterval(this.announcementInterval);
-      this.announcementInterval = null;
-    }
-  }
-
-  nextAnnouncement() {
-    const total = this.announcements().length;
-    if (total <= 1) return;
-    this.currentAnnouncementIndex.update((i) => (i + 1) % total);
-  }
-
-  prevAnnouncement() {
-    const total = this.announcements().length;
-    if (total <= 1) return;
-    this.currentAnnouncementIndex.update((i) => (i - 1 + total) % total);
-  }
-
-  goToAnnouncement(index: number) {
-    this.currentAnnouncementIndex.set(index);
-  }
-
-  pauseAnnouncements() {
-    this.isAnnouncementPaused.set(true);
-  }
-
-  resumeAnnouncements() {
-    this.isAnnouncementPaused.set(false);
-  }
-
-  onTouchStart(e: TouchEvent) {
-    this.touchStartX = e.changedTouches[0].clientX;
-  }
-
-  onTouchEnd(e: TouchEvent) {
-    const deltaX = e.changedTouches[0].clientX - this.touchStartX;
-    if (Math.abs(deltaX) > 40) {
-      if (deltaX < 0) this.nextAnnouncement();
-      else this.prevAnnouncement();
-    }
-  }
-
-  onMouseDown(e: MouseEvent) {
-    this.mouseStartX = e.clientX;
-    this.isMouseDown = true;
-  }
-
-  onMouseUp(e: MouseEvent) {
-    if (this.isMouseDown) {
-      this.isMouseDown = false;
-      const deltaX = e.clientX - this.mouseStartX;
-      if (Math.abs(deltaX) > 40) {
-        if (deltaX < 0) this.nextAnnouncement();
-        else this.prevAnnouncement();
-      }
-    }
   }
 
   isSectionEnabled(id: string): boolean {

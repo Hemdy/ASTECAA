@@ -211,22 +211,24 @@
       <div class="adm-card-title">Upcoming Events</div>
       <a routerLink="/admin/events" class="adm-btn adm-btn-ghost adm-btn-sm">Manage</a>
     </div>
-    <div class="adm-table-wrap">
-      <table class="adm-table">
-        <thead>
-          <tr><th>Event</th><th>Date</th><th>Registered</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          @for (e of upcomingEvents(); track e.id) {
-            <tr>
-              <td class="row-title">{{ e.title }}</td>
-              <td>{{ shortDate(e.date) }}</td>
-              <td>{{ e.registered }}/{{ e.capacity }}</td>
-              <td><span class="adm-badge" [class.adm-badge-success]="e.status === 'published'" [class.adm-badge-warning]="e.status !== 'published'">{{ e.status }}</span></td>
-            </tr>
-          }
-        </tbody>
-      </table>
+    <div class="adm-card-pad">
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr><th>Event</th><th>Date</th><th>Registered</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            @for (e of upcomingEvents(); track e.id) {
+              <tr>
+                <td class="row-title">{{ e.title }}</td>
+                <td>{{ shortDate(e.date) }}</td>
+                <td>{{ e.registered }}/{{ e.capacity }}</td>
+                <td><span class="adm-badge" [class.adm-badge-success]="e.status === 'published'" [class.adm-badge-warning]="e.status !== 'published'">{{ e.status }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -235,32 +237,34 @@
       <div class="adm-card-title">New Users</div>
       <a routerLink="/admin/users" class="adm-btn adm-btn-ghost adm-btn-sm">Manage</a>
     </div>
-    <div class="adm-table-wrap">
-      <table class="adm-table">
-        <thead>
-          <tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th></tr>
-        </thead>
-        <tbody>
-          @for (u of newUsers(); track u.id) {
-            <tr>
-              <td>
-                <div class="adm-cell-user">
-                  <img class="adm-avatar adm-avatar-sm" [src]="u.avatar" [alt]="u.name" (error)="onAvatarImageError($event)" />
-                  <div>
-                    <div class="adm-cell-user-name">{{ u.name }}</div>
-                    <div class="adm-cell-user-sub">{{ u.email }}</div>
+    <div class="adm-card-pad">
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            @for (u of newUsers(); track u.id) {
+              <tr>
+                <td>
+                  <div class="adm-cell-user">
+                    <img class="adm-avatar adm-avatar-sm" [src]="u.avatar" [alt]="u.name" (error)="onAvatarImageError($event)" />
+                    <div>
+                      <div class="adm-cell-user-name">{{ u.name }}</div>
+                      <div class="adm-cell-user-sub">{{ u.email }}</div>
+                    </div>
                   </div>
-                </div>
-              </td>
-              <td>{{ u.role }}</td>
-              <td>{{ shortDate(u.joined) }}</td>
-              <td>
-                <span class="adm-badge" [class.adm-badge-success]="u.status === 'active'" [class.adm-badge-warning]="u.status === 'pending'" [class.adm-badge-danger]="u.status === 'suspended'">{{ u.status }}</span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+                </td>
+                <td>{{ u.role }}</td>
+                <td>{{ shortDate(u.joined) }}</td>
+                <td>
+                  <span class="adm-badge" [class.adm-badge-success]="u.status === 'active'" [class.adm-badge-warning]="u.status === 'pending'" [class.adm-badge-danger]="u.status === 'suspended'">{{ u.status }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>

@@ -966,7 +966,20 @@ export const TRAFFIC_DATA: ChartPoint[] = [
   { label: 'W4', value: 6300 }, { label: 'W5', value: 7200 }, { label: 'W6', value: 8900 },
 ];
 
-export const ADMIN_NAV = [
+export interface AdminNavItem {
+  label: string;
+  path: string;
+  icon: string;
+  countKey?: 'events' | 'users' | 'pendingComments' | 'newContacts';
+  showZero?: boolean;
+}
+
+export interface AdminNavGroup {
+  section: string;
+  items: AdminNavItem[];
+}
+
+export const ADMIN_NAV: AdminNavGroup[] = [
   {
     section: 'Overview',
     items: [
@@ -976,18 +989,18 @@ export const ADMIN_NAV = [
   {
     section: 'Content',
     items: [
-      { label: 'Events', path: '/admin/events', icon: 'ri-calendar-event-line', badge: 6 },
+      { label: 'Events', path: '/admin/events', icon: 'ri-calendar-event-line', countKey: 'events', showZero: true },
       { label: 'Gallery', path: '/admin/gallery', icon: 'ri-image-line' },
       { label: 'Stories', path: '/admin/stories', icon: 'ri-article-line' },
-      { label: 'Comments', path: '/admin/comments', icon: 'ri-chat-3-line', badge: 4 },
+      { label: 'Comments', path: '/admin/comments', icon: 'ri-chat-3-line', countKey: 'pendingComments' },
       { label: 'Announcements', path: '/admin/announcements', icon: 'ri-notification-badge-line' },
     ],
   },
   {
     section: 'People',
     items: [
-      { label: 'Users', path: '/admin/users', icon: 'ri-group-line' },
-      { label: 'Contact', path: '/admin/contact', icon: 'ri-mail-line', badge: 1 },
+      { label: 'Users', path: '/admin/users', icon: 'ri-group-line', countKey: 'users', showZero: true },
+      { label: 'Contact', path: '/admin/contact', icon: 'ri-mail-line', countKey: 'newContacts' },
     ],
   },
   {

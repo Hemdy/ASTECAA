@@ -31,6 +31,25 @@ export class CmsService {
 
   // ==================== GALLERY ====================
 
+  private formatGalleryItem(r: typeof galleryItems.$inferSelect) {
+    return {
+      id: r.id,
+      title: r.title,
+      caption: r.description,
+      description: r.description,
+      url: r.url,
+      thumb: r.url,
+      album: r.album,
+      year: r.year,
+      type: r.mediaType as 'photo' | 'video',
+      mediaType: r.mediaType as 'photo' | 'video',
+      featured: r.featured,
+      size: r.size,
+      createdAt: r.createdAt.toISOString(),
+      updatedAt: r.updatedAt.toISOString(),
+    };
+  }
+
   async listGallery(album?: string, year?: number, featured?: boolean) {
     const db = this.database.db;
     const conditions = [];
@@ -42,68 +61,84 @@ export class CmsService {
       ? await db.select().from(galleryItems).where(and(...conditions)).orderBy(desc(galleryItems.createdAt))
       : await db.select().from(galleryItems).orderBy(desc(galleryItems.createdAt));
 
-    return rows.map((r) => ({
-      id: r.id,
-      title: r.title,
-      description: r.description,
-      url: r.url,
-      album: r.album,
-      year: r.year,
-      mediaType: r.mediaType as 'photo' | 'video',
-      featured: r.featured,
-      size: r.size,
-      createdAt: r.createdAt.toISOString(),
-    }));
+    return rows.map((r) => this.formatGalleryItem(r));
   }
 
   async createGalleryItem(data: {
     title: string;
-    description?: string;
+    caption?: string | null;
+    description?: string | null;
     url: string;
     album: string;
     year: number;
+    type?: 'photo' | 'video';
     mediaType?: 'photo' | 'video';
     featured?: boolean;
     size?: string;
   }) {
     const db = this.database.db;
+    const description = data.description ?? data.caption ?? null;
+    const mediaType = (data.mediaType ?? data.type) === 'video' ? 'video' : 'photo';
+
     const [created] = await db
       .insert(galleryItems)
       .values({
         title: data.title,
-        description: data.description,
+        description,
         url: data.url,
         album: data.album,
         year: data.year,
-        mediaType: data.mediaType || 'photo',
-        featured: data.featured || false,
+        mediaType,
+        featured: Boolean(data.featured),
         size: data.size,
       })
       .returning();
-    return created;
+    return this.formatGalleryItem(created);
   }
 
   async updateGalleryItem(
     id: string,
     data: Partial<{
       title: string;
-      description: string;
+      caption: string | null;
+      description: string | null;
       url: string;
       album: string;
       year: number;
+      type: 'photo' | 'video';
       mediaType: 'photo' | 'video';
       featured: boolean;
       size: string;
     }>
   ) {
     const db = this.database.db;
+    const updates: Partial<typeof galleryItems.$inferInsert> = {
+      updatedAt: new Date(),
+    };
+    if (data.title !== undefined) updates.title = data.title;
+    if (data.description !== undefined || data.caption !== undefined) {
+      updates.description = data.description ?? data.caption ?? null;
+    }
+    if (data.url !== undefined) updates.url = data.url;
+    if (data.album !== undefined) updates.album = data.album;
+    if (data.year !== undefined) updates.year = data.year;
+    if (data.mediaType !== undefined || data.type !== undefined) {
+      updates.mediaType = (data.mediaType ?? data.type) === 'video' ? 'video' : 'photo';
+    }
+    if (data.featured !== undefined) updates.featured = data.featured;
+    if (data.size !== undefined) updates.size = data.size;
+
     const [updated] = await db
       .update(galleryItems)
-      .set({ ...data, updatedAt: new Date() })
+      .set(updates)
       .where(eq(galleryItems.id, id))
       .returning();
     if (!updated) throw new AppError(404, 'Gallery item not found.', 'NOT_FOUND');
-    return updated;
+    return this.formatGalleryItem(updated);
+  }
+
+  async getMediaObject(key: string) {
+    return this.storage.getObject(key);
   }
 
   async deleteGalleryItem(id: string) {

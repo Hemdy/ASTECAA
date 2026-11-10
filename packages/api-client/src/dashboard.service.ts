@@ -1,13 +1,38 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
 import { applyAuthHeaders, captureAuthHeader } from './token-storage.js';
-import type { DashboardStatsItem } from '@astec/types';
+import type { AdminSidebarCounts, DashboardStatsItem } from '@astec/types';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardApiService {
+  readonly sidebarCounts = signal<AdminSidebarCounts | null>(null);
+  private inFlightCounts: Promise<AdminSidebarCounts> | null = null;
+
   async getStats(period?: string): Promise<DashboardStatsItem> {
     const qs = period ? `?period=${encodeURIComponent(period)}` : '';
     return this.request<DashboardStatsItem>(`/api/admin/v1/dashboard/stats${qs}`);
+  }
+
+  async getSidebarCounts(): Promise<AdminSidebarCounts> {
+    if (!this.inFlightCounts) {
+      this.inFlightCounts = this.request<AdminSidebarCounts>('/api/admin/v1/dashboard/sidebar-counts')
+        .then((counts) => {
+          this.sidebarCounts.set(counts);
+          return counts;
+        })
+        .finally(() => {
+          this.inFlightCounts = null;
+        });
+    }
+    return this.inFlightCounts;
+  }
+
+  async refreshSidebarCounts(): Promise<void> {
+    try {
+      await this.getSidebarCounts();
+    } catch {
+      // Non-fatal: keep last known counts if offline or unauthenticated
+    }
   }
 
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {

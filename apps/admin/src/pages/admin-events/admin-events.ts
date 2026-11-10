@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { AdmConfirm } from '../../components/adm-confirm/adm-confirm';
 import { ToastService } from '@astec/ui';
-import { EventsApiService, CmsApiService } from '@astec/api-client';
+import { EventsApiService, CmsApiService, DashboardApiService } from '@astec/api-client';
 import type { CmsEvent, EventInput, EventScheduleItem, EventStatus } from '@astec/types';
 
 interface EventEditor {
@@ -66,6 +66,7 @@ export class AdminEvents {
   private toast = inject(ToastService);
   private eventsApi = inject(EventsApiService);
   private cmsApi = inject(CmsApiService);
+  private dashboardApi = inject(DashboardApiService);
 
   events = signal<CmsEvent[]>([]);
   loading = signal(true);
@@ -186,6 +187,7 @@ export class AdminEvents {
     this.loading.set(true);
     try {
       this.events.set(await this.eventsApi.listAdmin());
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (error) {
       this.toast.show(errorMessage(error, 'Could not load events.'));
     } finally {
@@ -279,6 +281,7 @@ export class AdminEvents {
       );
       this.showModal.set(false);
       this.toast.show(this.editingId ? 'Event updated.' : 'Event created.');
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (error) {
       this.toast.show(errorMessage(error, 'Could not save event.'));
     } finally {
@@ -299,6 +302,7 @@ export class AdminEvents {
         await this.eventsApi.delete(target.id);
         this.events.update((items) => items.filter((event) => event.id !== target.id));
         this.toast.show('Event deleted.');
+        void this.dashboardApi.refreshSidebarCounts();
       } catch (error) {
         this.toast.show(errorMessage(error, 'Could not delete event.'));
       }

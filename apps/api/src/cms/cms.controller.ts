@@ -8,8 +8,10 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { CmsService } from './cms.service.js';
 import { AdminGuard } from '../auth/admin.guard.js';
 import { AppError } from '../core/app-error.js';
@@ -128,6 +130,33 @@ export class CmsController {
   @Get('v1/site-content/:key')
   async getSiteContent(@Param('key') key: string) {
     return this.cms.getSiteContent(key);
+  }
+
+  @Get('v1/media/file/:folder/:filename')
+  async getMediaFileWithFolder(
+    @Param('folder') folder: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    return this.serveMediaFile(`${folder}/${filename}`, res);
+  }
+
+  @Get('v1/media/file/:filename')
+  async getMediaFile(
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    return this.serveMediaFile(filename, res);
+  }
+
+  private async serveMediaFile(key: string, res: Response) {
+    const obj = await this.cms.getMediaObject(key);
+    if (!obj) {
+      throw new AppError(404, 'Media file not found.', 'NOT_FOUND');
+    }
+    res.setHeader('Content-Type', obj.contentType);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(obj.buffer);
   }
 
   // ==================== ADMIN CMS ENDPOINTS ====================
@@ -290,14 +319,19 @@ export class CmsController {
     let mimeType = body.type || 'image/jpeg';
 
     if (body.file.startsWith('data:')) {
-      const match = body.file.match(/^data:([^;]+);base64,(.+)$/);
-      if (match) {
-        mimeType = match[1];
-        base64Data = match[2];
+      const match = body.file.match(/^data:([^;,]+)(?:;[^,]+)*;base64,([\s\S]+)$/);
+      if (!match) {
+        throw new AppError(400, 'Invalid base64 data URL format.', 'INVALID_INPUT');
       }
+      mimeType = match[1].trim().toLowerCase();
+      base64Data = match[2];
     }
 
-    const buffer = Buffer.from(base64Data, 'base64');
+    const cleanedBase64 = base64Data.replace(/\s+/g, '');
+    const buffer = Buffer.from(cleanedBase64, 'base64');
+    if (buffer.length === 0) {
+      throw new AppError(400, 'Uploaded file payload is empty.', 'INVALID_INPUT');
+    }
     return this.cms.saveMedia(buffer, body.name, mimeType, body.folder || 'General');
   }
 

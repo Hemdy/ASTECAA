@@ -1,10 +1,12 @@
-import { Component, inject, computed, signal, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { Component, inject, computed, signal, OnInit, DestroyRef } from '@angular/core';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AdminState } from './admin-state';
 import { AdminAuthService } from './auth.service';
-import { CmsApiService } from '@astec/api-client';
-import { ADMIN_NAV, ADMIN_USER } from './admin-data';
+import { CmsApiService, DashboardApiService } from '@astec/api-client';
+import { ADMIN_NAV, ADMIN_USER, type AdminNavItem } from './admin-data';
 import type { AdminNotificationItem } from '@astec/types';
 
 @Component({
@@ -14,13 +16,23 @@ import type { AdminNotificationItem } from '@astec/types';
   templateUrl: './admin-layout.html',
 })
 export class AdminLayout implements OnInit {
+  private destroyRef = inject(DestroyRef);
   state = inject(AdminState);
   auth = inject(AdminAuthService);
   cmsApi = inject(CmsApiService);
+  dashboardApi = inject(DashboardApiService);
   router = inject(Router);
   nav = ADMIN_NAV;
   notifications = signal<AdminNotificationItem[]>([]);
   unreadCount = computed(() => this.notifications().filter((n) => !n.read).length);
+
+  navBadge(item: AdminNavItem): string | null {
+    if (!item.countKey) return null;
+    const counts = this.dashboardApi.sidebarCounts();
+    if (!counts) return null;
+    const value = counts[item.countKey];
+    return item.showZero || value > 0 ? String(value) : null;
+  }
 
   get user() {
     const p = this.auth.profile();
@@ -50,6 +62,16 @@ export class AdminLayout implements OnInit {
 
   ngOnInit() {
     void this.loadNotifications();
+    void this.dashboardApi.refreshSidebarCounts();
+    if (typeof document !== 'undefined') {
+      const onVisibility = () => {
+        if (document.visibilityState === 'visible') {
+          void this.dashboardApi.refreshSidebarCounts();
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibility);
+      this.destroyRef.onDestroy(() => document.removeEventListener('visibilitychange', onVisibility));
+    }
   }
 
   async loadNotifications() {
@@ -120,6 +142,15 @@ export class AdminLayout implements OnInit {
   }
 
   constructor() {
-    this.router.events.subscribe(() => this.state.closeNotif());
+    this.router.events
+      .pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.state.closeNotif();
+        this.closeMobile();
+        void this.dashboardApi.refreshSidebarCounts();
+      });
   }
 }

@@ -5,6 +5,7 @@ import { DatePipe } from '@angular/common';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
 import type { CmsMediaItem } from '@astec/types';
+import { prepareMediaUploadPayload } from '../../shared/media-upload.util';
 
 @Component({
   selector: 'app-admin-media',
@@ -148,9 +149,10 @@ export class AdminMedia implements OnInit {
 
   onFilesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files) {
+    if (input.files && input.files.length > 0) {
       this.selectedFiles.set(Array.from(input.files));
     }
+    input.value = '';
   }
 
   onDrop(event: DragEvent) {
@@ -174,11 +176,16 @@ export class AdminMedia implements OnInit {
     try {
       let count = 0;
       for (const file of files) {
-        const base64 = await this.readFileAsDataUrl(file);
-        await this.cmsApi.adminUploadMedia(base64, file.name, file.type, this.uploadFolder());
+        const prepared = await prepareMediaUploadPayload(file, { allowDocuments: true });
+        await this.cmsApi.adminUploadMedia(
+          prepared.dataUrl,
+          prepared.name,
+          prepared.mimeType,
+          this.uploadFolder(),
+        );
         count++;
       }
-      this.toast.show(`${count} file(s) uploaded to Cloudflare R2.`);
+      this.toast.show(`${count} file(s) uploaded.`);
       this.uploadModal.set(false);
       this.selectedFiles.set([]);
       await this.loadMedia();
@@ -205,14 +212,5 @@ export class AdminMedia implements OnInit {
       () => this.toast.show('URL copied to clipboard!'),
       () => this.toast.show('Failed to copy URL.')
     );
-  }
-
-  private readFileAsDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
   }
 }

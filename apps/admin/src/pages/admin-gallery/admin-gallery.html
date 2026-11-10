@@ -4,10 +4,10 @@
     <div class="adm-section-sub">Upload, organize, and feature photographs and videos from community gatherings.</div>
   </div>
   <div style="margin-left: auto; display: flex; gap: 10px">
-    <button class="adm-btn adm-btn-outline" (click)="bulkModal.set(true)">
+    <button type="button" class="adm-btn adm-btn-outline" (click)="openBulkUpload()">
       <i class="ri-folder-upload-line"></i> Bulk Upload
     </button>
-    <button class="adm-btn adm-btn-primary" (click)="uploadModal.set(true)">
+    <button type="button" class="adm-btn adm-btn-primary" (click)="openSingleUpload()">
       <i class="ri-upload-cloud-2-line"></i> Upload Media
     </button>
   </div>
@@ -28,7 +28,7 @@
   </div>
   <div class="adm-card adm-card-pad">
     <div class="adm-stat-label">Featured</div>
-    <div class="adm-stat-value">{{ filtered().length }}</div>
+    <div class="adm-stat-value">{{ featuredCount() }}</div>
     <div class="adm-card-sub" style="margin-top: 6px">Shown on homepage & gallery</div>
   </div>
 </div>
@@ -96,18 +96,21 @@
     <div class="adm-gallery-grid">
       @for (item of filtered(); track item.id) {
         <div class="adm-gallery-item" (click)="toggleSelect(item.id)">
-          @if (item.type === 'video') {
+          @if (itemType(item) === 'video') {
             <span class="adm-badge adm-badge-info" style="position: absolute; top: 8px; right: 8px; z-index: 2">
               <i class="ri-movie-line"></i> Video
             </span>
-          }
-          @if (item.featured) {
-            <span class="adm-badge adm-badge-gold" style="position: absolute; top: 8px; left: 8px; z-index: 2">
+          } @else if (item.featured) {
+            <span class="adm-badge adm-badge-gold" style="position: absolute; top: 8px; right: 8px; z-index: 2" title="Featured">
               <i class="ri-star-fill"></i>
             </span>
           }
           <input type="checkbox" class="adm-cb adm-gallery-check" [checked]="selected().includes(item.id)" (click)="$event.stopPropagation(); toggleSelect(item.id)" />
-          <img [src]="item.thumb || item.url" [alt]="item.title" />
+          @if (itemType(item) === 'video') {
+            <video [src]="item.url" muted playsinline preload="metadata" style="width: 100%; height: 100%; object-fit: cover"></video>
+          } @else {
+            <img [src]="item.thumb || item.url" [alt]="item.title" (error)="onThumbError($event)" />
+          }
           <div class="adm-gallery-item-overlay">
             <span class="adm-badge adm-badge-gold">{{ item.album }} · {{ item.year }}</span>
           </div>
@@ -127,48 +130,48 @@
 
 <!-- Upload Single Media Modal -->
 @if (uploadModal()) {
-  <div class="adm-modal-backdrop" (click)="uploadModal.set(false)">
+  <div class="adm-modal-backdrop" (click)="closeSingleUpload()">
     <div class="adm-modal" (click)="$event.stopPropagation()">
       <div class="adm-modal-head">
         <h3 class="adm-modal-title">Upload Media</h3>
-        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="uploadModal.set(false)"><i class="ri-close-line"></i></button>
+        <button type="button" class="adm-btn adm-btn-ghost adm-btn-icon" (click)="closeSingleUpload()" [disabled]="uploading()" aria-label="Close"><i class="ri-close-line"></i></button>
       </div>
       <div class="adm-modal-body">
         <input type="file" #singleFileInput (change)="onFileSelected($event)" accept="image/*,video/*" style="display: none" />
-        <div class="adm-dropzone" (click)="singleFileInput.click()" (drop)="onDrop($event)" (dragover)="onDragOver($event)" style="cursor: pointer">
+        <div class="adm-dropzone" (click)="!uploading() && singleFileInput.click()" (drop)="onDrop($event)" (dragover)="onDragOver($event)" style="cursor: pointer">
           @if (selectedFilePreview()) {
-            <img [src]="selectedFilePreview()" alt="Preview" style="max-height: 140px; border-radius: var(--ad-radius-sm); margin-bottom: 8px" />
+            <img [src]="selectedFilePreview()" alt="Preview" style="max-height: 140px; margin-inline: auto; border-radius: var(--ad-radius-sm); margin-bottom: 8px" />
             <div><strong>{{ selectedFile()?.name }}</strong></div>
-            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click to choose another file</div>
+            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click or drop another image/video to replace</div>
           } @else if (selectedFile()) {
             <div class="adm-dropzone-ico"><i class="ri-file-video-line"></i></div>
             <div><strong>{{ selectedFile()?.name }}</strong></div>
-            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click to choose another file</div>
+            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click or drop another image/video to replace</div>
           } @else {
             <div class="adm-dropzone-ico"><i class="ri-upload-cloud-2-line"></i></div>
             <div><strong>Click or drag & drop a file here</strong></div>
-            <div style="font-size: 0.8rem; margin-top: 4px">Supports JPG, PNG, WEBP, MP4 from your file system</div>
+            <div style="font-size: 0.8rem; margin-top: 4px">Supports JPG, PNG, WEBP, GIF, MP4 (large photos auto-optimized)</div>
           }
         </div>
         <div style="margin-top: 16px; display: grid; gap: 12px">
           <div class="adm-field" style="margin: 0">
             <label class="adm-field-label">Title</label>
-            <input class="adm-input" [ngModel]="uploadTitle()" (ngModelChange)="uploadTitle.set($event)" placeholder="e.g. Class of 1998 Reunion Dinner" />
+            <input class="adm-input" [ngModel]="uploadTitle()" (ngModelChange)="uploadTitle.set($event)" placeholder="e.g. Class of 1998 Reunion Dinner" [disabled]="uploading()" />
           </div>
           <div class="adm-field" style="margin: 0">
             <label class="adm-field-label">Caption (optional)</label>
-            <textarea class="adm-textarea" [ngModel]="uploadCaption()" (ngModelChange)="uploadCaption.set($event)" placeholder="Short memory or description…" style="min-height: 60px"></textarea>
+            <textarea class="adm-textarea" [ngModel]="uploadCaption()" (ngModelChange)="uploadCaption.set($event)" placeholder="Short memory or description…" style="min-height: 60px" [disabled]="uploading()"></textarea>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
             <div class="adm-field" style="margin: 0">
               <label class="adm-field-label">Album</label>
-              <select class="adm-select" [ngModel]="uploadAlbum()" (ngModelChange)="uploadAlbum.set($event)">
+              <select class="adm-select" [ngModel]="uploadAlbum()" (ngModelChange)="uploadAlbum.set($event)" [disabled]="uploading()">
                 @for (a of albums(); track a) { <option [value]="a">{{ a }}</option> }
               </select>
             </div>
             <div class="adm-field" style="margin: 0">
               <label class="adm-field-label">Year</label>
-              <input class="adm-input" type="number" [ngModel]="uploadYear()" (ngModelChange)="uploadYear.set($event)" placeholder="e.g. 2026" />
+              <input class="adm-input" type="number" [ngModel]="uploadYear()" (ngModelChange)="uploadYear.set($event)" placeholder="e.g. 2026" [disabled]="uploading()" />
             </div>
           </div>
           <div class="adm-toggle-row" style="border: none; padding: 0">
@@ -177,19 +180,19 @@
               <div class="adm-toggle-row-desc">Display prominently on the public homepage & gallery hero</div>
             </div>
             <label class="adm-switch">
-              <input type="checkbox" [ngModel]="uploadFeatured()" (ngModelChange)="uploadFeatured.set($event)" />
+              <input type="checkbox" [ngModel]="uploadFeatured()" (ngModelChange)="uploadFeatured.set($event)" [disabled]="uploading()" />
               <span class="adm-switch-slider"></span>
             </label>
           </div>
         </div>
       </div>
       <div class="adm-modal-foot">
-        <button class="adm-btn adm-btn-outline" (click)="uploadModal.set(false)" [disabled]="uploading()">Cancel</button>
-        <button class="adm-btn adm-btn-primary" (click)="confirmUpload()" [disabled]="uploading() || !selectedFile()">
+        <button type="button" class="adm-btn adm-btn-outline" (click)="closeSingleUpload()" [disabled]="uploading()">Cancel</button>
+        <button type="button" class="adm-btn adm-btn-primary" (click)="confirmUpload()" [disabled]="uploading() || !selectedFile()">
           @if (uploading()) {
-            <i class="ri-loader-4-line ri-spin"></i> Uploading to R2…
+            <i class="ri-loader-4-line ri-spin"></i> Uploading…
           } @else {
-            <i class="ri-upload-2-line"></i> Upload to R2
+            <i class="ri-upload-2-line"></i> Upload Media
           }
         </button>
       </div>
@@ -199,44 +202,114 @@
 
 <!-- Bulk Upload Modal -->
 @if (bulkModal()) {
-  <div class="adm-modal-backdrop" (click)="bulkModal.set(false)">
+  <div class="adm-modal-backdrop" (click)="closeBulkUpload()">
     <div class="adm-modal adm-modal-lg" (click)="$event.stopPropagation()">
       <div class="adm-modal-head">
         <h3 class="adm-modal-title">Bulk Upload Media</h3>
-        <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="bulkModal.set(false)"><i class="ri-close-line"></i></button>
+        <button type="button" class="adm-btn adm-btn-ghost adm-btn-icon" (click)="closeBulkUpload()" [disabled]="uploading()" aria-label="Close"><i class="ri-close-line"></i></button>
       </div>
       <div class="adm-modal-body">
         <input type="file" #bulkFileInput (change)="onBulkFilesSelected($event)" multiple accept="image/*,video/*" style="display: none" />
-        <div class="adm-dropzone" (click)="bulkFileInput.click()" (drop)="onBulkDrop($event)" (dragover)="onDragOver($event)" style="min-height: 140px; cursor: pointer">
+        <div class="adm-dropzone" (click)="!uploading() && bulkFileInput.click()" (drop)="onBulkDrop($event)" (dragover)="onDragOver($event)" style="min-height: 120px; padding: 24px 16px; cursor: pointer">
           <div class="adm-dropzone-ico"><i class="ri-folder-upload-line"></i></div>
-          @if (bulkFiles().length > 0) {
-            <div><strong>{{ bulkFiles().length }} file(s) selected</strong></div>
-            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click to choose different files</div>
+          @if (bulkEntries().length > 0) {
+            <div><strong>{{ bulkEntries().length }} file(s) queued</strong></div>
+            <div style="font-size: 0.8rem; margin-top: 4px; color: var(--ad-text-soft)">Click or drag more files here to add to the batch</div>
           } @else {
-            <div><strong>Click or drag multiple files to upload at once</strong></div>
-            <div style="font-size: 0.8rem; margin-top: 4px">All selected files will be uploaded to Cloudflare R2 and assigned below.</div>
+            <div><strong>Click or drag multiple images & videos here</strong></div>
+            <div style="font-size: 0.8rem; margin-top: 4px">Select one or many photos/videos at once (large images are optimized automatically)</div>
           }
         </div>
+
+        @if (bulkEntries().length > 0) {
+          <div class="adm-bulk-head">
+            <span class="adm-card-sub">{{ bulkEntries().length }} selected · {{ pendingBulkCount() }} ready to upload</span>
+            <button type="button" class="adm-btn adm-btn-ghost adm-btn-sm" (click)="clearBulkEntries()" [disabled]="uploading()">Clear all</button>
+          </div>
+          <div class="adm-bulk-list">
+            @for (entry of bulkEntries(); track entry.id) {
+              <div class="adm-bulk-row">
+                @if (entry.previewUrl) {
+                  <img class="adm-bulk-thumb" [src]="entry.previewUrl" [alt]="entry.title" />
+                } @else {
+                  <div class="adm-bulk-thumb adm-bulk-thumb-ico"><i class="ri-file-video-line"></i></div>
+                }
+                <div class="adm-bulk-info">
+                  <input
+                    class="adm-input adm-bulk-title-input"
+                    [ngModel]="entry.title"
+                    (ngModelChange)="updateBulkTitle(entry.id, $event)"
+                    [disabled]="uploading() || entry.status === 'done'"
+                    [attr.aria-label]="'Title for ' + entry.file.name"
+                  />
+                  <div class="adm-bulk-meta">
+                    <span>{{ entry.file.name }}</span>
+                    <span>· {{ entry.sizeLabel }}</span>
+                    @if (entry.error) {
+                      <span class="adm-bulk-err">{{ entry.error }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="adm-bulk-actions">
+                  @switch (entry.status) {
+                    @case ('uploading') {
+                      <span class="adm-badge adm-badge-info"><i class="ri-loader-4-line ri-spin"></i> Uploading</span>
+                    }
+                    @case ('done') {
+                      <span class="adm-badge adm-badge-success"><i class="ri-check-line"></i> Uploaded</span>
+                    }
+                    @case ('error') {
+                      <span class="adm-badge adm-badge-danger"><i class="ri-error-warning-line"></i> Failed</span>
+                    }
+                    @default {
+                      <span class="adm-badge adm-badge-muted">Queued</span>
+                    }
+                  }
+                  <button
+                    type="button"
+                    class="adm-btn adm-btn-ghost adm-btn-icon"
+                    (click)="removeBulkEntry(entry.id)"
+                    [disabled]="uploading()"
+                    aria-label="Remove file"
+                  >
+                    <i class="ri-close-line"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px">
-          <div class="adm-field">
+          <div class="adm-field" style="margin: 0">
             <label class="adm-field-label">Album</label>
-            <select class="adm-select" [ngModel]="bulkAlbum()" (ngModelChange)="bulkAlbum.set($event)">
+            <select class="adm-select" [ngModel]="bulkAlbum()" (ngModelChange)="bulkAlbum.set($event)" [disabled]="uploading()">
               @for (a of albums(); track a) { <option [value]="a">{{ a }}</option> }
             </select>
           </div>
-          <div class="adm-field">
+          <div class="adm-field" style="margin: 0">
             <label class="adm-field-label">Year</label>
-            <input class="adm-input" type="number" [ngModel]="bulkYear()" (ngModelChange)="bulkYear.set($event)" placeholder="2026" />
+            <input class="adm-input" type="number" [ngModel]="bulkYear()" (ngModelChange)="bulkYear.set($event)" placeholder="2026" [disabled]="uploading()" />
           </div>
+        </div>
+        <div class="adm-toggle-row" style="border: none; padding: 14px 0 0">
+          <div class="adm-toggle-row-text">
+            <div class="adm-toggle-row-title">Feature uploaded items</div>
+            <div class="adm-toggle-row-desc">Mark all files in this batch as featured on the homepage & gallery</div>
+          </div>
+          <label class="adm-switch">
+            <input type="checkbox" [ngModel]="bulkFeatured()" (ngModelChange)="bulkFeatured.set($event)" [disabled]="uploading()" />
+            <span class="adm-switch-slider"></span>
+          </label>
         </div>
       </div>
       <div class="adm-modal-foot">
-        <button class="adm-btn adm-btn-outline" (click)="bulkModal.set(false)" [disabled]="uploading()">Cancel</button>
-        <button class="adm-btn adm-btn-primary" (click)="confirmBulkUpload()" [disabled]="uploading() || bulkFiles().length === 0">
-          @if (uploading()) {
-            <i class="ri-loader-4-line ri-spin"></i> Uploading to R2…
+        <button type="button" class="adm-btn adm-btn-outline" (click)="closeBulkUpload()" [disabled]="uploading()">Cancel</button>
+        <button type="button" class="adm-btn adm-btn-primary" (click)="confirmBulkUpload()" [disabled]="uploading() || pendingBulkCount() === 0">
+          @if (bulkProgress(); as p) {
+            <i class="ri-loader-4-line ri-spin"></i> Uploading {{ p.current }} of {{ p.total }}…
           } @else {
-            <i class="ri-upload-cloud-2-line"></i> Upload all ({{ bulkFiles().length }})
+            <i class="ri-upload-cloud-2-line"></i> Upload all ({{ pendingBulkCount() }})
           }
         </button>
       </div>

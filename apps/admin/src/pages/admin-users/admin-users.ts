@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
-import { UsersApiService } from '@astec/api-client';
+import { UsersApiService, DashboardApiService } from '@astec/api-client';
 import { ToastService } from '@astec/ui';
 import type { AdminUser, Role } from '../../admin-data';
 
@@ -14,6 +14,7 @@ import type { AdminUser, Role } from '../../admin-data';
 export class AdminUsers {
   private toast = inject(ToastService);
   private usersApi = inject(UsersApiService);
+  private dashboardApi = inject(DashboardApiService);
 
   users = signal<AdminUser[]>([]);
   loading = signal(true);
@@ -58,6 +59,7 @@ export class AdminUsers {
     try {
       const list = await this.usersApi.listUsers();
       this.users.set(list as unknown as AdminUser[]);
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load users from database.');
     } finally {
@@ -87,6 +89,7 @@ export class AdminUsers {
       await this.usersApi.updateUserStatus(u.id, 'active');
       this.users.update((list) => list.map((x) => (x.id === u.id ? { ...x, status: 'active' } : x)));
       this.toast.show(`${u.name} approved.`);
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to approve user.');
     }
@@ -100,6 +103,7 @@ export class AdminUsers {
         list.map((x) => (x.id === u.id ? { ...x, status: nextStatus } : x))
       );
       this.toast.show(u.status === 'suspended' ? `${u.name} reactivated.` : `${u.name} suspended.`);
+      void this.dashboardApi.refreshSidebarCounts();
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to change status.');
     }

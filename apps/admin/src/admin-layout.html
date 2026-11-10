@@ -1,4 +1,7 @@
 <div class="admin" [class.collapsed]="state.collapsed()" [class.mobile-open]="state.mobileOpen()">
+  @if (state.mobileOpen()) {
+    <div class="adm-mobile-backdrop" (click)="closeMobile()" aria-hidden="true"></div>
+  }
   <!-- Sidebar -->
   <aside class="adm-sidebar">
     <div class="adm-brand">
@@ -32,8 +35,8 @@
           >
             <i [class]="'adm-nav-ico ' + item.icon"></i>
             <span>{{ item.label }}</span>
-            @if (item.badge) {
-              <span class="adm-nav-badge">{{ item.badge }}</span>
+            @if (navBadge(item); as count) {
+              <span class="adm-nav-badge">{{ count }}</span>
             }
           </a>
         }
