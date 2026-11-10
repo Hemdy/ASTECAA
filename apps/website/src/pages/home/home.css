@@ -1775,8 +1775,8 @@ app-countdown span.d-num {
 
 .org-grid {
   display: grid;
-
-  grid-template-columns:
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: clamp(8px, 2vw, 16px);  grid-template-columns:
     repeat(4, minmax(0, 1fr, ));
 
   gap: clamp(16px, 2.5vw, 28px);
