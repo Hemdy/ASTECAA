@@ -22,28 +22,30 @@
         >
           Scrapbook
         </button>
-        <button
+        <!-- <button
           class="style-btn"
           [class.active]="style() === 'polaroid'"
           (click)="style.set('polaroid')"
         >
           Polaroid wall
-        </button>
+        </button> -->
       </div>
 
       <div class="g-filters">
-        <select name="album" [ngModel]="album()" (ngModelChange)="album.set($event)" aria-label="Filter by album">
-          <option value="">All albums</option>
-          @for (a of albums(); track a) {
-            <option [value]="a">{{ a }}</option>
-          }
-        </select>
-        <select name="year" [ngModel]="year()" (ngModelChange)="year.set($event)" aria-label="Filter by year">
-          <option value="">All years</option>
-          @for (y of years(); track y) {
-            <option [value]="y">{{ y }}</option>
-          }
-        </select>
+        <app-custom-select
+          placeholder="All albums"
+          icon="ri-gallery-line"
+          ariaLabel="Filter by album"
+          [options]="albumOptions()"
+          [(value)]="album"
+        />
+        <app-custom-select
+          placeholder="All years"
+          icon="ri-calendar-line"
+          ariaLabel="Filter by year"
+          [options]="yearOptions()"
+          [(value)]="year"
+        />
       </div>
     </div>
 
@@ -51,25 +53,44 @@
       {{ filtered().length }} memor{{ filtered().length === 1 ? 'y' : 'ies' }}
     </p>
 
-    <!-- Scrapbook style -->
-    @if (style() === 'scrapbook') {
+    <!-- Loading skeleton -->
+    @if (loading()) {
+      <div class="scrapbook">
+        @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item; let i = $index) {
+          <figure class="polaroid sb-item skeleton-item" [style.transform]="'rotate(' + rot(i) + 'deg)'">
+            <div class="skeleton-img skeleton-pulse"></div>
+            <div class="skeleton-caption skeleton-pulse"></div>
+            <span class="sb-year skeleton-badge"></span>
+          </figure>
+        }
+      </div>
+    } @else if (style() === 'scrapbook') {
       <div class="scrapbook">
         @for (m of filtered(); track m.id; let i = $index) {
           <figure
             class="polaroid sb-item"
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
+            (click)="openLightbox(m, $event)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Enlarge ' + (m.caption || m.title)"
+            (keydown.enter)="openLightbox(m, $event)"
+            (keydown.space)="$event.preventDefault(); openLightbox(m, $event)"
           >
             @if ((m.type || m.mediaType) === 'video') {
-              <video [src]="m.url" controls playsinline preload="metadata" class="photo-vintage"></video>
+              <div class="gallery-media-preview">
+                <video [src]="m.url" playsinline preload="metadata" class="photo-vintage"></video>
+                <span class="sb-video"><i class="ri-play-circle-fill"></i></span>
+              </div>
             } @else {
-              <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+              <div class="gallery-media-preview">
+                <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+                <span class="sb-zoom-hint"><i class="ri-zoom-in-line"></i></span>
+              </div>
             }
             <figcaption class="caption">{{ m.caption || m.description || m.title }}</figcaption>
             <span class="sb-year">{{ m.year }}</span>
-            @if ((m.type || m.mediaType) === 'video') {
-              <span class="sb-video"><i class="ri-movie-line"></i></span>
-            }
           </figure>
         }
       </div>
@@ -83,11 +104,23 @@
             class="polaroid pw-item"
             appReveal
             [style.transform]="'rotate(' + rot(i) + 'deg)'"
+            (click)="openLightbox(m, $event)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'Enlarge ' + (m.caption || m.title)"
+            (keydown.enter)="openLightbox(m, $event)"
+            (keydown.space)="$event.preventDefault(); openLightbox(m, $event)"
           >
             @if ((m.type || m.mediaType) === 'video') {
-              <video [src]="m.url" controls playsinline preload="metadata" class="photo-vintage"></video>
+              <div class="gallery-media-preview">
+                <video [src]="m.url" playsinline preload="metadata" class="photo-vintage"></video>
+                <span class="sb-video"><i class="ri-play-circle-fill"></i></span>
+              </div>
             } @else {
-              <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+              <div class="gallery-media-preview">
+                <img [src]="m.thumb || m.url" [alt]="m.title" class="photo-vintage" (error)="onImageError($event)" />
+                <span class="sb-zoom-hint"><i class="ri-zoom-in-line"></i></span>
+              </div>
             }
             <figcaption class="caption">{{ m.caption || m.description || m.title }}</figcaption>
             <span class="pw-meta type">{{ m.album }} · {{ m.year }}</span>
@@ -106,3 +139,81 @@
     }
   </div>
 </section>
+
+<!-- ============ INTERACTIVE LIGHTBOX OVERLAY ============ -->
+@if (lightboxItem(); as item) {
+  <div class="lightbox-overlay" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Media Lightbox">
+    <div class="lightbox-dialog" (click)="$event.stopPropagation()">
+      <div class="lightbox-top-bar">
+        <div class="lightbox-meta-tags">
+          <span class="lightbox-year-badge">{{ item.year }}</span>
+          @if (item.album) {
+            <span class="lightbox-album-badge">{{ item.album }}</span>
+          }
+          <span class="lightbox-counter">{{ lightboxIndex() + 1 }} / {{ filtered().length }}</span>
+        </div>
+        <button
+          type="button"
+          class="lightbox-close-btn"
+          (click)="closeLightbox()"
+          aria-label="Close lightbox"
+          title="Close (Esc)"
+        >
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <div class="lightbox-media-container">
+        @if (filtered().length > 1) {
+          <button
+            type="button"
+            class="lightbox-nav-btn prev"
+            (click)="prevLightbox($event)"
+            aria-label="Previous item"
+            title="Previous (Left Arrow)"
+          >
+            <i class="ri-arrow-left-s-line"></i>
+          </button>
+        }
+
+        <div class="lightbox-media-wrapper">
+          @if ((item.type || item.mediaType) === 'video') {
+            <video
+              [src]="item.url"
+              controls
+              autoplay
+              playsinline
+              class="lightbox-video"
+            ></video>
+          } @else {
+            <img
+              [src]="item.url || item.thumb"
+              [alt]="item.title"
+              class="lightbox-image"
+              (error)="onImageError($event)"
+            />
+          }
+        </div>
+
+        @if (filtered().length > 1) {
+          <button
+            type="button"
+            class="lightbox-nav-btn next"
+            (click)="nextLightbox($event)"
+            aria-label="Next item"
+            title="Next (Right Arrow)"
+          >
+            <i class="ri-arrow-right-s-line"></i>
+          </button>
+        }
+      </div>
+
+      <div class="lightbox-caption-bar">
+        <h4 class="lightbox-title">{{ item.title }}</h4>
+        @if (item.caption || item.description) {
+          <p class="lightbox-description">{{ item.caption || item.description }}</p>
+        }
+      </div>
+    </div>
+  </div>
+}

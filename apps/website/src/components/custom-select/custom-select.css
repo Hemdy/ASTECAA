@@ -1,0 +1,213 @@
+:host {
+  display: block;
+}
+
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-label {
+  display: block;
+  margin-bottom: 7px;
+  padding-left: 3px;
+  font-family: var(--font-cinzel, inherit);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c-brown-500, #6e4e3e);
+}
+
+.custom-select-trigger {
+  width: 100%;
+  min-width: 170px;
+  height: 50px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--c-paper-100, #ece2cc);
+  border: 1px solid rgba(92, 64, 51, 0.14);
+  border-radius: 13px;
+  color: var(--c-brown-700, #4a3228);
+  font-family: var(--font-body, inherit);
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(55, 35, 25, 0.03);
+}
+
+.custom-select-trigger:hover {
+  border-color: rgba(92, 64, 51, 0.28);
+  background-color: #fffdf8;
+}
+
+.custom-select-wrapper.is-open .custom-select-trigger,
+.custom-select-trigger:focus-visible {
+  outline: none;
+  background: #fffdf8;
+  border-color: var(--c-gold-500, #c49a45);
+  box-shadow: 0 0 0 4px rgba(196, 154, 69, 0.14);
+}
+
+.custom-select-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.custom-select-icon {
+  font-size: 1.05rem;
+  color: var(--c-burgundy-600, #7a3e3e);
+  flex-shrink: 0;
+}
+
+.custom-select-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--c-brown-700, #4a3228);
+}
+
+.custom-select-text.is-placeholder {
+  color: rgba(92, 64, 51, 0.65);
+  font-weight: 400;
+}
+
+.custom-select-arrow {
+  color: var(--c-brown-500, #6e4e3e);
+  font-size: 1.15rem;
+  line-height: 1;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.custom-select-wrapper.is-open .custom-select-arrow {
+  transform: rotate(180deg);
+  color: var(--c-gold-600, #b08a37);
+}
+
+/* =========================================================
+   DROPDOWN PANEL
+   ========================================================= */
+
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 70;
+  background: #fffdf9;
+  border: 1px solid rgba(196, 154, 69, 0.3);
+  border-radius: 14px;
+  box-shadow:
+    0 14px 38px rgba(55, 35, 25, 0.14),
+    0 4px 12px rgba(55, 35, 25, 0.08);
+  overflow: hidden;
+  animation: dropdownFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 100%;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.custom-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  max-height: 260px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 154, 69, 0.4) transparent;
+}
+
+.custom-select-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-select-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-select-list::-webkit-scrollbar-thumb {
+  background: rgba(196, 154, 69, 0.4);
+  border-radius: 10px;
+}
+
+.custom-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  color: var(--c-brown-700, #4a3228);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.custom-select-option:hover {
+  background: rgba(196, 154, 69, 0.12);
+  color: var(--c-brown-800, #38241c);
+}
+
+.custom-select-option.is-selected {
+  background: rgba(196, 154, 69, 0.18);
+  color: var(--c-brown-800, #38241c);
+  font-weight: 600;
+}
+
+.option-content {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+}
+
+.option-icon {
+  font-size: 1rem;
+  color: var(--c-burgundy-600, #7a3e3e);
+  flex-shrink: 0;
+}
+
+.option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-check {
+  font-size: 1.1rem;
+  color: var(--c-gold-700, #9c7a30);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   DISABLED STATE
+   ========================================================= */
+
+.custom-select-wrapper.is-disabled .custom-select-trigger {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--c-paper-200, #e8ddc5);
+}

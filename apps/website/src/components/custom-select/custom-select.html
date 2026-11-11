@@ -1,0 +1,54 @@
+<div class="custom-select-wrapper" [class.is-open]="isOpen()" [class.is-disabled]="disabled()">
+  @if (label()) {
+    <label class="custom-select-label">{{ label() }}</label>
+  }
+
+  <button
+    type="button"
+    class="custom-select-trigger"
+    (click)="toggle()"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-label]="ariaLabel() || label() || placeholder()"
+    [disabled]="disabled()"
+  >
+    <div class="custom-select-value">
+      @if (selectedOption()?.icon || icon()) {
+        <i [class]="selectedOption()?.icon || icon()" class="custom-select-icon"></i>
+      }
+      <span class="custom-select-text" [class.is-placeholder]="!selectedOption() || selectedOption()?.value === ''">
+        {{ displayLabel() }}
+      </span>
+    </div>
+
+    <span class="custom-select-arrow" aria-hidden="true">
+      <i class="ri-arrow-down-s-line"></i>
+    </span>
+  </button>
+
+  @if (isOpen()) {
+    <div class="custom-select-dropdown" role="listbox">
+      <ul class="custom-select-list">
+        @for (opt of normalizedOptions(); track opt.value) {
+          <li
+            role="option"
+            class="custom-select-option"
+            [class.is-selected]="isSelected(opt.value)"
+            [attr.aria-selected]="isSelected(opt.value)"
+            (click)="select(opt.value)"
+          >
+            <div class="option-content">
+              @if (opt.icon) {
+                <i [class]="opt.icon" class="option-icon"></i>
+              }
+              <span class="option-label">{{ opt.label }}</span>
+            </div>
+
+            @if (isSelected(opt.value)) {
+              <i class="ri-check-line option-check" aria-hidden="true"></i>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

@@ -1,6 +1,7 @@
 @if (announcements().length > 0 && currentAnnouncement(); as ann) {
   <section
     class="announcements-bar"
+    [class.is-expanded]="isExpanded()"
     appReveal
     (mouseenter)="pause()"
     (mouseleave)="resume()"
@@ -15,21 +16,37 @@
       <div class="announcements-badge">
         <i class="ri-notification-3-line"></i>
         <span>Official Notices</span>
+        <span class="announcements-count" [attr.aria-label]="announcements().length + ' notices'">{{ announcements().length }}</span>
       </div>
-      <div class="announcements-carousel">
+
+      <div
+        class="announcements-carousel"
+        role="button"
+        tabindex="0"
+        (click)="toggleExpand()"
+        (keydown.enter)="toggleExpand()"
+        (keydown.space)="$event.preventDefault(); toggleExpand()"
+        [attr.aria-expanded]="isExpanded()"
+        title="Click to expand full announcement"
+      >
         <div class="announcement-slide">
           <span class="announcement-tag">{{ ann.pinned ? '📌 Pinned' : 'Notice' }}</span>
           <strong class="announcement-title">{{ ann.title }}</strong>
           <span class="announcement-body">{{ ann.body }}</span>
           <span class="announcement-date">{{ ann.date }}</span>
+          <span class="announcement-expand-chip">
+            <span>{{ isExpanded() ? 'Collapse' : 'Expand' }}</span>
+            <i [class]="isExpanded() ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+          </span>
         </div>
       </div>
-      @if (announcements().length > 1) {
-        <div class="announcements-controls">
+
+      <div class="announcements-controls">
+        @if (announcements().length > 1) {
           <button
             type="button"
             class="announcement-arrow-btn"
-            (click)="prev()"
+            (click)="prev(); $event.stopPropagation()"
             aria-label="Previous announcement"
           >
             <i class="ri-arrow-left-s-line"></i>
@@ -40,7 +57,7 @@
                 type="button"
                 class="announcement-dot"
                 [class.active]="idx === activeIndex()"
-                (click)="goTo(idx)"
+                (click)="goTo(idx); $event.stopPropagation()"
                 [attr.aria-label]="'Go to notice ' + (idx + 1)"
               ></button>
             }
@@ -48,13 +65,77 @@
           <button
             type="button"
             class="announcement-arrow-btn"
-            (click)="next()"
+            (click)="next(); $event.stopPropagation()"
             aria-label="Next announcement"
           >
             <i class="ri-arrow-right-s-line"></i>
           </button>
-        </div>
-      }
+        }
+        <button
+          type="button"
+          class="announcement-read-btn"
+          (click)="toggleExpand(); $event.stopPropagation()"
+          [attr.aria-expanded]="isExpanded()"
+          [title]="isExpanded() ? 'Collapse notice' : 'Read full notification'"
+        >
+          <span>{{ isExpanded() ? 'Close' : 'Read Notice' }}</span>
+          <i [class]="isExpanded() ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+        </button>
+      </div>
     </div>
+
+    <!-- Dropdown / Expandable Full Notice Panel -->
+    @if (isExpanded()) {
+      <div class="announcement-dropdown" appReveal>
+        <div class="container announcement-dropdown-inner">
+          <div class="dropdown-top-bar">
+            <div class="dropdown-left-meta">
+              <span class="announcement-tag">{{ ann.pinned ? '📌 Pinned Notice' : 'Official Notice' }}</span>
+              <span class="dropdown-notice-num">Notice {{ activeIndex() + 1 }} of {{ announcements().length }}</span>
+            </div>
+            <div class="dropdown-right-meta">
+              <span class="dropdown-date"><i class="ri-calendar-line"></i> {{ ann.date }}</span>
+              <button
+                type="button"
+                class="dropdown-close-icon-btn"
+                (click)="collapse(); $event.stopPropagation()"
+                aria-label="Close notification"
+                title="Close"
+              >
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+          </div>
+
+          <h3 class="dropdown-heading">{{ ann.title }}</h3>
+
+          <div class="dropdown-body-text">
+            {{ ann.body }}
+          </div>
+
+          @if (announcements().length > 1) {
+            <div class="dropdown-footer-actions">
+              <button
+                type="button"
+                class="dropdown-nav-btn"
+                (click)="prev(); $event.stopPropagation()"
+              >
+                <i class="ri-arrow-left-s-line"></i> Previous
+              </button>
+              <div class="dropdown-page-indicator">
+                {{ activeIndex() + 1 }} / {{ announcements().length }}
+              </div>
+              <button
+                type="button"
+                class="dropdown-nav-btn"
+                (click)="next(); $event.stopPropagation()"
+              >
+                Next <i class="ri-arrow-right-s-line"></i>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
   </section>
 }

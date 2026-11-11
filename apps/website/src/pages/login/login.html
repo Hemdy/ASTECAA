@@ -1,68 +1,149 @@
 <section class="auth-page">
   <div class="auth-card paper">
-    <a routerLink="/" class="auth-back">← Back to Home</a>
+    <div class="auth-top-nav">
+      <a routerLink="/" class="auth-back">
+        <i class="ri-arrow-left-line"></i>
+        <span>Return to Home</span>
+      </a>
+      <span class="auth-brand-badge">ASTECAA · Owerrinta</span>
+    </div>
 
+    <!-- Heritage Seal & Header -->
     <div class="auth-header">
-      <span class="eyebrow">Welcome Back</span>
-      <h1>ASTECAA Alumni Portal</h1>
+      <div class="auth-seal">
+        <i class="ri-shield-user-fill"></i>
+      </div>
+      <span class="eyebrow gold">Official Alumni Portal</span>
+      <h1>Welcome Back</h1>
       <p class="lede">
-        Sign in to connect with fellow alumni, participate in elections, share
-        updates, upload photos, and stay engaged with the ASTECAA community.
+        Sign in to access official ballots, reconnect with your graduating class, and stay engaged with ASTECAA.
       </p>
     </div>
 
-    <form (ngSubmit)="submit($event)" class="auth-form">
-      <div class="field">
-        <label>Email Address</label>
-        <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="Enter your email address"
-          required
-          autocomplete="email"
-        />
-      </div>
-
-      <div class="field">
-        <label>Password</label>
-        <div class="auth-pw-wrap">
-          <input
-            [type]="showPw() ? 'text' : 'password'"
-            name="password"
-            [(ngModel)]="password"
-            placeholder="Enter your password"
-            required
-            autocomplete="current-password"
-          />
-          <button
-            type="button"
-            class="auth-pw-toggle"
-            (click)="showPw.set(!showPw())"
-          >
-            {{ showPw() ? 'Hide' : 'Show' }}
-          </button>
+    <!-- SKELETON LOADER STATE -->
+    @if (loading()) {
+      <div class="auth-skeleton-form" aria-busy="true" aria-label="Loading authentication form">
+        <div class="sk-field">
+          <div class="sk-shimmer sk-text w-35" style="height: 12px;"></div>
+          <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+        </div>
+        <div class="sk-field" style="margin-top: 18px;">
+          <div class="sk-shimmer sk-text w-25" style="height: 12px;"></div>
+          <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+        </div>
+        <div class="sk-shimmer sk-box" style="height: 50px; border-radius: var(--r-pill); margin-top: 24px;"></div>
+        <div class="sk-field" style="margin-top: 24px; text-align: center; display: flex; justify-content: center;">
+          <div class="sk-shimmer sk-text w-60" style="height: 14px;"></div>
         </div>
       </div>
+    } @else {
+      <!-- AUTHENTICATION FORM -->
+      <form (ngSubmit)="submit($event)" class="auth-form" novalidate>
+        <!-- Email Field -->
+        <div class="auth-field-group">
+          <label for="login-email" class="auth-label">
+            <span>Email Address</span>
+            <span class="auth-required">*</span>
+          </label>
+          <div class="auth-input-wrap">
+            <i class="ri-mail-line auth-input-icon"></i>
+            <input
+              id="login-email"
+              type="email"
+              name="email"
+              class="auth-input"
+              [(ngModel)]="email"
+              placeholder="e.g. alumni@astecaa.org"
+              required
+              autocomplete="email"
+            />
+          </div>
+        </div>
 
-      @if (auth.authError()) {
-        <div class="auth-error">{{ auth.authError() }}</div>
-      }
+        <!-- Password Field -->
+        <div class="auth-field-group">
+          <div class="auth-label-row">
+            <label for="login-password" class="auth-label">
+              <span>Password</span>
+              <span class="auth-required">*</span>
+            </label>
+          </div>
+          <div class="auth-input-wrap">
+            <i class="ri-lock-2-line auth-input-icon"></i>
+            <input
+              id="login-password"
+              [type]="showPw() ? 'text' : 'password'"
+              name="password"
+              class="auth-input with-toggle"
+              [(ngModel)]="password"
+              placeholder="Enter your alumni password"
+              required
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="auth-pw-toggle-btn"
+              (click)="togglePassword()"
+              [attr.aria-label]="showPw() ? 'Hide password' : 'Show password'"
+            >
+              <i [class]="showPw() ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+              <!-- <span>{{ showPw() ? 'Hide' : 'Show' }}</span> -->
+            </button>
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        class="btn btn-gold auth-submit"
-        [disabled]="submitting() || !canSubmit()"
-      >
-        {{ submitting() ? 'Signing in...' : 'Sign In' }}
-      </button>
-    </form>
+        <!-- Error Alert -->
+        @if (errorMessage() || auth.authError()) {
+          <div class="auth-error-banner" role="alert">
+            <i class="ri-error-warning-fill"></i>
+            <div class="auth-error-content">
+              <strong>Authentication Notice</strong>
+              <p>{{ errorMessage() || auth.authError() }}</p>
+            </div>
+          </div>
+        }
 
-    <div class="auth-foot">
-      <p>
-        Not yet a member?
-        <a routerLink="/register">Create your alumni account</a>
-      </p>
-    </div>
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn btn-gold auth-submit-btn"
+          [disabled]="submitting() || !canSubmit()"
+        >
+          @if (submitting()) {
+            <i class="ri-loader-4-line spin"></i>
+            <span>Authenticating Credentials…</span>
+          } @else {
+            <i class="ri-login-circle-line"></i>
+            <span>Sign In to Portal</span>
+          }
+        </button>
+
+        <!-- Trust Badges -->
+        <div class="auth-trust-badges">
+          <div class="trust-badge">
+            <i class="ri-shield-check-line"></i>
+            <span>Verified Alumni</span>
+          </div>
+          <div class="trust-badge">
+            <i class="ri-award-line"></i>
+            <span>Electoral Ballot</span>
+          </div>
+          <div class="trust-badge">
+            <i class="ri-lock-line"></i>
+            <span>Encrypted Session</span>
+          </div>
+        </div>
+      </form>
+
+      <!-- Foot Link -->
+      <div class="auth-foot">
+        <p>
+          Not yet registered as an alumnus?
+          <a routerLink="/register" class="auth-foot-link">
+            Join the ASTECAA Network <span class="arrow">→</span>
+          </a>
+        </p>
+      </div>
+    }
   </div>
 </section>

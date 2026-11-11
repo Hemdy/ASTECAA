@@ -1,28 +1,40 @@
 import { Component, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../reveal.directive';
+import { CustomSelect, SelectOption } from '../../components/custom-select/custom-select';
 import { ToastService } from '@astec/ui';
 import { CmsApiService } from '@astec/api-client';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [FormsModule, RevealDirective],
+  imports: [FormsModule, RouterLink, RevealDirective, CustomSelect],
   templateUrl: './contact.html',
   styleUrl: './contact.css',
 })
 export class Contact {
   private cmsApi = inject(CmsApiService);
   private toast = inject(ToastService);
+  loading = signal(false);
   submitting = signal(false);
   form = { name: '', email: '', subject: '', message: '', captcha: false };
 
+  subjectOptions: SelectOption[] = [
+    { label: 'General Inquiry', value: 'general', icon: 'ri-question-line' },
+    { label: 'Share an Archival Memory', value: 'memory', icon: 'ri-history-line' },
+    { label: 'Donate Photographs / Records', value: 'photo', icon: 'ri-image-line' },
+    { label: 'Upcoming Event Question', value: 'event', icon: 'ri-calendar-event-line' },
+    { label: 'Alumni Volunteering & Mentorship', value: 'volunteer', icon: 'ri-hand-heart-line' },
+    { label: 'Press & Media Relations', value: 'press', icon: 'ri-newspaper-line' },
+  ];
+
   canSubmit() {
     return (
-      this.form.name.trim() &&
-      this.form.email.trim() &&
-      this.form.subject &&
-      this.form.message.trim() &&
+      Boolean(this.form.name.trim()) &&
+      Boolean(this.form.email.trim()) &&
+      Boolean(this.form.subject) &&
+      Boolean(this.form.message.trim()) &&
       this.form.captcha &&
       !this.submitting()
     );

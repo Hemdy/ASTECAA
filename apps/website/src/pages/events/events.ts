@@ -2,6 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RevealDirective } from '../../reveal.directive';
+import { CustomSelect, SelectOption } from '../../components/custom-select/custom-select';
 import { UiState } from '../../ui-state';
 import { EventsApiService, VotingService } from '@astec/api-client';
 import type { PublicEvent, Election } from '@astec/types';
@@ -9,7 +10,7 @@ import type { PublicEvent, Election } from '@astec/types';
 @Component({
   selector: 'app-events',
   standalone: true,
-  imports: [RouterLink, FormsModule, RevealDirective],
+  imports: [RouterLink, FormsModule, RevealDirective, CustomSelect],
   templateUrl: './events.html',
   styleUrl: './events.css',
 })
@@ -27,6 +28,17 @@ export class Events {
   sort = signal<'date' | 'title' | 'popular'>('date');
 
   categories = computed(() => [...new Set(this.all().map((event) => event.category))]);
+
+  categoryOptions = computed<SelectOption[]>(() => [
+    { label: 'All categories', value: '', icon: 'ri-apps-line' },
+    ...this.categories().map((c) => ({ label: c, value: c })),
+  ]);
+
+  sortOptions: SelectOption[] = [
+    { label: 'Date (soonest)', value: 'date', icon: 'ri-calendar-check-line' },
+    { label: 'Title (A–Z)', value: 'title', icon: 'ri-sort-alphabet-asc' },
+    { label: 'Most registered', value: 'popular', icon: 'ri-fire-line' },
+  ];
 
   filtered = computed(() => {
     const q = this.query().toLowerCase().trim();

@@ -1,45 +1,64 @@
-import { Component, signal, inject } from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
-import { MemberAuthService } from "../../services/member-auth";
-import { ToastService } from "@astec/ui";
+import { Component, signal, computed, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { MemberAuthService } from '../../services/member-auth';
+import { ToastService } from '@astec/ui';
 
 @Component({
-  selector: "app-register",
+  selector: 'app-register',
   standalone: true,
   imports: [FormsModule, RouterLink],
-  templateUrl: "./register.html",
-  styleUrl: "./register.css",
+  templateUrl: './register.html',
+  styleUrl: './register.css',
 })
 export class Register {
   readonly auth = inject(MemberAuthService);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
 
-  fullName = "";
-  email = "";
-  graduationSet = "";
-  phone = "";
-  password = "";
-  confirmPassword = "";
+  fullName = '';
+  email = '';
+  graduationSet = '';
+  phone = '';
+  password = '';
+  confirmPassword = '';
   showPw = signal(false);
+  showConfirmPw = signal(false);
   submitting = signal(false);
+  loading = signal(true);
   localError = signal<string | null>(null);
 
   constructor() {
     void this.auth.ready().then(async () => {
+      this.loading.set(false);
       if (this.auth.isAuthenticated()) {
-        await this.router.navigate(["/"]);
+        await this.router.navigate(['/']);
       }
+    }).catch(() => {
+      this.loading.set(false);
     });
   }
+
+  togglePassword() {
+    this.showPw.update((v) => !v);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPw.update((v) => !v);
+  }
+
+  passwordsMatch = computed(() => {
+    if (!this.confirmPassword) return true;
+    return this.password === this.confirmPassword;
+  });
 
   canSubmit(): boolean {
     return (
       this.fullName.trim().length > 0 &&
-      this.email.trim().includes("@") &&
+      this.email.trim().includes('@') &&
       this.password.length >= 8 &&
-      this.password === this.confirmPassword
+      this.password === this.confirmPassword &&
+      !this.submitting()
     );
   }
 
@@ -48,12 +67,12 @@ export class Register {
     this.localError.set(null);
 
     if (this.password.length < 8) {
-      this.localError.set("Password must be at least 8 characters long.");
+      this.localError.set('Password must be at least 8 characters long.');
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      this.localError.set("Passwords do not match.");
+      this.localError.set('Passwords do not match. Please verify your password entry.');
       return;
     }
 
@@ -69,9 +88,14 @@ export class Register {
 
     if (ok) {
       this.toast.show(
-        `Welcome to ASTECAA, ${this.fullName.trim().split(" ")[0]}!`
+        `Welcome to ASTECAA, ${this.fullName.trim().split(' ')[0]}!`
       );
-      await this.router.navigate(["/"]);
+      await this.router.navigate(['/']);
+    } else {
+      this.localError.set(
+        this.auth.authError() ||
+          'Registration could not be completed. Please check your information and try again.'
+      );
     }
   }
 }

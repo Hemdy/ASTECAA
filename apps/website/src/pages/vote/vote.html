@@ -1,61 +1,539 @@
 <section class="vote-hero">
   <div class="container">
-    <span class="eyebrow">ASTECAA member voice</span>
-    <h1>Shape our next chapter.</h1>
-    <p class="lede">Secure, transparent alumni elections. Choose the leaders who will carry our community forward.</p>
-    <div class="vote-hero-meta">
-      <span><i class="ri-check-line"></i> One vote per position</span>
-      <span><i class="ri-shield-keyhole-line"></i> Verified by OTP</span>
-      <span><i class="ri-lock-line"></i> Anonymous ballot</span>
+    <div class="vote-hero-inner">
+      <span class="eyebrow"><i class="ri-government-line"></i> ASTECAA Alumni Ballot</span>
+      <h1>Official Association Elections</h1>
+      <p class="lede">
+        Participate in shaping the future of our alumni association. Browse verified candidates, read their manifestos, and cast your secure, authenticated vote.
+      </p>
+
+      <div class="vote-hero-meta">
+        <div class="hero-meta-item">
+          <i class="ri-checkbox-circle-fill"></i>
+          <span>One Vote Per Position</span>
+        </div>
+        <div class="hero-meta-item">
+          <i class="ri-shield-keyhole-fill"></i>
+          <span>Verified Alumni OTP</span>
+        </div>
+        <div class="hero-meta-item">
+          <i class="ri-lock-2-fill"></i>
+          <span>Encrypted Secret Ballot</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section">
+<section class="section vote-content-section">
   <div class="container">
+    <!-- Loading State -->
     @if (loading()) {
-      <div class="vote-skeleton-grid">@for (item of [1,2,3]; track item) { <div class="vote-skeleton paper"></div> }</div>
-    } @else if (selectedElection()) {
+      <div class="vote-skeleton-container" aria-busy="true" aria-label="Loading election ballot and candidates">
+        <div class="election-view-header" style="margin-bottom: 24px;">
+          <div class="sk-shimmer sk-pill" style="width: 150px; height: 26px; margin-bottom: 14px;"></div>
+          <div class="sk-shimmer sk-title" style="width: 60%; height: 32px; margin-bottom: 12px;"></div>
+          <div class="sk-shimmer sk-text w-80" style="height: 16px; margin-bottom: 8px;"></div>
+          <div class="sk-shimmer sk-text w-50" style="height: 14px;"></div>
+        </div>
+
+        <div class="positions-container">
+          @for (pos of [1, 2]; track pos) {
+            <section class="position-section paper" style="pointer-events: none; margin-bottom: 24px;">
+              <div class="position-header">
+                <div class="position-info" style="width: 60%;">
+                  <div class="sk-shimmer sk-pill" style="width: 90px; height: 20px; margin-bottom: 8px;"></div>
+                  <div class="sk-shimmer sk-title" style="width: 70%; height: 24px; margin-bottom: 6px;"></div>
+                  <div class="sk-shimmer sk-text w-85" style="height: 14px;"></div>
+                </div>
+                <div class="sk-shimmer sk-pill" style="width: 120px; height: 30px;"></div>
+              </div>
+
+              <div class="candidates-grid">
+                @for (c of [1, 2]; track c) {
+                  <div class="candidate-card" style="pointer-events: none;">
+                    <div class="candidate-card-top">
+                      <div class="sk-shimmer sk-circle" style="width: 60px; height: 60px; flex-shrink: 0;"></div>
+                      <div style="flex: 1;">
+                        <div class="sk-shimmer sk-title" style="width: 60%; height: 20px; margin-bottom: 6px;"></div>
+                        <div class="sk-shimmer sk-pill" style="width: 90px; height: 18px;"></div>
+                      </div>
+                    </div>
+                    <div class="candidate-card-body" style="margin-top: 14px;">
+                      <div class="sk-shimmer sk-text w-100"></div>
+                      <div class="sk-shimmer sk-text w-90"></div>
+                      <div class="sk-shimmer sk-text w-70" style="margin-bottom: 16px;"></div>
+                      <div class="sk-shimmer sk-box" style="height: 42px; border-radius: var(--r-pill);"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Single Election Selected View -->
+    @else if (selectedElection(); as election) {
       @if (hasVoted()) {
-        <div class="vote-state paper"><div class="vote-seal"><i class="ri-check-line"></i></div><span class="eyebrow">Ballot received</span><h2>You've already voted</h2><p>Your vote in <strong>{{ selectedElection()!.title }}</strong> has been recorded. Thank you for taking part.</p><button class="btn btn-outline" (click)="backToList()">Back to elections</button></div>
-      } @else if (closedElection()) {
-        <div class="vote-state paper"><div class="vote-state-icon"><i class="ri-time-line"></i></div><span class="eyebrow">Election closed</span><h2>This ballot is no longer accepting votes</h2><p>Voting closed on {{ formatDate(selectedElection()!.end_date) }}. Results will be shared by the association.</p><button class="btn btn-outline" (click)="backToList()">View elections</button></div>
-      } @else if (showReview()) {
-        <div class="vote-review paper"><a class="vote-back" (click)="showReview.set(false)"><i class="ri-arrow-left-line"></i> Edit selections</a><span class="eyebrow">Final review</span><h2>Confirm your ballot</h2><p class="text-muted">Your choices are final once submitted.</p><div class="vote-review-list">@for (pos of selectedElection()!.positions; track pos.id) { <div class="vote-review-item"><span>{{ pos.title }}</span><strong>{{ candidateName(pos.id) }}</strong></div> }</div><button class="btn btn-gold" (click)="submitVotes()" [disabled]="submitting()">{{ submitting() ? 'Submitting ballot…' : 'Submit my ballot' }}</button></div>
-      } @else {
-        <div class="vote-detail-head"><a class="vote-back" (click)="backToList()"><i class="ri-arrow-left-line"></i> All elections</a><span class="eyebrow">{{ formatDate(selectedElection()!.start_date) }} — {{ formatDate(selectedElection()!.end_date) }}</span><h2>{{ selectedElection()!.title }}</h2><p class="lede">{{ selectedElection()!.description }}</p></div>
-        @for (pos of selectedElection()!.positions; track pos.id) {
-          <div class="vote-position paper"><div class="vote-position-head"><span class="eyebrow">Position {{ pos.sort_order }}</span><h3>{{ pos.title }}</h3><p class="text-muted">{{ pos.description }}</p></div><div class="vote-candidates">
-            @for (c of pos.candidates; track c.id) {
-              <button class="vote-candidate" [class.selected]="selections()[pos.id] === c.id" (click)="selectCandidate(pos.id, c.id)">
-                <div class="vote-candidate-photo">@if (c.photo_url) { <img [src]="c.photo_url" [alt]="c.full_name" /> } @else { <span>{{ c.full_name.charAt(0) }}</span> }</div><div class="vote-candidate-info"><strong>{{ c.full_name }}</strong><span>{{ c.department }} · Class of {{ c.graduation_year }}</span><p>{{ c.biography }}</p><details (click)="$event.stopPropagation()"><summary>Read manifesto</summary><p>{{ c.manifesto }}</p></details></div><span class="vote-radio"><i class="ri-check-line"></i></span>
-              </button>
-            }
-          </div></div>
-        }
-        <div class="vote-submit-bar"><span>{{ selectedCount() }} of {{ selectedElection()!.positions.length }} positions selected</span><button class="btn btn-gold" (click)="reviewVotes()" [disabled]="!allPositionsSelected()">Review and verify →</button></div>
+        <div class="vote-state-card paper">
+          <div class="vote-state-seal success">
+            <i class="ri-checkbox-circle-line"></i>
+          </div>
+          <span class="eyebrow gold">Official Ballot Submitted</span>
+          <h2>Thank You For Voting!</h2>
+          <p class="vote-state-desc">
+            Your vote in <strong>{{ election.title }}</strong> has been securely submitted and permanently recorded. Results will be published by the electoral committee upon the close of voting.
+          </p>
+          <button class="btn btn-outline" (click)="backToList()">
+            <i class="ri-arrow-left-line"></i> Back to Elections
+          </button>
+        </div>
       }
-    } @else {
-      <div class="vote-section-head"><div><span class="eyebrow">The ballot room</span><h2>Current elections</h2></div></div>
-      <div class="vote-election-list">
-        @for (e of activeElections(); track e.id) {
-          <button class="vote-election-card paper" (click)="openElection(e)"><div class="vote-card-top"><span class="vote-status" [class.closed]="statusLabel(e) === 'Closed'"></span><span class="tag" [class.tag-forest]="statusLabel(e) === 'Open'">{{ statusLabel(e) }}</span><span class="type">{{ formatDate(e.start_date) }} — {{ formatDate(e.end_date) }}</span></div><h3>{{ e.title }}</h3><p>{{ e.description }}</p><div class="vote-card-foot"><span>View candidates</span><span><i class="ri-arrow-right-line"></i></span></div></button>
-        } @empty { <div class="vote-state paper"><h3>No elections available</h3><p>Check back soon for the next alumni ballot.</p></div> }
+
+      @else if (closedElection()) {
+        <div class="vote-state-card paper">
+          <div class="vote-state-seal closed">
+            <i class="ri-time-line"></i>
+          </div>
+          <span class="eyebrow">Election Closed</span>
+          <h2>Voting is Now Closed</h2>
+          <p class="vote-state-desc">
+            Voting for <strong>{{ election.title }}</strong> concluded on {{ formatDate(election.end_date) }}. Official election results will be certified and communicated to all alumni members.
+          </p>
+          <button class="btn btn-outline" (click)="backToList()">
+            <i class="ri-arrow-left-line"></i> Return to Ballot Room
+          </button>
+        </div>
+      }
+
+      @else if (showReview()) {
+        <div class="vote-review-card paper">
+          <div class="review-header">
+            <button type="button" class="vote-back-link" (click)="showReview.set(false)">
+              <i class="ri-arrow-left-line"></i> Edit Candidate Selections
+            </button>
+            <span class="eyebrow gold">Official Review</span>
+            <h2>Confirm Your Ballot</h2>
+            <p class="review-subtitle">
+              Please inspect your selections for <strong>{{ election.title }}</strong> carefully. Once submitted, your ballot cannot be altered or resubmitted.
+            </p>
+          </div>
+
+          <div class="review-summary-table">
+            @for (pos of election.positions; track pos.id) {
+              <div class="review-row">
+                <div class="review-position">
+                  <span class="review-pos-tag">Position {{ pos.sort_order }}</span>
+                  <strong>{{ pos.title }}</strong>
+                </div>
+                <div class="review-selection">
+                  <span class="review-cand-badge"><i class="ri-check-line"></i> Selected</span>
+                  <span class="review-cand-name">{{ candidateName(pos.id) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="review-actions">
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="showReview.set(false)"
+            >
+              Modify Choices
+            </button>
+            <button
+              type="button"
+              class="btn btn-gold btn-submit-ballot"
+              (click)="submitVotes()"
+              [disabled]="submitting()"
+            >
+              @if (submitting()) {
+                <i class="ri-loader-4-line spin"></i> Submitting Official Ballot…
+              } @else {
+                <i class="ri-checkbox-circle-fill"></i> Confirm & Cast My Ballot
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      @else {
+        <!-- Voting Active: Candidate exploration and selection -->
+        <div class="election-view-header">
+          <button type="button" class="vote-back-link" (click)="backToList()">
+            <i class="ri-arrow-left-line"></i> All Association Elections
+          </button>
+
+          <div class="election-meta-strip">
+            <span class="tag tag-forest"><i class="ri-record-circle-line"></i> Voting Live</span>
+            <span class="type election-dates-type">
+              <i class="ri-calendar-line"></i> Closes {{ formatDate(election.end_date) }}
+            </span>
+          </div>
+
+          <h2 class="election-main-title">{{ election.title }}</h2>
+          @if (election.description) {
+            <p class="election-main-desc">{{ election.description }}</p>
+          }
+
+          <!-- 3-Step Voting Instruction Guide -->
+          <div class="voting-guide-strip">
+            <div class="guide-step">
+              <span class="step-num">1</span>
+              <span>Explore Candidates</span>
+            </div>
+            <div class="guide-arrow"><i class="ri-arrow-right-s-line"></i></div>
+            <div class="guide-step">
+              <span class="step-num">2</span>
+              <span>Read Full Manifestos</span>
+            </div>
+            <div class="guide-arrow"><i class="ri-arrow-right-s-line"></i></div>
+            <div class="guide-step">
+              <span class="step-num">3</span>
+              <span>Verify OTP & Cast Vote</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Position Sections -->
+        <div class="positions-container">
+          @for (pos of election.positions; track pos.id) {
+            <section class="position-section paper" [class.is-completed]="isPositionComplete(pos.id)">
+              <div class="position-header">
+                <div class="position-info">
+                  <span class="position-badge">Position {{ pos.sort_order }}</span>
+                  <h3 class="position-title">{{ pos.title }}</h3>
+                  @if (pos.description) {
+                    <p class="position-desc">{{ pos.description }}</p>
+                  }
+                </div>
+                <div class="position-status-pill" [class.complete]="isPositionComplete(pos.id)">
+                  @if (isPositionComplete(pos.id)) {
+                    <i class="ri-checkbox-circle-fill"></i>
+                    <span>Selected</span>
+                  } @else {
+                    <i class="ri-error-warning-line"></i>
+                    <span>Choice Required</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Candidates Grid -->
+              <div class="candidates-grid">
+                @for (c of pos.candidates; track c.id) {
+                  <div
+                    class="candidate-card"
+                    [class.is-selected]="isCandidateSelected(pos.id, c.id)"
+                    (click)="selectCandidate(pos.id, c.id, $event)"
+                  >
+                    <div class="candidate-card-top">
+                      <div class="candidate-avatar-wrap">
+                        @if (c.photo_url) {
+                          <img
+                            [src]="c.photo_url"
+                            [alt]="c.full_name"
+                            class="candidate-photo"
+                            (error)="onCandidatePhotoError($event)"
+                          />
+                        } @else {
+                          <div class="candidate-initials">
+                            {{ c.full_name.charAt(0) }}
+                          </div>
+                        }
+                      </div>
+
+                      <div class="candidate-meta">
+                        <h4 class="candidate-name">{{ c.full_name }}</h4>
+                        <div class="candidate-details-row">
+                          @if (c.graduation_year) {
+                            <span class="candidate-pill">Class of {{ c.graduation_year }}</span>
+                          }
+                          @if (c.department) {
+                            <span class="candidate-dept">{{ c.department }}</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    @if (c.biography) {
+                      <p class="candidate-bio">{{ c.biography }}</p>
+                    }
+
+                    <div class="candidate-actions-footer">
+                      <button
+                        type="button"
+                        class="btn-manifesto"
+                        (click)="openManifesto(c, pos.title, pos.id, $event)"
+                        title="Read full manifesto for {{ c.full_name }}"
+                      >
+                        <i class="ri-book-open-line"></i>
+                        <span>Read Manifesto</span>
+                      </button>
+
+                      <div class="candidate-select-indicator">
+                        <span class="select-label">
+                          {{ isCandidateSelected(pos.id, c.id) ? 'Selected' : 'Vote' }}
+                        </span>
+                        <div class="custom-radio">
+                          <i class="ri-check-line"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+        </div>
+
+        <!-- Sticky Bottom Ballot Submission Bar -->
+        <div class="vote-sticky-bar paper">
+          <div class="sticky-bar-info">
+            <div class="ballot-progress-indicator">
+              <span class="progress-counts">
+                <strong>{{ selectedCount() }}</strong> of <strong>{{ totalPositions() }}</strong> positions selected
+              </span>
+              <div class="progress-track">
+                <div
+                  class="progress-fill"
+                  [style.width.%]="totalPositions() ? (selectedCount() / totalPositions()) * 100 : 0"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-gold btn-review-ballot"
+            (click)="reviewVotes()"
+            [disabled]="!allPositionsSelected()"
+          >
+            <span>Review & Verify Ballot</span>
+            <i class="ri-arrow-right-line"></i>
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Elections List View -->
+    @else {
+      <div class="elections-lobby">
+        <div class="lobby-header">
+          <span class="eyebrow">Alumni Democracy</span>
+          <h2>Available Elections & Ballots</h2>
+          <p class="lobby-desc">Select an active ballot below to explore contested offices and candidates.</p>
+        </div>
+
+        <div class="elections-grid">
+          @for (e of activeElections(); track e.id) {
+            <article class="election-card paper" (click)="openElection(e)">
+              <div class="election-card-header">
+                <span
+                  class="status-badge"
+                  [class.status-open]="statusLabel(e) === 'Open'"
+                  [class.status-upcoming]="statusLabel(e) === 'Upcoming'"
+                  [class.status-closed]="statusLabel(e) === 'Closed'"
+                >
+                  <i class="ri-checkbox-circle-fill"></i> {{ statusLabel(e) }}
+                </span>
+                <span class="election-date-text">
+                  {{ formatDate(e.start_date) }} – {{ formatDate(e.end_date) }}
+                </span>
+              </div>
+
+              <h3 class="election-card-title">{{ e.title }}</h3>
+              @if (e.description) {
+                <p class="election-card-desc">{{ e.description }}</p>
+              }
+
+              <div class="election-card-footer">
+                <span class="election-link-hint">
+                  Explore Candidates & Ballot
+                </span>
+                <i class="ri-arrow-right-line"></i>
+              </div>
+            </article>
+          } @empty {
+            <div class="vote-state-card paper empty-state">
+              <div class="vote-state-seal"><i class="ri-government-line"></i></div>
+              <h3>No Active Elections</h3>
+              <p>There are currently no active elections underway. Check back for upcoming association ballots.</p>
+            </div>
+          }
+        </div>
       </div>
     }
   </div>
 </section>
 
+<!-- ============ DEDICATED MANIFESTO MODAL READER ============ -->
+@if (activeManifestoCandidate(); as item) {
+  <div class="manifesto-overlay" (click)="closeManifesto()" role="dialog" aria-modal="true" aria-label="Candidate Manifesto">
+    <div class="manifesto-dialog" (click)="$event.stopPropagation()">
+      <div class="manifesto-top-bar">
+        <div class="manifesto-candidate-header">
+          <div class="manifesto-avatar">
+            @if (item.candidate.photo_url) {
+              <img
+                [src]="item.candidate.photo_url"
+                [alt]="item.candidate.full_name"
+                (error)="onCandidatePhotoError($event)"
+              />
+            } @else {
+              <span>{{ item.candidate.full_name.charAt(0) }}</span>
+            }
+          </div>
+          <div class="manifesto-header-text">
+            <span class="manifesto-position-tag"><i class="ri-award-line"></i> Contesting for {{ item.positionTitle }}</span>
+            <h3 class="manifesto-candidate-name">{{ item.candidate.full_name }}</h3>
+            <span class="manifesto-meta-pill">
+              @if (item.candidate.graduation_year) { Class of {{ item.candidate.graduation_year }} }
+              @if (item.candidate.department) { · {{ item.candidate.department }} }
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="manifesto-close-btn"
+          (click)="closeManifesto()"
+          aria-label="Close manifesto"
+          title="Close (Esc)"
+        >
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+
+      <div class="manifesto-scroll-body">
+        @if (item.candidate.biography) {
+          <div class="manifesto-bio-callout">
+            <strong class="bio-label"><i class="ri-profile-line"></i> Candidate Background:</strong>
+            <p>{{ item.candidate.biography }}</p>
+          </div>
+        }
+
+        <div class="manifesto-text-container">
+          <h4 class="manifesto-section-title"><i class="ri-file-text-line"></i> Official Candidate Manifesto</h4>
+          @if (item.candidate.manifesto) {
+            <div class="manifesto-prose">
+              {{ item.candidate.manifesto }}
+            </div>
+          } @else {
+            <p class="manifesto-empty">No written manifesto submitted yet for this candidate.</p>
+          }
+        </div>
+      </div>
+
+      <div class="manifesto-footer">
+        <button type="button" class="btn btn-outline" (click)="closeManifesto()">
+          Close Manifesto
+        </button>
+        <button
+          type="button"
+          class="btn btn-gold btn-vote-manifesto"
+          (click)="selectCandidateFromManifesto()"
+        >
+          <i class="ri-check-line"></i>
+          <span>{{ isCandidateSelected(item.positionId, item.candidate.id) ? 'Selected for Ballot' : 'Vote for this Candidate' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ============ VERIFICATION & OTP MODAL ============ -->
 @if (verificationOpen()) {
-  <div class="verification-backdrop" (click)="closeVerification()"><div class="verification-modal paper" (click)="$event.stopPropagation()">
-    <button class="verification-close" (click)="closeVerification()" aria-label="Close">×</button>
-    @if (verificationStep() === 'details') {
-      <span class="eyebrow">Step 1 of 2 · Verify membership</span><h2>Who is voting?</h2><p>We’ll send a one-time code to confirm your alumni details. No account is required.</p>
-      <form class="verification-form" (ngSubmit)="requestOtp()"><input name="voterName" [(ngModel)]="voter.name" placeholder="Full name" required autocomplete="name"><input name="voterEmail" [(ngModel)]="voter.email" type="email" placeholder="Email address" required autocomplete="email"><input name="voterPhone" [(ngModel)]="voter.phone" type="tel" placeholder="Phone number" required autocomplete="tel"><input name="voterYear" [(ngModel)]="voter.graduationYear" type="number" placeholder="Graduation year" required><button class="btn btn-gold" type="submit" [disabled]="otpLoading()">{{ otpLoading() ? 'Sending code…' : 'Send verification code' }}</button></form>
-    } @else if (verificationStep() === 'otp') {
-      <span class="eyebrow">Step 2 of 2 · One-time code</span><h2>Check your phone</h2><p>Enter the six-digit code sent to {{ maskedPhone }}.</p><form class="verification-form" (ngSubmit)="verifyOtp()"><input name="otp" [(ngModel)]="otp" inputmode="numeric" maxlength="6" placeholder="123456" required autofocus><button class="btn btn-gold" type="submit" [disabled]="otpLoading() || otp.length !== 6">{{ otpLoading() ? 'Verifying…' : 'Verify and continue' }}</button></form><button class="verification-link" (click)="verificationStep.set('details')">Use different details</button>
-    } @else {
-      <span class="eyebrow">Verified</span><h2>Identity confirmed</h2><p>Your ballot is ready. Review your choices before submitting.</p><button class="btn btn-gold" (click)="closeVerification(); showReview.set(true)">Review my ballot</button>
-    }
-  </div></div>
+  <div class="verification-backdrop" (click)="closeVerification()" role="dialog" aria-modal="true">
+    <div class="verification-modal paper" (click)="$event.stopPropagation()">
+      <button class="verification-close" (click)="closeVerification()" aria-label="Close verification">
+        <i class="ri-close-line"></i>
+      </button>
+
+      @if (verificationStep() === 'details') {
+        <span class="eyebrow gold">Step 1 of 2 · Alumni Verification</span>
+        <h2>Confirm Your Identity</h2>
+        <p class="verification-desc">
+          To ensure ballot integrity, enter your alumni details below. We’ll send a secure one-time verification code to your registered mobile phone.
+        </p>
+
+        <form class="verification-form" (ngSubmit)="requestOtp()">
+          <div class="v-field">
+            <label>Full Name <span class="required">*</span></label>
+            <input name="voterName" [(ngModel)]="voter.name" placeholder="Full name as on school records" required autocomplete="name" />
+          </div>
+          <div class="v-field">
+            <label>Email Address <span class="required">*</span></label>
+            <input name="voterEmail" [(ngModel)]="voter.email" type="email" placeholder="you@example.com" required autocomplete="email" />
+          </div>
+          <div class="v-field">
+            <label>Phone Number <span class="required">*</span></label>
+            <input name="voterPhone" [(ngModel)]="voter.phone" type="tel" placeholder="+234..." required autocomplete="tel" />
+          </div>
+          <div class="v-field">
+            <label>Graduation Year / Set <span class="required">*</span></label>
+            <input name="voterYear" [(ngModel)]="voter.graduationYear" type="number" placeholder="e.g. 2004" required min="1990" max="2030" />
+          </div>
+
+          <button class="btn btn-gold v-btn" type="submit" [disabled]="otpLoading()">
+            @if (otpLoading()) {
+              <i class="ri-loader-4-line spin"></i> Sending verification code…
+            } @else {
+              <i class="ri-send-plane-fill"></i> Send Verification Code
+            }
+          </button>
+        </form>
+      }
+
+      @else if (verificationStep() === 'otp') {
+        <span class="eyebrow gold">Step 2 of 2 · One-Time Passcode</span>
+        <h2>Enter Verification Code</h2>
+        <p class="verification-desc">
+          Enter the six-digit verification code delivered to <strong>{{ maskedPhone }}</strong>.
+        </p>
+
+        <form class="verification-form" (ngSubmit)="verifyOtp()">
+          <div class="v-field">
+            <label>6-Digit Code</label>
+            <input
+              name="otp"
+              [(ngModel)]="otp"
+              inputmode="numeric"
+              maxlength="6"
+              placeholder="••••••"
+              class="otp-input"
+              required
+              autofocus
+            />
+          </div>
+
+          <button class="btn btn-gold v-btn" type="submit" [disabled]="otpLoading() || otp.length !== 6">
+            @if (otpLoading()) {
+              <i class="ri-loader-4-line spin"></i> Verifying code…
+            } @else {
+              <i class="ri-shield-check-line"></i> Verify & Open Ballot Review
+            }
+          </button>
+        </form>
+
+        <button type="button" class="verification-link" (click)="verificationStep.set('details')">
+          <i class="ri-arrow-left-line"></i> Edit contact details
+        </button>
+      }
+
+      @else {
+        <div class="verified-success-state">
+          <div class="vote-state-seal success"><i class="ri-check-line"></i></div>
+          <span class="eyebrow gold">Identity Verified</span>
+          <h2>Alumni Status Confirmed</h2>
+          <p class="verification-desc">Your voter eligibility is verified. Review your candidate selections before final ballot submission.</p>
+          <button class="btn btn-gold v-btn" (click)="closeVerification(); showReview.set(true)">
+            Proceed to Final Ballot Review
+          </button>
+        </div>
+      }
+    </div>
+  </div>
 }

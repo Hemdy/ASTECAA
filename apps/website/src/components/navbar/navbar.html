@@ -27,7 +27,7 @@
 
     <nav class="nav-desktop" aria-label="Main navigation">
       <div class="nav-links">
-        @for (item of items; track item.path) {
+        @for (item of filteredNavItems(); track item.path) {
           <a
             [routerLink]="item.path"
             routerLinkActive="active"
@@ -49,7 +49,7 @@
               class="nav-user-avatar"
               (error)="onAvatarError($event)"
             />
-            <span class="nav-user-name">{{ auth.displayName().split(' ')[0] }}</span>
+            <!-- <span class="nav-user-name">{{ auth.displayName().split(' ')[0] }}</span> -->
             <i class="ri-dashboard-line nav-user-icon" aria-hidden="true"></i>
           </a>
           <button class="nav-signout" (click)="signOut()">Sign out</button>
@@ -121,12 +121,16 @@
             {{ auth.profile()?.graduation_set ? ('Class of ' + auth.profile()?.graduation_set) : 'ASTECAA Member' }}
           </div>
         </div>
-        <a routerLink="/dashboard" (click)="close()" class="drawer-dashboard-pill">Dashboard</a>
+            <i class="ri-dashboard-line nav-user-icon"  routerLink="/dashboard" aria-hidden="true"></i>
+
+
+
+        <!-- <a routerLink="/dashboard" (click)="close()" class="drawer-dashboard-pill">Dashboard</a> -->
       </div>
     }
 
     <nav class="drawer-nav-list" aria-label="Mobile main navigation">
-      @for (item of items; track item.path) {
+      @for (item of filteredNavItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="active"

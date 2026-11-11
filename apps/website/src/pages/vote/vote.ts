@@ -1,6 +1,6 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Election, ElectionWithDetails, VoterDetails, VotingService } from '@astec/api-client';
+import { Election, ElectionWithDetails, VoterDetails, VotingService, Candidate } from '@astec/api-client';
 import { ToastService } from '@astec/ui';
 
 @Component({
@@ -10,7 +10,7 @@ import { ToastService } from '@astec/ui';
   templateUrl: './vote.html',
   styleUrl: './vote.css',
 })
-export class Vote {
+export class Vote implements OnDestroy {
   private voting = inject(VotingService);
   private toast = inject(ToastService);
 
@@ -21,26 +21,45 @@ export class Vote {
   hasVoted = signal(false);
   selections = signal<Record<string, string>>({});
   showReview = signal(false);
+
+  // Dedicated Manifesto Reader Modal state
+  activeManifestoCandidate = signal<{ candidate: Candidate; positionTitle: string; positionId: string } | null>(null);
+
+  // Verification & OTP state
   verificationStep = signal<'details' | 'otp' | 'verified'>('details');
   verificationOpen = signal(false);
   otp = '';
   otpLoading = signal(false);
   voter: VoterDetails = { name: '', email: '', phone: '', graduationYear: '' };
   maskedPhone = '';
+
   closedElection = computed(() => {
     const election = this.selectedElection();
     return !!election && new Date(election.end_date) < new Date();
   });
 
+  upcomingElection = computed(() => {
+    const election = this.selectedElection();
+    return !!election && new Date(election.start_date) > new Date();
+  });
+
+  selectedCount = computed(() => Object.keys(this.selections()).length);
+  totalPositions = computed(() => this.selectedElection()?.positions.length || 0);
+
   constructor() {
     this.loadActiveElections();
+  }
+
+  ngOnDestroy(): void {
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+    }
   }
 
   async loadActiveElections() {
     this.loading.set(true);
     try {
       const elections = await this.voting.getActiveElections();
-      const now = new Date();
       this.activeElections.set(elections);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load elections');
@@ -57,6 +76,7 @@ export class Vote {
       this.selections.set({});
       this.showReview.set(false);
       this.verificationOpen.set(false);
+      this.activeManifestoCandidate.set(null);
     } catch (err: any) {
       this.toast.show(err.message || 'Failed to load election');
     }
@@ -68,15 +88,49 @@ export class Vote {
     this.selections.set({});
     this.showReview.set(false);
     this.verificationOpen.set(false);
+    this.activeManifestoCandidate.set(null);
   }
 
-  selectCandidate(positionId: string, candidateId: string) {
+  selectCandidate(positionId: string, candidateId: string, event?: Event) {
+    if (event) event.stopPropagation();
     this.selections.update((s) => ({ ...s, [positionId]: candidateId }));
+  }
+
+  isCandidateSelected(positionId: string, candidateId: string): boolean {
+    return this.selections()[positionId] === candidateId;
+  }
+
+  isPositionComplete(positionId: string): boolean {
+    return Boolean(this.selections()[positionId]);
+  }
+
+  openManifesto(candidate: Candidate, positionTitle: string, positionId: string, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.activeManifestoCandidate.set({ candidate, positionTitle, positionId });
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  closeManifesto(): void {
+    this.activeManifestoCandidate.set(null);
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+    }
+  }
+
+  selectCandidateFromManifesto(): void {
+    const item = this.activeManifestoCandidate();
+    if (item) {
+      this.selectCandidate(item.positionId, item.candidate.id);
+      this.closeManifesto();
+      this.toast.show(`Selected ${item.candidate.full_name} for ${item.positionTitle}`);
+    }
   }
 
   allPositionsSelected(): boolean {
     const details = this.selectedElection();
-    if (!details) return false;
+    if (!details || details.positions.length === 0) return false;
     return details.positions.every((p) => this.selections()[p.id]);
   }
 
@@ -133,7 +187,7 @@ export class Vote {
     const pos = details.positions.find((p) => p.id === positionId);
     const candId = this.selections()[positionId];
     const cand = pos?.candidates.find((c) => c.id === candId);
-    return cand?.full_name ?? '';
+    return cand?.full_name ?? 'No selection';
   }
 
   async submitVotes() {
@@ -155,13 +209,14 @@ export class Vote {
       await this.voting.finalizeVote(details.id);
       this.hasVoted.set(true);
       this.showReview.set(false);
-      this.toast.show('Your vote has been submitted successfully!');
+      this.toast.show('Your official ballot has been submitted successfully!');
     } else {
       this.toast.show(errMsg);
     }
   }
 
   formatDate(iso: string): string {
+    if (!iso) return '';
     return new Date(iso).toLocaleDateString('en-US', {
       month: 'long',
       day: 'numeric',
@@ -169,20 +224,24 @@ export class Vote {
     });
   }
 
-  statusLabel(election: Election): string {
+  statusLabel(election: Election): 'Open' | 'Upcoming' | 'Closed' {
     const now = new Date();
     if (new Date(election.end_date) < now) return 'Closed';
     if (new Date(election.start_date) > now) return 'Upcoming';
     return 'Open';
   }
 
-  trackPosition(_: number, p: { id: string }): string {
-    return p.id;
+  onCandidatePhotoError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/empty/avatar-fallback.jpg';
   }
 
-  selectedCount = computed(() => Object.keys(this.selections()).length);
-
-  trackCandidate(_: number, c: { id: string }): string {
-    return c.id;
+  @HostListener('window:keydown.escape')
+  onEscape(): void {
+    if (this.activeManifestoCandidate()) {
+      this.closeManifesto();
+    } else if (this.verificationOpen()) {
+      this.closeVerification();
+    }
   }
 }

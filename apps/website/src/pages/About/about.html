@@ -138,16 +138,31 @@
       <p>A small, devoted group keeps the gatherings and the memories alive.</p>
     </div>
     <div class="org-grid">
-      @for (o of organizers; track o.id) {
-        <article class="org-card" appReveal>
-          <div class="org-photo">
-            <img [src]="o.photo" [alt]="o.name" class="photo-vintage" (error)="onAvatarImageError($event)" />
-          </div>
-          <h4>{{ o.name }}</h4>
-          <span class="tag tag-forest">{{ o.role }}</span>
-          <span class="type org-years">{{ o.years }}</span>
-          <p class="org-bio">{{ o.bio }}</p>
-        </article>
+      @if (loading()) {
+        @for (item of [1, 2, 3, 4]; track item) {
+          <article class="org-card" style="pointer-events: none;">
+            <div class="org-photo">
+              <div class="sk-shimmer sk-box" style="width: 100%; height: 100%; min-height: 220px;"></div>
+            </div>
+            <div class="sk-shimmer sk-title" style="width: 60%; height: 20px; margin-top: 14px; margin-bottom: 6px;"></div>
+            <div class="sk-shimmer sk-pill" style="width: 80px; height: 18px; margin-bottom: 6px;"></div>
+            <div class="sk-shimmer sk-text w-35" style="height: 12px; margin-bottom: 10px;"></div>
+            <div class="sk-shimmer sk-text w-100"></div>
+            <div class="sk-shimmer sk-text w-80"></div>
+          </article>
+        }
+      } @else {
+        @for (o of organizers; track o.id) {
+          <article class="org-card" appReveal>
+            <div class="org-photo">
+              <img [src]="o.photo" [alt]="o.name" class="photo-vintage" (error)="onAvatarImageError($event)" />
+            </div>
+            <h4>{{ o.name }}</h4>
+            <span class="tag tag-forest">{{ o.role }}</span>
+            <span class="type org-years">{{ o.years }}</span>
+            <p class="org-bio">{{ o.bio }}</p>
+          </article>
+        }
       }
     </div>
   </div>

@@ -45,6 +45,11 @@ export class Home implements OnInit {
     return this.homepage()?.hero?.bgImage || this.featured()?.banner || '/images/empty/image-fallback.jpg';
   });
 
+  featuredMediaImage = computed(() => {
+    const ev = this.featured();
+    return ev?.banner || ev?.poster || '/images/empty/image-fallback.jpg';
+  });
+
   upcoming = computed(() =>
     this.events()
       .filter((event) => event.id !== this.featured()?.id && event.date >= new Date().toISOString().slice(0, 10))
@@ -52,6 +57,8 @@ export class Home implements OnInit {
   );
 
   eventsError = signal<string | null>(null);
+  eventsLoading = signal(true);
+  galleryLoading = signal(true);
   latestMemories = signal<CmsGalleryItem[]>([]);
   galleryPreview = signal<CmsGalleryItem[]>([]);
   timelinePreview = signal<CmsTimelineMilestone[]>([]);
@@ -77,14 +84,18 @@ export class Home implements OnInit {
   }
 
   private async loadEvents(): Promise<void> {
+    this.eventsLoading.set(true);
     try {
       this.events.set(await this.eventsApi.listPublic());
     } catch (error) {
       this.eventsError.set(error instanceof Error ? error.message : 'Events could not be loaded.');
+    } finally {
+      this.eventsLoading.set(false);
     }
   }
 
   private async loadCmsContent(): Promise<void> {
+    this.galleryLoading.set(true);
     try {
       const [hp, gallery, timeline, messages, ann] = await Promise.all([
         this.cmsApi.getHomepage().catch(() => null),
@@ -110,6 +121,8 @@ export class Home implements OnInit {
       }
     } catch {
       // Empty arrays handled by signals
+    } finally {
+      this.galleryLoading.set(false);
     }
   }
 

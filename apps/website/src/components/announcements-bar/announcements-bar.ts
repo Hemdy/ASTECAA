@@ -22,6 +22,7 @@ export class AnnouncementsBar implements OnInit, OnDestroy {
 
   currentIndex = signal(0);
   isPaused = signal(false);
+  isExpanded = signal(false);
 
   private rotationTimer: ReturnType<typeof setInterval> | null = null;
   private touchStartX = 0;
@@ -60,7 +61,7 @@ export class AnnouncementsBar implements OnInit, OnDestroy {
   startRotation(): void {
     this.stopRotation();
     this.rotationTimer = setInterval(() => {
-      if (!this.isPaused() && this.announcements().length > 1) {
+      if (!this.isPaused() && !this.isExpanded() && this.announcements().length > 1) {
         this.next();
       }
     }, 5000);
@@ -71,6 +72,18 @@ export class AnnouncementsBar implements OnInit, OnDestroy {
       clearInterval(this.rotationTimer);
       this.rotationTimer = null;
     }
+  }
+
+  toggleExpand(): void {
+    this.isExpanded.update((v) => !v);
+  }
+
+  expand(): void {
+    this.isExpanded.set(true);
+  }
+
+  collapse(): void {
+    this.isExpanded.set(false);
   }
 
   next(): void {
@@ -110,6 +123,10 @@ export class AnnouncementsBar implements OnInit, OnDestroy {
   }
 
   onMouseDown(e: MouseEvent): void {
+    // Only track drag if clicking outside interactive elements and not expanded
+    if (this.isExpanded()) return;
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('a')) return;
     this.mouseStartX = e.clientX;
     this.isMouseDown = true;
   }

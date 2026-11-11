@@ -306,6 +306,11 @@
   gap: 7px;
 }
 
+.filter-group app-custom-select {
+  width: 100%;
+  min-width: 175px;
+}
+
 .filter-group label {
   padding-left: 3px;
 

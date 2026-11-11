@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RevealDirective } from '../../reveal.directive';
 import { ABOUT_MILESTONES, ORGANIZERS, MEMORIES } from '../../data';
@@ -11,6 +11,7 @@ import { ABOUT_MILESTONES, ORGANIZERS, MEMORIES } from '../../data';
   styleUrl: './about.css',
 })
 export class About {
+  loading = signal(false);
   milestones = ABOUT_MILESTONES;
   organizers = ORGANIZERS;
   heritagePhoto = MEMORIES[7].image;

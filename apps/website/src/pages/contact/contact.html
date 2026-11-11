@@ -1,106 +1,178 @@
 <section class="page-hero">
   <div class="container">
-    <span class="eyebrow" appReveal>Write to us</span>
-    <h1 appReveal delay="80">Get in touch</h1>
+    <span class="eyebrow" appReveal>Connect with our community</span>
+    <h1 appReveal delay="80">Get in touch with ASTECAA</h1>
     <p class="lede" appReveal delay="160">
-      A question, a memory to share, an offer to help — we read every letter that comes through.
+      Have a question about gatherings, an archival memory to donate, or want to connect with the association leadership? We read every note that comes across the desk.
     </p>
   </div>
 </section>
 
 <section class="section">
-  <div class="container contact">
-    <!-- Form -->
-    <div class="contact-form-wrap paper" appReveal>
-      <h2>Send a letter</h2>
-      <p class="contact-sub type">We reply within a few days.</p>
-
-      <form (ngSubmit)="submit()">
-        <div class="field">
-          <label for="name">Your name</label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            [(ngModel)]="form.name"
-            required
-            placeholder="e.g. Eleanor Voss"
-          />
+  <div class="container contact-grid">
+    <!-- Main Contact Form -->
+    <div class="contact-form-card paper" appReveal>
+      <div class="form-header">
+        <div class="form-header-badge">
+          <i class="ri-mail-send-line"></i>
         </div>
-        <div class="field">
-          <label for="email">Email address</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            [(ngModel)]="form.email"
-            required
-            placeholder="you@example.com"
-          />
+        <div>
+          <h2>Send a message</h2>
+          <p class="form-subtitle">Fill out the form and our secretariat team will respond within 48 hours.</p>
         </div>
-        <div class="field">
-          <label for="subject">Subject</label>
-          <select id="subject" name="subject" [(ngModel)]="form.subject" required>
-            <option value="" disabled>Choose a subject…</option>
-            <option value="general">A general question</option>
-            <option value="memory">I have a memory to share</option>
-            <option value="photo">I have photographs to donate</option>
-            <option value="event">A question about an event</option>
-            <option value="volunteer">I'd like to volunteer</option>
-            <option value="press">Press or media</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="message">Your message</label>
-          <textarea
-            id="message"
-            name="message"
-            [(ngModel)]="form.message"
-            required
-            placeholder="Write your letter here…"
-          ></textarea>
-        </div>
-
-        <!-- Fake CAPTCHA -->
-        <div class="captcha">
-          <label class="captcha-box">
-            <input type="checkbox" name="captcha" [(ngModel)]="form.captcha" />
-            <span>I'm not a robot</span>
-          </label>
-          <span class="type captcha-note">A simple check to keep the wall clean.</span>
-        </div>
-
-        <button type="submit" class="btn btn-gold contact-submit" [disabled]="!canSubmit()">
-          Send letter
-        </button>
-      </form>
-    </div>
-
-    <!-- Side info -->
-    <aside class="contact-side">
-   <div class="card contact-card" appReveal delay="80">
-  <span class="eyebrow">Become a Member</span>
-  <h3>Join ASTECAA</h3>
-
-  <p>
-    Register to reconnect with classmates, participate in alumni elections,
-    share memories, and stay informed about upcoming events.
-  </p>
-</div>
-
-      <div class="card contact-card" appReveal delay="140">
-        <span class="eyebrow">Write directly</span>
-        <h3>By post or wire</h3>
-        <a href="mailto:hello@ASTECAA.example">hello@ASTECAA.example</a>
-        <a href="tel:+2349012345678">+234 901 234 5678</a>
       </div>
 
-      <div class="card contact-card" appReveal delay="200">
-        <span class="eyebrow">Stewards</span>
-        <h3>The hands behind it</h3>
-        <p class="contact-stewards">
-          A small volunteer group keeps the archive and the gatherings alive. New hands are
-          always welcome.
+      @if (loading()) {
+        <div class="contact-skeleton-form" aria-busy="true">
+          <div class="form-row">
+            <div class="sk-field" style="flex: 1;">
+              <div class="sk-shimmer sk-text w-35" style="height: 12px;"></div>
+              <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+            </div>
+            <div class="sk-field" style="flex: 1;">
+              <div class="sk-shimmer sk-text w-40" style="height: 12px;"></div>
+              <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+            </div>
+          </div>
+          <div class="sk-field" style="margin-top: 16px;">
+            <div class="sk-shimmer sk-text w-25" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
+          <div class="sk-field" style="margin-top: 16px;">
+            <div class="sk-shimmer sk-text w-30" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 120px; border-radius: var(--r-md);"></div>
+          </div>
+          <div class="sk-shimmer sk-box" style="height: 50px; border-radius: var(--r-pill); margin-top: 24px;"></div>
+        </div>
+      } @else {
+      <form (ngSubmit)="submit()" class="contact-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Full Name <span class="required">*</span></label>
+            <div class="input-wrap">
+              <i class="ri-user-line input-icon"></i>
+              <input
+                id="name"
+                type="text"
+                name="name"
+                [(ngModel)]="form.name"
+                required
+                placeholder="e.g. Chinedu Okafor"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address <span class="required">*</span></label>
+            <div class="input-wrap">
+              <i class="ri-mail-line input-icon"></i>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="form.email"
+                required
+                placeholder="alumnus@example.com"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Topic / Subject <span class="required">*</span></label>
+          <app-custom-select
+            placeholder="Select what your inquiry is about…"
+            icon="ri-price-tag-3-line"
+            ariaLabel="Topic"
+            [options]="subjectOptions"
+            [(value)]="form.subject"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="message">Your Message or Story <span class="required">*</span></label>
+          <div class="textarea-wrap">
+            <textarea
+              id="message"
+              name="message"
+              [(ngModel)]="form.message"
+              required
+              rows="6"
+              placeholder="Tell us about your question, memory, or suggestion…"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Verification Check -->
+        <div class="captcha-card">
+          <label class="captcha-checkbox-label">
+            <input type="checkbox" name="captcha" [(ngModel)]="form.captcha" />
+            <span class="custom-check-mark"><i class="ri-check-line"></i></span>
+            <span class="captcha-text">I confirm that this is a genuine inquiry for ASTECAA</span>
+          </label>
+          <span class="captcha-shield"><i class="ri-shield-check-line"></i> Spam Protection</span>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-gold btn-submit"
+          [disabled]="!canSubmit()"
+        >
+          @if (submitting()) {
+            <i class="ri-loader-4-line spin"></i> Sending message…
+          } @else {
+            <i class="ri-send-plane-fill"></i> Send Message
+          }
+        </button>
+      </form>
+      }
+    </div>
+
+    <!-- Side Information Panels -->
+    <aside class="contact-sidebar">
+      <!-- Secretariat Info Card -->
+      <div class="card sidebar-card" appReveal delay="80">
+        <span class="sidebar-card-eyebrow"><i class="ri-map-pin-2-line"></i> Association Office</span>
+        <h3>ASTECAA Secretariat</h3>
+        <p class="sidebar-text">
+          Adventist Secondary Technical College (ASTEC) Campus,<br />
+          Owerrinta, Abia State, Nigeria
+        </p>
+
+        <div class="sidebar-contact-links">
+          <a href="mailto:info@astecaa.org" class="contact-link">
+            <i class="ri-mail-line"></i>
+            <span>info&#64;astecaa.org</span>
+          </a>
+          <a href="tel:+2349012345678" class="contact-link">
+            <i class="ri-phone-line"></i>
+            <span>+234 901 234 5678</span>
+          </a>
+          <span class="contact-link static">
+            <i class="ri-time-line"></i>
+            <span>Mon – Fri: 9:00 AM – 5:00 PM WAT</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Membership Join Card -->
+      <div class="card sidebar-card highlight-card" appReveal delay="140">
+        <span class="sidebar-card-eyebrow gold"><i class="ri-award-line"></i> Alumni Membership</span>
+        <h3>Join the ASTECAA Network</h3>
+        <p class="sidebar-text">
+          Register to reconnect with your graduating class, vote in association elections, and contribute to our Alma Mater.
+        </p>
+        <a routerLink="/register" class="btn btn-primary btn-sm sidebar-cta">
+          Register as Alumnus →
+        </a>
+      </div>
+
+      <!-- Archive Stewardship Card -->
+      <div class="card sidebar-card" appReveal delay="200">
+        <span class="sidebar-card-eyebrow"><i class="ri-archive-line"></i> Archival Donations</span>
+        <h3>Preserve History</h3>
+        <p class="sidebar-text">
+          Do you hold vintage school magazines, graduation programmes, or photographs? We can scan and digitize them to safeguard our collective legacy.
         </p>
       </div>
     </aside>

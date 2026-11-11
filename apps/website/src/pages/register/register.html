@@ -1,113 +1,277 @@
 <section class="auth-page">
-  <div class="auth-card paper">
-    <a routerLink="/" class="auth-back">← Back to Home</a>
+  <div class="auth-card paper register-card">
+    <div class="auth-top-nav">
+      <a routerLink="/" class="auth-back">
+        <i class="ri-arrow-left-line"></i>
+        <span>Return to Home</span>
+      </a>
+      <span class="auth-brand-badge">ASTECAA · Owerrinta</span>
+    </div>
+
+    <!-- Heritage Seal & Header -->
     <div class="auth-header">
-      <span class="eyebrow">Join the ASTECAA Community</span>
-      <h1>Alumni Registration</h1>
+      <div class="auth-seal">
+        <i class="ri-user-star-line"></i>
+      </div>
+      <span class="eyebrow gold">Alumni Membership</span>
+      <h1>Join the ASTECAA Network</h1>
       <p class="lede">
-        Create your alumni account to connect with classmates, participate in elections, and stay engaged with ASTECAA.
+        Register to reconnect with your classmates, participate in association elections, and contribute to our Alma Mater.
       </p>
     </div>
 
-    <form (ngSubmit)="submit($event)" class="auth-form">
-      <div class="field">
-        <label>Full Name</label>
-        <input
-          type="text"
-          name="fullName"
-          [(ngModel)]="fullName"
-          placeholder="e.g. Chukwuma Obi"
-          required
-          autocomplete="name"
-        />
-      </div>
-
-      <div class="field">
-        <label>Email Address</label>
-        <input
-          type="email"
-          name="email"
-          [(ngModel)]="email"
-          placeholder="name@domain.com"
-          required
-          autocomplete="email"
-        />
-      </div>
-
-      <div class="field">
-        <label>Graduation Set / Year <span class="auth-optional">(e.g. Class of 2005)</span></label>
-        <input
-          type="text"
-          name="graduationSet"
-          [(ngModel)]="graduationSet"
-          placeholder="e.g. 2005 or Class of 2005"
-        />
-      </div>
-
-      <div class="field">
-        <label>Phone Number <span class="auth-optional">(optional)</span></label>
-        <input
-          type="tel"
-          name="phone"
-          [(ngModel)]="phone"
-          placeholder="+234 800 000 0000"
-          autocomplete="tel"
-        />
-      </div>
-
-      <div class="field">
-        <label>Password <span class="auth-optional">(min 8 characters)</span></label>
-        <div class="auth-pw-wrap">
-          <input
-            [type]="showPw() ? 'text' : 'password'"
-            name="password"
-            [(ngModel)]="password"
-            placeholder="Create a password"
-            required
-            autocomplete="new-password"
-          />
-          <button
-            type="button"
-            class="auth-pw-toggle"
-            (click)="showPw.set(!showPw())"
-          >
-            {{ showPw() ? 'Hide' : 'Show' }}
-          </button>
+    <!-- SKELETON LOADER STATE -->
+    @if (loading()) {
+      <div class="auth-skeleton-form" aria-busy="true" aria-label="Loading registration form">
+        <div class="sk-grid-2">
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-40" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-50" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
         </div>
-      </div>
-
-      <div class="field">
-        <label>Confirm Password</label>
-        <div class="auth-pw-wrap">
-          <input
-            [type]="showPw() ? 'text' : 'password'"
-            name="confirmPassword"
-            [(ngModel)]="confirmPassword"
-            placeholder="Confirm your password"
-            required
-            autocomplete="new-password"
-          />
+        <div class="sk-grid-2" style="margin-top: 14px;">
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-35" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-30" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
         </div>
+        <div class="sk-grid-2" style="margin-top: 14px;">
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-30" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
+          <div class="sk-field">
+            <div class="sk-shimmer sk-text w-40" style="height: 12px;"></div>
+            <div class="sk-shimmer sk-box" style="height: 48px; border-radius: var(--r-md);"></div>
+          </div>
+        </div>
+        <div class="sk-shimmer sk-box" style="height: 52px; border-radius: var(--r-pill); margin-top: 24px;"></div>
       </div>
+    } @else {
+      <!-- REGISTRATION FORM -->
+      <form (ngSubmit)="submit($event)" class="auth-form" novalidate>
+        <!-- Group 1: Personal Identification -->
+        <div class="form-section-header">
+          <span class="section-title"><i class="ri-user-3-line"></i> Alumni Information</span>
+        </div>
 
-      @if (localError() || auth.authError()) {
-        <div class="auth-error">{{ localError() || auth.authError() }}</div>
-      }
+        <div class="form-grid-2">
+          <!-- Full Name -->
+          <div class="auth-field-group">
+            <label for="reg-fullname" class="auth-label">
+              <span>Full Name</span>
+              <span class="auth-required">*</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-user-line auth-input-icon"></i>
+              <input
+                id="reg-fullname"
+                type="text"
+                name="fullName"
+                class="auth-input"
+                [(ngModel)]="fullName"
+                placeholder="e.g. Chukwuma Obi"
+                required
+                autocomplete="name"
+              />
+            </div>
+          </div>
 
-      <button
-        type="submit"
-        class="btn btn-gold auth-submit"
-        [disabled]="submitting() || !canSubmit()"
-      >
-        {{ submitting() ? 'Creating account...' : 'Complete Registration' }}
-      </button>
-    </form>
+          <!-- Graduation Set / Year -->
+          <div class="auth-field-group">
+            <label for="reg-set" class="auth-label">
+              <span>Graduation Set</span>
+              <span class="auth-optional">(e.g. Class of 2005)</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-calendar-line auth-input-icon"></i>
+              <input
+                id="reg-set"
+                type="text"
+                name="graduationSet"
+                class="auth-input"
+                [(ngModel)]="graduationSet"
+                placeholder="e.g. 2005 or Class of 2005"
+              />
+            </div>
+          </div>
+        </div>
 
-    <div class="auth-foot">
-      <p>
-        Already have an alumni account?
-        <a routerLink="/login">Sign in here</a>
-      </p>
-    </div>
+        <div class="form-grid-2">
+          <!-- Email Address -->
+          <div class="auth-field-group">
+            <label for="reg-email" class="auth-label">
+              <span>Email Address</span>
+              <span class="auth-required">*</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-mail-line auth-input-icon"></i>
+              <input
+                id="reg-email"
+                type="email"
+                name="email"
+                class="auth-input"
+                [(ngModel)]="email"
+                placeholder="name@example.com"
+                required
+                autocomplete="email"
+              />
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="auth-field-group">
+            <label for="reg-phone" class="auth-label">
+              <span>Phone Number</span>
+              <span class="auth-optional">(optional)</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-phone-line auth-input-icon"></i>
+              <input
+                id="reg-phone"
+                type="tel"
+                name="phone"
+                class="auth-input"
+                [(ngModel)]="phone"
+                placeholder="+234 800 000 0000"
+                autocomplete="tel"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 2: Account Security -->
+        <div class="form-section-header" style="margin-top: 10px;">
+          <span class="section-title"><i class="ri-shield-keyhole-line"></i> Security Credentials</span>
+        </div>
+
+        <div class="form-grid-2">
+          <!-- Password -->
+          <div class="auth-field-group">
+            <label for="reg-password" class="auth-label">
+              <span>Password</span>
+              <span class="auth-required">*</span>
+              <span class="auth-hint">(min 8 characters)</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-lock-2-line auth-input-icon"></i>
+              <input
+                id="reg-password"
+                [type]="showPw() ? 'text' : 'password'"
+                name="password"
+                class="auth-input with-toggle"
+                [(ngModel)]="password"
+                placeholder="Create a password"
+                required
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="auth-pw-toggle-btn"
+                (click)="togglePassword()"
+                [attr.aria-label]="showPw() ? 'Hide password' : 'Show password'"
+              >
+                <i [class]="showPw() ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                <!-- <span>{{ showPw() ? 'Hide' : 'Show' }}</span> -->
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="auth-field-group">
+            <label for="reg-confirm-password" class="auth-label">
+              <span>Confirm Password</span>
+              <span class="auth-required">*</span>
+            </label>
+            <div class="auth-input-wrap">
+              <i class="ri-lock-check-line auth-input-icon"></i>
+              <input
+                id="reg-confirm-password"
+                [type]="showConfirmPw() ? 'text' : 'password'"
+                name="confirmPassword"
+                class="auth-input with-toggle"
+                [class.input-error]="confirmPassword && !passwordsMatch()"
+                [(ngModel)]="confirmPassword"
+                placeholder="Repeat your password"
+                required
+                autocomplete="new-password"
+              />
+              <button
+                type="button"
+                class="auth-pw-toggle-btn"
+                (click)="toggleConfirmPassword()"
+                [attr.aria-label]="showConfirmPw() ? 'Hide password' : 'Show password'"
+              >
+                <i [class]="showConfirmPw() ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
+                <!-- <span>{{ showConfirmPw() ? 'Hide' : 'Show' }}</span> -->
+              </button>
+            </div>
+            @if (confirmPassword && !passwordsMatch()) {
+              <span class="field-error-text"><i class="ri-error-warning-line"></i> Passwords do not match</span>
+            }
+          </div>
+        </div>
+
+        <!-- Error Alert -->
+        @if (localError() || auth.authError()) {
+          <div class="auth-error-banner" role="alert">
+            <i class="ri-error-warning-fill"></i>
+            <div class="auth-error-content">
+              <strong>Registration Notice</strong>
+              <p>{{ localError() || auth.authError() }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="btn btn-gold auth-submit-btn"
+          [disabled]="submitting() || !canSubmit()"
+        >
+          @if (submitting()) {
+            <i class="ri-loader-4-line spin"></i>
+            <span>Creating Alumni Account…</span>
+          } @else {
+            <i class="ri-user-add-line"></i>
+            <span>Complete Alumni Registration</span>
+          }
+        </button>
+
+        <!-- Trust Badges -->
+        <div class="auth-trust-badges">
+          <div class="trust-badge">
+            <i class="ri-team-line"></i>
+            <span>Alumni Directory</span>
+          </div>
+          <div class="trust-badge">
+            <i class="ri-vote-line"></i>
+            <span>Voting Rights</span>
+          </div>
+          <div class="trust-badge">
+            <i class="ri-shield-check-line"></i>
+            <span>Alumni Verification</span>
+          </div>
+        </div>
+      </form>
+
+      <!-- Foot Link -->
+      <div class="auth-foot">
+        <p>
+          Already registered as an alumnus?
+          <a routerLink="/login" class="auth-foot-link">
+            Sign In to your account <span class="arrow">→</span>
+          </a>
+        </p>
+      </div>
+    }
   </div>
 </section>

@@ -1,8 +1,9 @@
-import { Component, signal, inject, HostListener, effect, OnDestroy } from '@angular/core';
+import { Component, signal, computed, inject, HostListener, effect, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { NAV_ITEMS, NavItem } from '../../data';
 import { MemberAuthService } from '../../services/member-auth';
+import { VotingService } from '@astec/api-client';
 
 @Component({
   selector: 'app-navbar',
@@ -11,11 +12,23 @@ import { MemberAuthService } from '../../services/member-auth';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar implements OnDestroy {
+export class Navbar implements OnInit, OnDestroy {
   private readonly router = inject(Router);
+  private readonly votingService = inject(VotingService);
   readonly auth = inject(MemberAuthService);
 
   readonly items: NavItem[] = NAV_ITEMS;
+  readonly hasActiveElection = signal(false);
+
+  readonly filteredNavItems = computed(() => {
+    return this.items.filter((item) => {
+      if (item.path === '/vote') {
+        return this.hasActiveElection();
+      }
+      return true;
+    });
+  });
+
   readonly scrolled = signal(false);
   readonly open = signal(false);
 
@@ -34,6 +47,25 @@ export class Navbar implements OnDestroy {
         document.body.classList.toggle('nav-drawer-active', isOpen);
       }
     });
+  }
+
+  ngOnInit(): void {
+    void this.checkActiveElections();
+  }
+
+  async checkActiveElections(): Promise<void> {
+    try {
+      const elections = await this.votingService.getActiveElections();
+      const now = new Date();
+      const active = (elections || []).some((e) => {
+        const start = new Date(e.start_date);
+        const end = new Date(e.end_date);
+        return start <= now && end >= now;
+      });
+      this.hasActiveElection.set(active);
+    } catch {
+      this.hasActiveElection.set(false);
+    }
   }
 
   @HostListener('window:scroll')

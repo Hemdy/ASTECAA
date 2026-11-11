@@ -3,6 +3,17 @@
   position: sticky;
   top: 0;
   z-index: 100;
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+}
+
+.nav,
+.nav button,
+.nav a,
+.nav-mobile-drawer,
+.drawer-nav-item,
+.drawer-user-name,
+.drawer-user-sub {
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
 }
 
 
@@ -98,7 +109,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 130px;
+  /* min-height: 130px; */
   gap: 28px;
   padding: 16px 38px 20px;
   background:
@@ -271,7 +282,7 @@
   gap: 12px;
   padding: 0 18px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 10px;
   color: var(--nav-forest-dark);
   font-size: 0.94rem;
   font-weight: 700;
@@ -511,7 +522,6 @@
   gap: 20px;
   padding: 0 18px;
   border-radius: 14px;
-  color: #15372a;
   font-size: 1rem;
   font-weight: 550;
   text-decoration: none;
@@ -525,14 +535,13 @@
     background: var(--c-brown-600);
 }
 
-.drawer-nav-item.active {
+/* .drawer-nav-item.active {
   font-weight: 700;
-}
+} */
 
 .drawer-nav-icon {
   width: 24px;
   flex: 0 0 auto;
-  color: var(--nav-forest);
   font-size: 1.45rem;
   text-align: center;
 }
@@ -543,7 +552,6 @@
 
 .drawer-nav-arrow {
   flex: 0 0 auto;
-  color: var(--nav-forest);
   font-size: 1.35rem;
 }
 
@@ -630,7 +638,7 @@ button:focus-visible {
   }
 
   .nav-main {
-    min-height: 105px;
+    /* min-height: 105px; */
     padding: 12px 24px 16px;
   }
 

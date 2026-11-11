@@ -9,6 +9,7 @@
       "architect": {
         "build": {
           "builder": "@angular/build:application",
+          "defaultConfiguration": "production",
           "configurations": {
             "development": {
               "extractLicenses": false,
@@ -19,7 +20,14 @@
             "production": {
               "extractLicenses": true,
               "namedChunks": false,
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": false
+              },
               "outputHashing": "all",
               "sourceMap": false
             }
@@ -69,6 +77,7 @@
       "architect": {
         "build": {
           "builder": "@angular/build:application",
+          "defaultConfiguration": "production",
           "configurations": {
             "development": {
               "extractLicenses": false,
@@ -79,7 +88,14 @@
             "production": {
               "extractLicenses": true,
               "namedChunks": false,
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": false
+              },
               "outputHashing": "all",
               "sourceMap": false
             }

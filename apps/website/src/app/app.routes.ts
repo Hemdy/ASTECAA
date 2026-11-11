@@ -25,6 +25,8 @@ export const routes: Routes = [
   { path: 'vote', component: Vote },
   { path: 'register', component: Register },
   { path: 'login', component: Login },
+  { path: 'sign-in', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'signup', redirectTo: 'register', pathMatch: 'full' },
   { path: 'dashboard', component: Dashboard },
   { path: 'alumni/dashboard', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', component: NotFound },

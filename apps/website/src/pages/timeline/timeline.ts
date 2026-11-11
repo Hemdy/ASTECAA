@@ -66,4 +66,9 @@ export class Timeline implements OnInit {
       this.filtered.set(items.filter((m) => m.year >= e.from && m.year <= e.to));
     }
   }
+
+  onImageError(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    img.src = '/images/empty/image-fallback.jpg';
+  }
 }

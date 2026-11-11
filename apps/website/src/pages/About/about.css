@@ -1,8 +1,7 @@
 .page-hero {
   padding: clamp(72px, 12vw, 140px) 0 clamp(40px, 6vw, 72px);
   text-align: center;
-  background: var(--c-brown-700);
-  background-image: linear-gradient(160deg, var(--c-brown-600), var(--c-brown-700));
+    background-image: radial-gradient(circle at 15% 20%, rgba(196, 154, 69, 0.15) 0%, transparent 40%), radial-gradient(circle at 85% 75%, rgba(122, 62, 62, 0.2) 0%, transparent 40%), linear-gradient(150deg, #3d2921 0%, #291a14 100%);  
   color: var(--c-bg-50);
 }
 .page-hero .eyebrow {

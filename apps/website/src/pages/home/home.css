@@ -327,6 +327,8 @@ img {
   transition:
     transform 0.7s ease,
     filter 0.5s ease;
+
+    border-radius: 10px;
 }
 
 .hero-card:hover .hero-card-img {
@@ -341,9 +343,10 @@ img {
    IMAGE BOTTOM GRADIENT
    ========================================================= */
 
-.hero-card-img {
+.hero-card-img  {
   position: relative;
 }
+
 
 
 /* =========================================================
@@ -564,9 +567,9 @@ app-countdown span.d-num {
   }
 
   .hero-card-head {
-    top: 12px;
-    left: 12px;
-    right: 12px;
+    top: 22px;
+    left: 25px;
+    right: 29px;
   }
 
   .hero-card-img {
@@ -2519,4 +2522,121 @@ gap: clamp(8px, 2vw, 16px);  grid-template-columns:
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* =========================================================
+   GALLERY SKELETON LOADERS
+   ========================================================= */
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(92, 64, 51, 0.08) 25%,
+    rgba(196, 154, 69, 0.18) 50%,
+    rgba(92, 64, 51, 0.08) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton-mem-card {
+  pointer-events: none;
+}
+
+.skeleton-mem-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: var(--c-paper-300);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.skeleton-year-chip {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 48px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(126, 36, 58, 0.25);
+  z-index: 2;
+}
+
+.skeleton-mem-overlay {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-shimmer-line {
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0.25) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton-shimmer-line.w-40 {
+  width: 40%;
+}
+
+.skeleton-shimmer-line.w-75 {
+  width: 75%;
+}
+
+.skeleton-film-frame {
+  pointer-events: none;
+}
+
+.skeleton-film-photo {
+  width: 100%;
+  height: clamp(140px, 17vw, 160px);
+  border-radius: 2px;
+  border: 5px solid #fdfaf3;
+  box-shadow: var(--shadow-sm);
+  background: linear-gradient(
+    90deg,
+    #3b2d23 25%,
+    #4a392d 50%,
+    #3b2d23 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+}
+
+.skeleton-film-caption {
+  height: 10px;
+  width: 60%;
+  margin: 10px auto 0;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(224, 192, 120, 0.18) 25%,
+    rgba(224, 192, 120, 0.35) 50%,
+    rgba(224, 192, 120, 0.18) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
 }

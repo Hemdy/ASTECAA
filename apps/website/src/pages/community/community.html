@@ -16,11 +16,22 @@
     <!-- Leave a message -->
     <div class="post-card paper" appReveal>
       <div class="post-head">
-        <span class="eyebrow">Pin a note</span>
+        <div class="post-head-left">
+          <div class="post-icon-badge">
+            <i class="ri-pushpin-2-fill"></i>
+          </div>
+          <div>
+            <span class="eyebrow gold">Alumni Wall Reflection</span>
+            <h2 class="post-card-title">Pin a Memory to the Wall</h2>
+            <p class="post-card-desc">
+              Share an experience, nostalgic thought, or greetings with fellow ASTECAA alumni across generations.
+            </p>
+          </div>
+        </div>
         @if (auth.isAuthenticated() && auth.profile()) {
-          <span class="type post-moderation">Verified alumni post directly to the wall</span>
+          <span class="type post-moderation verified-tag"><i class="ri-checkbox-circle-fill"></i> Verified Alumni Mode</span>
         } @else {
-          <span class="type post-moderation">Enter your details to post</span>
+          <span class="type post-moderation"><i class="ri-shield-check-line"></i> Open for Alumni & Friends</span>
         }
       </div>
 
@@ -44,61 +55,122 @@
         </div>
       } @else {
         <div class="alumni-guest-hint">
-          <span>Are you an alumnus? <a routerLink="/sign-in" class="alumni-link">Sign in</a> to pin notes with 1-click and skip entering personal details.</span>
+          <div class="guest-hint-icon"><i class="ri-information-line"></i></div>
+          <div class="guest-hint-text">
+            <span>Are you a registered alumnus?</span>
+            <a routerLink="/login" class="alumni-link">Sign in to your account</a>
+            <span>to pin notes with your verified badge and skip entering personal details.</span>
+          </div>
         </div>
       }
 
-      <form (ngSubmit)="submit()">
+      <form (ngSubmit)="submit()" class="community-post-form">
         @if (!auth.isAuthenticated() || !auth.profile()) {
           <div class="post-row">
-            <input
-              type="text"
-              name="name"
-              placeholder="Your name"
-              [(ngModel)]="form.name"
-              required
-              aria-label="Your name"
-            />
-            <input
-              type="email"
-              name="email"
-              placeholder="Your email"
-              [(ngModel)]="form.email"
-              required
-              aria-label="Your email"
-            />
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Your phone number"
-              [(ngModel)]="form.phone"
-              required
-              aria-label="Your phone number"
-            />
-            <input
-              type="number"
-              name="graduationYear"
-              placeholder="Graduation year"
-              [(ngModel)]="form.graduationYear"
-              required
-              min="1900"
-              [max]="currentYear"
-              aria-label="Graduation year"
-            />
+            <div class="post-field-group">
+              <label for="post-name" class="post-field-label">Your Name <span class="required">*</span></label>
+              <div class="post-input-wrap">
+                <i class="ri-user-line post-field-icon"></i>
+                <input
+                  id="post-name"
+                  type="text"
+                  name="name"
+                  placeholder="e.g. Chukwuma Obi"
+                  [(ngModel)]="form.name"
+                  required
+                  aria-label="Your name"
+                />
+              </div>
+            </div>
+
+            <div class="post-field-group">
+              <label for="post-email" class="post-field-label">Email Address <span class="required">*</span></label>
+              <div class="post-input-wrap">
+                <i class="ri-mail-line post-field-icon"></i>
+                <input
+                  id="post-email"
+                  type="email"
+                  name="email"
+                  placeholder="e.g. name@example.com"
+                  [(ngModel)]="form.email"
+                  required
+                  aria-label="Your email"
+                />
+              </div>
+            </div>
+
+            <div class="post-field-group">
+              <label for="post-phone" class="post-field-label">Phone Number <span class="required">*</span></label>
+              <div class="post-input-wrap">
+                <i class="ri-phone-line post-field-icon"></i>
+                <input
+                  id="post-phone"
+                  type="tel"
+                  name="phone"
+                  placeholder="+234 800 000 0000"
+                  [(ngModel)]="form.phone"
+                  required
+                  aria-label="Your phone number"
+                />
+              </div>
+            </div>
+
+            <div class="post-field-group">
+              <label for="post-grad" class="post-field-label">Graduation Year <span class="required">*</span></label>
+              <div class="post-input-wrap">
+                <i class="ri-calendar-line post-field-icon"></i>
+                <input
+                  id="post-grad"
+                  type="number"
+                  name="graduationYear"
+                  placeholder="e.g. 2005"
+                  [(ngModel)]="form.graduationYear"
+                  required
+                  min="1900"
+                  [max]="currentYear"
+                  aria-label="Graduation year"
+                />
+              </div>
+            </div>
           </div>
         }
 
-        <textarea
-          name="message"
-          placeholder="Leave a memory, a note, or a word for the community…"
-          [(ngModel)]="form.message"
-          required
-          aria-label="Your message"
-        ></textarea>
+        <div class="post-field-group textarea-group">
+          <label for="post-msg" class="post-field-label">Your Note or Reflection <span class="required">*</span></label>
+          <div class="post-textarea-wrap">
+            <textarea
+              id="post-msg"
+              name="message"
+              placeholder="Share a cherished school memory, words of encouragement, or greetings to your set…"
+              [(ngModel)]="form.message"
+              maxlength="400"
+              required
+              aria-label="Your message"
+            ></textarea>
+          </div>
+        </div>
+
         <div class="post-foot">
-          <span class="type post-count">{{ form.message.length }} / 400 characters</span>
-          <button type="submit" class="btn btn-gold btn-sm" [disabled]="!canSubmit() || submitting()">
-            {{ submitting() ? 'Pinning note…' : 'Post to the wall' }}
+          <div class="post-foot-meta">
+            <span class="type post-count">
+              <i class="ri-character-recognition-line"></i>
+              {{ form.message.length }} / 400 characters
+            </span>
+            <span class="post-guideline-hint">
+              <i class="ri-shield-check-line"></i> Posts are moderated for alumni safety
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-gold btn-submit-post"
+            [disabled]="!canSubmit() || submitting()"
+          >
+            @if (submitting()) {
+              <i class="ri-loader-4-line spin"></i> Pinning Note…
+            } @else {
+              <i class="ri-pushpin-fill"></i> Pin to Wall
+            }
           </button>
         </div>
       </form>
@@ -117,7 +189,28 @@
 
     <!-- Wall -->
     <div class="wall">
-      @for (msg of visible(); track msg.id; let i = $index) {
+      @if (loading()) {
+        @for (item of [1, 2, 3, 4, 5, 6]; track item; let i = $index) {
+          <article class="card note" [style.transform]="'rotate(' + rot(i) + 'deg)'" aria-busy="true" style="pointer-events: none;">
+            <div class="sk-shimmer sk-text w-100" style="height: 15px; margin-bottom: 8px;"></div>
+            <div class="sk-shimmer sk-text w-85" style="height: 15px; margin-bottom: 8px;"></div>
+            <div class="sk-shimmer sk-text w-60" style="height: 15px; margin-bottom: 24px;"></div>
+            <div class="note-foot" style="margin-top: auto; display: flex; align-items: center; gap: 10px;">
+              <div class="sk-shimmer sk-circle" style="width: 38px; height: 38px; flex-shrink: 0;"></div>
+              <div style="flex: 1;">
+                <div class="sk-shimmer sk-text w-50" style="height: 14px; margin-bottom: 4px;"></div>
+                <div class="sk-shimmer sk-text w-35" style="height: 12px; margin: 0;"></div>
+              </div>
+            </div>
+            <div style="margin-top: 14px; border-top: 1px dashed rgba(196, 154, 69, 0.2); padding-top: 10px; display: flex; gap: 6px;">
+              <div class="sk-shimmer sk-pill" style="width: 50px; height: 26px;"></div>
+              <div class="sk-shimmer sk-pill" style="width: 50px; height: 26px;"></div>
+              <div class="sk-shimmer sk-pill" style="width: 50px; height: 26px;"></div>
+            </div>
+          </article>
+        }
+      } @else {
+        @for (msg of visible(); track msg.id; let i = $index) {
         <article
           class="card note"
           [class.pinned]="msg.pinned"
@@ -242,7 +335,7 @@
                 </div>
               } @else {
                 <div class="reply-login-prompt">
-                  <a routerLink="/sign-in" class="alumni-link">Sign in</a> as an alumni to reply to this note.
+                  <a routerLink="/login" class="alumni-link">Sign in</a> as an alumni to reply to this note.
                 </div>
               }
             </div>
@@ -250,6 +343,7 @@
 
           <div class="note-tape"></div>
         </article>
+      }
       }
     </div>
   </div>

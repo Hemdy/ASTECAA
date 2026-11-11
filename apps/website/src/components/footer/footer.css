@@ -48,7 +48,7 @@
 }
 .foot-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  grid-template-columns: 1.4fr 1fr 1.4fr 1fr;
   gap: clamp(32px, 5vw, 56px);
   padding-block: 40px 56px;
   border-top: 1px solid rgba(232, 221, 197, 0.18);

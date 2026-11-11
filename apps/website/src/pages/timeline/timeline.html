@@ -35,32 +35,55 @@
 
     <!-- Timeline -->
     <div class="timeline">
-      @for (m of filtered(); track m.id; let i = $index) {
-        <div class="t-item" [class.right]="i % 2 === 1" appReveal>
-          <div class="t-marker">
-            <span class="t-year">{{ m.year }}</span>
-            <span class="t-dot"></span>
+      @if (loading()) {
+        @for (item of [1, 2, 3, 4]; track item; let i = $index) {
+          <div class="t-item" [class.right]="i % 2 === 1" aria-busy="true">
+            <div class="t-marker">
+              <div class="sk-shimmer sk-pill" style="width: 52px; height: 22px;"></div>
+              <div class="t-dot sk-shimmer"></div>
+            </div>
+            <article class="t-card">
+              <div class="t-media">
+                <div class="sk-shimmer sk-box" style="width: 100%; height: 100%; min-height: 220px;"></div>
+              </div>
+              <div class="t-body">
+                <div class="sk-shimmer sk-pill" style="width: 60px; height: 16px; margin-bottom: 8px;"></div>
+                <div class="sk-shimmer sk-title" style="width: 75%; height: 24px; margin-bottom: 12px;"></div>
+                <div class="sk-shimmer sk-text w-100"></div>
+                <div class="sk-shimmer sk-text w-85"></div>
+                <div class="sk-shimmer sk-text w-60"></div>
+              </div>
+            </article>
           </div>
-          <article class="t-card">
-            <div class="t-media">
-              <img [src]="m.image || m.url" [alt]="m.title" class="photo-vintage" />
-              @if (m.hasVideo) {
-                <span class="t-video"><i class="ri-movie-line"></i></span>
-              }
+        }
+      } @else {
+        @for (m of filtered(); track m.id; let i = $index) {
+          <div class="t-item" [class.right]="i % 2 === 1" appReveal>
+            <div class="t-marker">
+              <span class="t-year">{{ m.year }}</span>
+              <span class="t-dot"></span>
             </div>
-            <div class="t-body">
-              <span class="eyebrow">{{ m.year }}</span>
-              <h3>{{ m.title }}</h3>
-              <p>{{ m.story || m.description }}</p>
-              @if (m.quote) {
-                <blockquote class="t-quote">
-                  "{{ m.quote }}"
-                  <cite>{{ m.quoteAuthor }}</cite>
-                </blockquote>
-              }
-            </div>
-          </article>
-        </div>
+            <article class="t-card">
+              <div class="t-media">
+                <img [src]="m.imageUrl || m.image || m.url || '/images/empty/image-fallback.jpg'" [alt]="m.title" class="photo-vintage" loading="lazy" decoding="async" (error)="onImageError($event)" />
+                @if (m.hasVideo) {
+                  <span class="t-video"><i class="ri-movie-line"></i></span>
+                }
+              </div>
+              <div class="t-body">
+                <span class="eyebrow">{{ m.year }}</span>
+                <h3>{{ m.title }}</h3>
+                <p>{{ m.story || m.description }}</p>
+                @if (m.quote) {
+                  <blockquote class="t-quote">
+                    "{{ m.quote }}"
+                    <cite>{{ m.quoteAuthor }}</cite>
+                  </blockquote>
+                }
+              </div>
+            </article>
+          </div>
+        }
       }
     </div>
   </div>
