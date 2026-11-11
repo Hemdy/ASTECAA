@@ -102,11 +102,24 @@
   /* Layout */
   --container: 1200px;
   --container-narrow: 760px;
+  --navbar-height: 98px;
 
   /* Motion */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
   --dur: 0.5s;
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --navbar-height: 80px;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --navbar-height: 88px;
+  }
 }
 
 /* ---------- Reset ---------- */
@@ -120,6 +133,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--navbar-height, 98px);
   -webkit-text-size-adjust: 100%;
   max-width: 100%;
   overflow-x: hidden;
