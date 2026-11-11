@@ -497,11 +497,11 @@
 
 <!-- ============ LEADERSHIP PREVIEW ============ -->
 @if (isSectionEnabled('organizers')) {
-<section class="section">
+<section class="section section-leadership">
   <div class="container">
     <div class="shead" appReveal>
-      <span class="eyebrow">Our leadership</span>
-      <h2>Leading the ASTECAA community</h2>
+      <span class="eyebrow">Our Leadership</span>
+      <h2>Leading the ASTECAA Community</h2>
       <p>
         Meet the dedicated alumni working together to strengthen our
         association, connect members, and preserve the ASTECAA legacy.
@@ -510,24 +510,47 @@
 
     <div class="org-grid">
       @for (o of organizers; track o.id) {
-      <article class="org-card" appReveal>
-        <div class="org-photo">
-          <img
-            [src]="o.photo || '/images/empty/avatar-fallback.jpg'"
-            [alt]="o.name"
-            class="photo-vintage"
-            loading="lazy"
-            decoding="async"
-            (error)="onAvatarImageError($event)"
-          />
+      <article class="org-card paper" appReveal>
+        <div class="org-photo-wrap">
+          <div class="org-photo">
+            <img
+              [src]="o.photo || '/images/empty/avatar-fallback.jpg'"
+              [alt]="o.name"
+              class="photo-vintage"
+              loading="lazy"
+              decoding="async"
+              (error)="onAvatarImageError($event)"
+            />
+          </div>
+          <span class="org-verified-badge" title="Executive Officer">
+            <i class="ri-shield-check-fill" aria-hidden="true"></i>
+          </span>
         </div>
 
-        <h4>{{ o.name }}</h4>
-        <span class="tag tag-forest">{{ o.role }}</span>
-        <span class="type org-years">{{ o.years }}</span>
-        <p class="org-bio">{{ o.bio }}</p>
+        <div class="org-card-body">
+          <h3 class="org-name">{{ o.name }}</h3>
+          <div class="org-role-wrap">
+            <span class="tag tag-forest org-role-tag">{{ o.role }}</span>
+          </div>
+          <span class="org-years-tag">
+            <i class="ri-time-line" aria-hidden="true"></i> {{ o.years }} of Service
+          </span>
+          <p class="org-bio">{{ o.bio }}</p>
+        </div>
+
+        <div class="org-card-footer">
+          <span class="org-foot-badge">
+            <i class="ri-medal-line" aria-hidden="true"></i> ASTECAA Executive
+          </span>
+        </div>
       </article>
       }
+    </div>
+
+    <div class="leadership-cta text-center" appReveal delay="120">
+      <a routerLink="/about" class="btn btn-outline">
+        <i class="ri-team-line" aria-hidden="true"></i> View Full Leadership & History
+      </a>
     </div>
   </div>
 </section>
