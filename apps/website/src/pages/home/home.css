@@ -2598,6 +2598,106 @@ gap: clamp(8px, 2vw, 16px);  grid-template-columns:
   animation: skeletonShimmer 1.8s ease-in-out infinite;
 }
 
+/* =========================================================
+   HERO CONTENT SKELETON
+   ========================================================= */
+
+.hero-skeleton-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 640px;
+}
+
+.hero-sk-eyebrow {
+  width: 150px;
+  height: 24px;
+  background: linear-gradient(
+    90deg,
+    rgba(196, 154, 69, 0.2) 0%,
+    rgba(246, 235, 201, 0.45) 50%,
+    rgba(196, 154, 69, 0.2) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.hero-sk-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 4px 0 8px;
+}
+
+.hero-sk-title-line {
+  height: clamp(38px, 5.5vw, 56px);
+  border-radius: var(--r-md);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.hero-sk-title-line.line-1 {
+  width: 88%;
+}
+
+.hero-sk-title-line.line-2 {
+  width: 65%;
+}
+
+.hero-sk-lede-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  max-width: 580px;
+}
+
+.hero-sk-text {
+  height: 18px !important;
+  background: linear-gradient(
+    90deg,
+    rgba(248, 243, 232, 0.12) 0%,
+    rgba(248, 243, 232, 0.28) 50%,
+    rgba(248, 243, 232, 0.12) 100%
+  ) !important;
+  background-size: 200% 100% !important;
+}
+
+.hero-sk-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.hero-sk-btn {
+  width: 175px;
+  height: 48px;
+  border-radius: var(--r-pill);
+  background: linear-gradient(
+    90deg,
+    rgba(196, 154, 69, 0.3) 0%,
+    rgba(246, 235, 201, 0.55) 50%,
+    rgba(196, 154, 69, 0.3) 100%
+  );
+  background-size: 200% 100%;
+}
+
+.hero-sk-btn.outline {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  background-size: 200% 100%;
+}
+
 .skeleton-shimmer-line.w-40 {
   width: 40%;
 }

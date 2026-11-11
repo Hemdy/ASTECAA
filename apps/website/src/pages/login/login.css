@@ -91,6 +91,10 @@
     0 4px 14px rgba(71, 90, 71, 0.35),
     inset 0 1px 1px rgba(255, 255, 255, 0.3),
     0 0 0 4px rgba(196, 154, 69, 0.2);
+
+    img{
+      border-radius: 50%;
+    }
 }
 
 .auth-header h1 {
@@ -203,11 +207,11 @@
   font-family: var(--font-body);
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--c-muted);
+  /* color: var(--c-muted);
   background: var(--c-bg-100);
   border: 1px solid rgba(138, 117, 97, 0.25);
   padding: 5px 10px;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-pill); */
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -297,7 +301,7 @@
 /* Trust Badges */
 .auth-trust-badges {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
   align-items: center;
   padding: 12px 6px 6px;
   border-top: 1px dashed rgba(196, 154, 69, 0.25);

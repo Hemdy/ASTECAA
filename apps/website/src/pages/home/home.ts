@@ -59,6 +59,7 @@ export class Home implements OnInit {
   eventsError = signal<string | null>(null);
   eventsLoading = signal(true);
   galleryLoading = signal(true);
+  homepageLoading = signal(true);
   latestMemories = signal<CmsGalleryItem[]>([]);
   galleryPreview = signal<CmsGalleryItem[]>([]);
   timelinePreview = signal<CmsTimelineMilestone[]>([]);
@@ -96,6 +97,7 @@ export class Home implements OnInit {
 
   private async loadCmsContent(): Promise<void> {
     this.galleryLoading.set(true);
+    this.homepageLoading.set(true);
     try {
       const [hp, gallery, timeline, messages, ann] = await Promise.all([
         this.cmsApi.getHomepage().catch(() => null),
@@ -123,6 +125,7 @@ export class Home implements OnInit {
       // Empty arrays handled by signals
     } finally {
       this.galleryLoading.set(false);
+      this.homepageLoading.set(false);
     }
   }
 

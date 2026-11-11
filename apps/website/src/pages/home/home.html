@@ -16,24 +16,36 @@
 
   <div class="container hero-inner">
     <div class="hero-content">
-      <span class="eyebrow hero-eyebrow">{{ homepage()?.hero?.tagline || 'Est. 1993. ASTEC' }}</span>
-      <h1 class="hero-title">
-        @if (homepage()?.hero?.headline) {
-          {{ homepage()?.hero?.headline }}
-        } @else {
-          Where memories live<br />
-          and new <em>stories</em> begin.
+      @if (homepageLoading() || !homepage()?.hero?.headline) {
+        <div class="hero-skeleton-wrap" aria-busy="true" aria-label="Loading hero content">
+          <div class="sk-shimmer sk-pill hero-sk-eyebrow"></div>
+          <div class="hero-sk-title-wrap">
+            <div class="sk-shimmer hero-sk-title-line line-1"></div>
+            <div class="sk-shimmer hero-sk-title-line line-2"></div>
+          </div>
+          <div class="hero-sk-lede-wrap">
+            <div class="sk-shimmer sk-text w-100 hero-sk-text"></div>
+            <div class="sk-shimmer sk-text w-90 hero-sk-text"></div>
+            <div class="sk-shimmer sk-text w-65 hero-sk-text"></div>
+          </div>
+          <div class="hero-sk-actions">
+            <div class="sk-shimmer hero-sk-btn"></div>
+            <div class="sk-shimmer hero-sk-btn outline"></div>
+          </div>
+        </div>
+      } @else {
+        <span class="eyebrow hero-eyebrow">{{ homepage()?.hero?.tagline || 'Est. 1993 · ASTEC' }}</span>
+        <h1 class="hero-title">{{ homepage()?.hero?.headline }}</h1>
+        @if (homepage()?.hero?.subheadline) {
+          <p class="hero-lede lede">{{ homepage()?.hero?.subheadline }}</p>
         }
-      </h1>
-      <p class="hero-lede lede">
-        {{ homepage()?.hero?.subheadline || "A living archive of a community's gatherings — the songs, the suppers, the lantern-lit walks through the old orchard. Step inside, and add your chapter." }}
-      </p>
-      <div class="hero-actions">
-        <a routerLink="/events" class="btn btn-gold">{{ homepage()?.hero?.primaryBtn || 'Upcoming Gatherings' }}</a>
-        <a routerLink="/timeline" class="btn btn-outline hero-outline"
-          >{{ homepage()?.hero?.secondaryBtn || 'Walk the Timeline' }}</a
-        >
-      </div>
+        <div class="hero-actions">
+          <a routerLink="/events" class="btn btn-gold">{{ homepage()?.hero?.primaryBtn || 'Upcoming Gatherings' }}</a>
+          <a routerLink="/timeline" class="btn btn-outline hero-outline"
+            >{{ homepage()?.hero?.secondaryBtn || 'Walk the Timeline' }}</a
+          >
+        </div>
+      }
     </div>
     @if (eventsLoading()) {
       <div class="hero-card" aria-busy="true">

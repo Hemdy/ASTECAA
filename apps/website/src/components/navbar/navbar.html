@@ -95,19 +95,13 @@
   >
     <div class="drawer-header">
       <a routerLink="/" class="brand drawer-brand" (click)="close()" aria-label="ASTECAA home">
-        <img src="/images/ASTECAA.jpg" alt="" class="brand-mark" />
+        <!-- <img src="/images/ASTECAA.jpg" alt="" class="brand-mark" />
         <span class="brand-divider" aria-hidden="true"></span>
         <span class="brand-text">
           <span class="brand-name">ASTECAA</span>
           <span class="brand-sub">Est. 1995</span>
-        </span>
-      </a>
-      <button class="drawer-close" (click)="close()" aria-label="Close menu">
-        <i class="ri-close-line" aria-hidden="true"></i>
-      </button>
-    </div>
-
-    @if (auth.isAuthenticated()) {
+        </span> -->
+  @if (auth.isAuthenticated()) {
       <div class="drawer-profile-card">
         <img
           [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
@@ -123,11 +117,32 @@
         </div>
             <i class="ri-dashboard-line nav-user-icon"  routerLink="/dashboard" aria-hidden="true"></i>
 
-
-
-        <!-- <a routerLink="/dashboard" (click)="close()" class="drawer-dashboard-pill">Dashboard</a> -->
       </div>
     }
+      </a>
+      <button class="drawer-close" (click)="close()" aria-label="Close menu">
+        <i class="ri-close-line" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!-- @if (auth.isAuthenticated()) {
+      <div class="drawer-profile-card">
+        <img
+          [src]="auth.profile()?.avatar_url || '/images/reading-room.jpg'"
+          [alt]="auth.displayName()"
+          class="drawer-avatar"
+          (error)="onAvatarError($event)"
+        />
+        <div class="drawer-user-meta">
+          <div class="drawer-user-name">{{ auth.displayName() }}</div>
+          <div class="drawer-user-sub">
+            {{ auth.profile()?.graduation_set ? ('Class of ' + auth.profile()?.graduation_set) : 'ASTECAA Member' }}
+          </div>
+        </div>
+            <i class="ri-dashboard-line nav-user-icon"  routerLink="/dashboard" aria-hidden="true"></i>
+
+      </div>
+    } -->
 
     <nav class="drawer-nav-list" aria-label="Mobile main navigation">
       @for (item of filteredNavItems(); track item.path) {

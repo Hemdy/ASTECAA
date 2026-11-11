@@ -1,204 +1,960 @@
-.page-hero {
-  padding: clamp(72px, 12vw, 140px) 0 clamp(40px, 6vw, 72px);
+/* ============================================================
+   ASTECAA — About Page Styles
+   Elevated Editorial Nostalgia Aesthetic
+   ============================================================ */
+
+/* ---------- 1. Hero Section ---------- */
+.about-hero {
+  position: relative;
+  padding: clamp(80px, 11vw, 140px) 0 clamp(48px, 6vw, 80px);
   text-align: center;
-    background-image: radial-gradient(circle at 15% 20%, rgba(196, 154, 69, 0.15) 0%, transparent 40%), radial-gradient(circle at 85% 75%, rgba(122, 62, 62, 0.2) 0%, transparent 40%), linear-gradient(150deg, #3d2921 0%, #291a14 100%);  
+  background-color: #241610;
+  background-image:
+    radial-gradient(circle at 18% 25%, rgba(196, 154, 69, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 82% 70%, rgba(91, 109, 91, 0.22) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(122, 62, 62, 0.15) 0%, transparent 60%),
+    linear-gradient(155deg, #2b1a13 0%, #1e120c 60%, #160c07 100%);
   color: var(--c-bg-50);
-}
-.page-hero .eyebrow {
-  color: var(--c-gold-300);
-}
-.page-hero h1 {
-  color: var(--c-bg-50);
-  margin: 18px 0 18px;
-  font-size: clamp(2.4rem, 6vw, 4rem);
-}
-.page-hero .lede {
-  color: rgba(248, 243, 232, 0.85);
-  max-width: 60ch;
-  margin: 0 auto;
+  overflow: hidden;
 }
 
-.section-paper {
-  background: var(--c-paper-100);
-  background-image:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 60%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.25 0 0 0 0 0.20 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+.about-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.about-hero-seal {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 154, 69, 0.12);
+  border: 1.5px solid rgba(196, 154, 69, 0.4);
+  color: var(--c-gold-400);
+  font-size: 1.8rem;
+  box-shadow: 0 0 24px rgba(196, 154, 69, 0.25);
+
+  img{
+    border-radius: 50%;
+  }
+}
+
+.about-hero .eyebrow {
+  letter-spacing: 0.16em;
+  font-weight: 600;
+}
+
+.about-hero-title {
+  color: var(--c-bg-50);
+  margin: 16px auto 20px;
+  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+  line-height: 1.18;
+  max-width: 20ch;
+  font-family: var(--font-cinzel);
+}
+
+.about-hero-title em {
+  font-style: italic;
+  font-family: var(--font-display);
+  color: var(--c-gold-300);
+  font-weight: 500;
+}
+
+.about-hero-lede {
+  color: rgba(248, 243, 232, 0.88);
+  max-width: 64ch;
+  margin: 0 auto 36px;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  line-height: 1.65;
+}
+
+/* Key Impact Metrics Strip */
+.about-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(196, 154, 69, 0.25);
+  border-radius: var(--r-lg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 10px;
+  border-radius: var(--r-md);
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.stat-pill:hover {
+  transform: translateY(-2px);
+  border-color: rgba(196, 154, 69, 0.4);
+}
+
+.stat-num {
+  font-family: var(--font-cinzel);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--c-gold-300);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.stat-lbl {
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(248, 243, 232, 0.75);
+  font-weight: 600;
+}
+
+/* ---------- 2. Origin & Legacy Section ---------- */
+.about-origin-section {
+  padding-top: clamp(60px, 8vw, 96px);
+  padding-bottom: clamp(60px, 8vw, 96px);
 }
 
 .origin {
   display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: clamp(32px, 6vw, 72px);
+  grid-template-columns: 1fr 1.15fr;
+  gap: clamp(36px, 6vw, 76px);
   align-items: center;
 }
-.origin-media {
+
+.origin-media-wrap {
   position: relative;
+  z-index: 2;
 }
-.origin-media img {
-  width: 100%;
-  height: clamp(360px, 48vw, 520px);
-  object-fit: cover;
+
+.vintage-frame {
+  position: relative;
+  padding: 14px;
+  background: var(--c-paper-100);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg);
+  box-shadow:
+    0 16px 36px rgba(58, 42, 32, 0.16),
+    0 2px 8px rgba(58, 42, 32, 0.08),
+    inset 0 0 0 1px rgba(196, 154, 69, 0.35);
+  transform: rotate(-1.5deg);
+  transition: transform 0.4s ease;
 }
+
+.vintage-frame:hover {
+  transform: rotate(0deg) scale(1.01);
+}
+
+.origin-photo {
+  width: 100%;
+  height: clamp(340px, 44vw, 480px);
+  object-fit: cover;
+  border-radius: calc(var(--r-md) - 6px);
+  display: block;
+}
+
+.photo-caption-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px 2px;
+  font-size: 0.82rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--c-brown-600);
+}
+
+.photo-caption-tag i {
+  color: var(--c-gold-600);
+  font-size: 0.95rem;
+}
+
 .origin-seal {
   position: absolute;
-  bottom: -22px;
-  right: -22px;
+  bottom: -20px;
+  right: -20px;
   width: 96px;
   height: 96px;
   font-size: 0.78rem;
-}
-.tape-tl {
-  top: -14px;
-  left: 24px;
-  transform: rotate(-8deg);
-}
-.origin-text h2 {
-  margin: 12px 0 18px;
+  z-index: 3;
 }
 
-.mission-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+.tape-tl {
+  top: -12px;
+  left: 28px;
+  transform: rotate(-10deg);
+  z-index: 4;
 }
-.mission-card {
-  padding: 32px 28px;
-  text-align: center;
+
+.tape-br {
+  bottom: -10px;
+  right: 50px;
+  transform: rotate(12deg);
+  z-index: 4;
 }
-.mission-ico {
-  font-size: 2.2rem;
+
+.origin-text h2 {
+  margin: 12px 0 20px;
+  font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+  line-height: 1.25;
+}
+
+.lead-paragraph {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--c-brown-700);
+  font-weight: 500;
   margin-bottom: 16px;
 }
-.mission-card h3 {
+
+.origin-text p {
+  color: var(--c-ink-soft);
+  line-height: 1.68;
+  margin-bottom: 16px;
+}
+
+/* Three Pillars Callout */
+.origin-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--c-paper-300);
+}
+
+.pillar-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.pillar-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--c-paper-200);
+  border: 1px solid var(--c-gold-400);
+  color: var(--c-forest-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pillar-content h4 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--c-brown-700);
+}
+
+.pillar-content p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--c-ink-soft);
+}
+
+/* ---------- 3. Mission, Vision & Core Values ---------- */
+.section-paper {
+  background: var(--c-paper-100);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.36 0 0 0 0 0.25 0 0 0 0 0.20 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+.mission-vision-section {
+  padding-top: clamp(64px, 8vw, 100px);
+  padding-bottom: clamp(64px, 8vw, 100px);
+}
+
+.mission-vision-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  margin-top: 36px;
+}
+
+.mv-card {
+  padding: clamp(28px, 4vw, 40px) clamp(24px, 3.5vw, 36px);
+  border-radius: var(--r-md);
+  background: var(--c-bg-50);
+  border: 1px solid var(--c-paper-300);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mv-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.mission-card {
+  border-top: 4px solid var(--c-gold-500);
+}
+
+.vision-card {
+  border-top: 4px solid var(--c-forest-600);
+}
+
+.mv-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mv-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.mv-icon.gold {
+  background: rgba(196, 154, 69, 0.15);
+  color: var(--c-gold-700);
+  border: 1px solid rgba(196, 154, 69, 0.3);
+}
+
+.mv-icon.forest {
+  background: rgba(91, 109, 91, 0.15);
+  color: var(--c-forest-700);
+  border: 1px solid rgba(91, 109, 91, 0.3);
+}
+
+.mv-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.mv-label.gold {
+  color: var(--c-gold-700);
+}
+
+.mv-label.forest {
+  color: var(--c-forest-700);
+}
+
+.mv-card h3 {
+  font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  margin-bottom: 14px;
+  color: var(--c-brown-700);
+}
+
+.mv-card > p {
+  font-size: 1rem;
+  line-height: 1.68;
+  color: var(--c-ink-soft);
+  margin-bottom: 24px;
+}
+
+.mv-checklist {
+  list-style: none;
+  padding: 0;
+  margin: auto 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid var(--c-paper-200);
+  padding-top: 20px;
+}
+
+.mv-checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.94rem;
+  color: var(--c-ink);
+  line-height: 1.5;
+}
+
+.mv-checklist li i {
+  color: var(--c-gold-600);
+  font-size: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Core Values Block */
+.values-block {
+  margin-top: clamp(56px, 8vw, 84px);
+}
+
+.values-header {
+  margin-bottom: 32px;
+}
+
+.values-header h3 {
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  color: var(--c-brown-700);
+  margin-top: 8px;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.value-card {
+  background: var(--c-bg-50);
+  border: 1px solid var(--c-paper-300);
+  border-radius: var(--r-md);
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--c-gold-400);
+  box-shadow: var(--shadow-sm);
+}
+
+.value-ico {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 154, 69, 0.12);
+  border: 1px solid rgba(196, 154, 69, 0.35);
+  color: var(--c-gold-600);
+  font-size: 1.45rem;
+}
+
+.value-card h4 {
+  font-size: 1.12rem;
+  color: var(--c-brown-700);
   margin-bottom: 10px;
 }
 
-.milestones {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0;
-}
-.mile {
-  position: relative;
-  padding: 0 18px 32px;
-}
-.mile-year {
-  font-family: var(--font-cinzel);
-  font-weight: 700;
-  font-size: 1.5rem;
-  color: var(--c-burgundy-600);
-  margin-bottom: 14px;
-}
-.mile-dot {
-  position: absolute;
-  top: 38px;
-  left: 18px;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--c-gold-500);
-  box-shadow: 0 0 0 3px var(--c-bg-100), 0 0 0 5px var(--c-gold-300);
-}
-.mile-line {
-  position: absolute;
-  top: 44px;
-  left: 32px;
-  right: -18px;
-  height: 2px;
-  background: linear-gradient(to right, var(--c-gold-400), rgba(196, 154, 69, 0.2));
-}
-.mile-body h4 {
-  font-size: 1.1rem;
-  margin: 18px 0 8px;
-}
-.mile-body p {
-  font-size: 0.92rem;
+.value-card p {
+  font-size: 0.9rem;
+  line-height: 1.58;
   color: var(--c-ink-soft);
   margin: 0;
 }
 
-.narrow {
-  max-width: var(--container-narrow);
-  margin: 0 auto;
+/* ---------- 4. Historical Milestones Section ---------- */
+.milestones-section {
+  padding-top: clamp(64px, 8vw, 100px);
+  padding-bottom: clamp(64px, 8vw, 100px);
 }
+
+.era-filter-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 32px 0 44px;
+}
+
+.era-btn {
+  background: var(--c-bg-50);
+  border: 1.5px solid var(--c-paper-300);
+  color: var(--c-brown-600);
+  padding: 9px 20px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.era-btn:hover {
+  border-color: var(--c-gold-500);
+  color: var(--c-brown-700);
+  background: var(--c-paper-100);
+}
+
+.era-btn.active {
+  background: var(--c-forest-700);
+  border-color: var(--c-forest-700);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(71, 90, 71, 0.3);
+}
+
+.milestones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 24px;
+}
+
+.milestone-card {
+  padding: 26px 24px;
+  border-radius: var(--r-md);
+  border-top: 3px solid var(--c-gold-400);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+}
+
+.milestone-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.milestone-card.highlight {
+  border-top: 3px solid var(--c-burgundy-600);
+  background: linear-gradient(180deg, rgba(232, 221, 197, 0.35) 0%, var(--c-bg-100) 100%);
+}
+
+.milestone-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.milestone-year-badge {
+  font-family: var(--font-cinzel);
+  font-weight: 700;
+  font-size: 1.55rem;
+  color: var(--c-burgundy-600);
+  line-height: 1;
+}
+
+.milestone-card.highlight .milestone-year-badge {
+  color: var(--c-burgundy-700);
+}
+
+.milestone-index-tag {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--c-gold-700);
+  background: rgba(196, 154, 69, 0.12);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.milestone-title {
+  font-size: 1.18rem;
+  color: var(--c-brown-700);
+  margin: 0 0 10px;
+  line-height: 1.35;
+}
+
+.milestone-text {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--c-ink-soft);
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+
+.milestone-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--c-paper-300);
+}
+
+.milestone-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c-gold-500);
+}
+
+.milestone-card.highlight .milestone-status-dot {
+  background: var(--c-burgundy-600);
+}
+
+.milestone-foot-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+  font-weight: 600;
+}
+
+/* ---------- 5. Archival Provenance Quote ---------- */
+.quote-section {
+  padding-top: clamp(60px, 8vw, 90px);
+  padding-bottom: clamp(60px, 8vw, 90px);
+}
+
+.quote-card {
+  padding: clamp(36px, 6vw, 60px) clamp(24px, 5vw, 56px);
+  border-radius: var(--r-md);
+  position: relative;
+  border: 1px solid var(--c-paper-300);
+  box-shadow: var(--shadow-md);
+}
+
+.quote-seal {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 154, 69, 0.12);
+  border: 1.5px solid var(--c-gold-400);
+  color: var(--c-gold-600);
+  font-size: 1.6rem;
+}
+
 .big-quote {
   font-family: var(--font-display);
   font-style: italic;
-  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
-  line-height: 1.3;
+  font-size: clamp(1.4rem, 3.2vw, 2.3rem);
+  line-height: 1.35;
   color: var(--c-brown-700);
-  margin: 8px 0;
+  margin: 16px auto 24px;
+  max-width: 32ch;
+  position: relative;
 }
-.quote-attrib {
-  font-size: 0.86rem;
-  letter-spacing: 0.06em;
+
+.quote-attribution {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quote-attribution strong {
+  font-size: 0.94rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-brown-700);
+}
+
+.quote-attribution span {
+  font-size: 0.82rem;
+  color: var(--c-muted);
+}
+
+/* ---------- 6. Stewards of the Archive (Leadership) ---------- */
+.stewards-section {
+  padding-top: clamp(64px, 8vw, 100px);
+  padding-bottom: clamp(64px, 8vw, 100px);
 }
 
 .org-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
+  margin-top: 40px;
 }
+
 .org-card {
   text-align: center;
-  padding: 24px 20px;
+  padding: 30px 22px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--c-paper-300);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-.org-photo {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 16px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid var(--c-paper-200);
+
+.org-card:hover {
+  transform: translateY(-4px);
   box-shadow: var(--shadow-md);
 }
+
+.org-photo-wrap {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto 18px;
+}
+
+.org-photo {
+  width: 124px;
+  height: 124px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid var(--c-bg-50);
+  box-shadow:
+    0 0 0 2px var(--c-gold-400),
+    var(--shadow-md);
+}
+
 .org-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-.org-card h4 {
-  font-size: 1.15rem;
-  margin-bottom: 10px;
-}
-.org-card .tag {
-  margin-bottom: 8px;
-}
-.org-years {
   display: block;
-  font-size: 0.72rem;
-  margin-bottom: 12px;
-}
-.org-bio {
-  font-size: 0.9rem;
-  color: var(--c-ink-soft);
-  line-height: 1.55;
-  text-align: left;
-  margin: 0;
 }
 
-.cta h2 {
+.org-verified-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--c-forest-700);
+  color: var(--c-gold-300);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.org-name {
+  font-size: 1.15rem;
+  color: var(--c-brown-700);
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.org-role-tag {
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  padding: 3px 12px;
+}
+
+.org-years-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  color: var(--c-muted);
+  margin-bottom: 12px;
+}
+
+.org-bio {
+  font-size: 0.88rem;
+  color: var(--c-ink-soft);
+  line-height: 1.55;
+  text-align: center;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Skeleton Loading Helpers for Stewards */
+.sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(221, 208, 178, 0.45) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(221, 208, 178, 0.45) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.8s ease-in-out infinite;
+  border-radius: var(--r-sm);
+}
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.sk-text.w-100 {
+  width: 100%;
+  height: 12px;
   margin-bottom: 6px;
 }
 
-@media (max-width: 900px) {
+.sk-text.w-85 {
+  width: 85%;
+  height: 12px;
+  margin: 0 auto;
+}
+
+/* ---------- 7. Reconnection Call to Action ---------- */
+.about-cta-section {
+  padding-top: clamp(64px, 8vw, 100px);
+  padding-bottom: clamp(64px, 8vw, 100px);
+}
+
+.cta-card {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: clamp(36px, 6vw, 64px) clamp(20px, 4vw, 48px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--c-paper-300);
+  box-shadow: var(--shadow-lg);
+  background: var(--c-bg-50);
+}
+
+.cta-card h2 {
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  margin: 12px auto 16px;
+  color: var(--c-brown-700);
+}
+
+.cta-lede {
+  max-width: 58ch;
+  margin: 0 auto 32px;
+  font-size: clamp(0.98rem, 1.8vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--c-ink-soft);
+}
+
+.cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* ---------- 8. Comprehensive Responsive Breakpoints ---------- */
+@media (max-width: 1024px) {
   .origin {
     grid-template-columns: 1fr;
+    gap: 40px;
   }
-  .mission-grid {
+
+  .origin-media-wrap {
+    max-width: 540px;
+    margin: 0 auto;
+  }
+
+  .mission-vision-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
+
+  .values-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .org-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-@media (max-width: 540px) {
-  .org-grid {
+
+@media (max-width: 768px) {
+  .about-stats-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .stat-pill {
+    padding: 12px 8px;
+  }
+
+  .era-filter-strip {
+    gap: 8px;
+  }
+
+  .era-btn {
+    font-size: 0.82rem;
+    padding: 8px 16px;
+  }
+
+  .milestones-grid {
     grid-template-columns: 1fr;
   }
-  .mile-line {
-    display: none;
+}
+
+@media (max-width: 576px) {
+  .values-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .org-grid {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Ultra-compact screens (320px - 380px) */
+@media (max-width: 380px) {
+  .about-stats-strip {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .stat-num {
+    font-size: 1.4rem;
+  }
+
+  .vintage-frame {
+    padding: 10px;
+  }
+
+  .origin-photo {
+    height: 280px;
+  }
+
+  .origin-seal {
+    width: 76px;
+    height: 76px;
+    font-size: 0.68rem;
+    bottom: -12px;
+    right: -10px;
+  }
+
+  .pillar-item {
+    gap: 12px;
+  }
+
+  .pillar-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  .mv-card {
+    padding: 24px 18px;
+  }
+
+  .quote-card {
+    padding: 28px 16px;
+  }
+
+  .cta-card {
+    padding: 28px 16px;
   }
 }
