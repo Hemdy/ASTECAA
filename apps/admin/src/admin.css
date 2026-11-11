@@ -189,6 +189,13 @@ a {
   flex-shrink: 0;
   box-shadow: var(--ad-shadow-sm);
 }
+
+.adm-brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
 .adm-brand-name {
   font-family: var(--font-display);
   font-weight: 700;

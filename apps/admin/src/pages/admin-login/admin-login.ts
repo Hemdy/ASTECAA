@@ -7,7 +7,7 @@ import { AdminState } from '../../admin-state';
 @Component({
   selector: 'app-admin-login',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, ],
   templateUrl: './admin-login.html',
 })
 export class AdminLogin {
