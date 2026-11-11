@@ -1,6 +1,6 @@
 .foot {
-  background: var(--c-brown-700);
-  background-image: linear-gradient(180deg, var(--c-brown-600), var(--c-brown-700));
+     background: var(--c-brown-700);
+    background-image: radial-gradient(circle at 15% 20%, rgba(196, 154, 69, .15) 0%, transparent 40%), radial-gradient(circle at 85% 75%, rgba(122, 62, 62, .2) 0%, transparent 40%), linear-gradient(150deg, #3d2921, #291a14);
   color: var(--c-paper-300);
   padding-top: clamp(56px, 8vw, 88px);
   /* margin-top: clamp(56px, 8vw, 96px); */
