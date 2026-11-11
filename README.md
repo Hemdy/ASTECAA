@@ -1,6 +1,6 @@
 # ASTECAA
 
-ASTECAA is an alumni community and archive platform organized as a high-performance `pnpm` monorepo. It features independent Angular frontend applications for both public alumni members and administrators, a NestJS REST API with Neon PostgreSQL and Drizzle ORM, Cloudflare R2 object storage, and shared TypeScript libraries.
+ASTECAA is an alumni community and archive platform organized as a high-performance `pnpm` monorepo. It features independent Angular frontend applications for both public alumni members and administrators, a NestJS REST API with Neon PostgreSQL and Drizzle ORM, Cloudflare R2 object storage, and shared TypeScript libraries....
 
 ---
 
