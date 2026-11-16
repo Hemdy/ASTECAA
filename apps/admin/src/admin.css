@@ -104,6 +104,17 @@ html,
 body {
   background-color: var(--ad-bg);
   color: var(--ad-text);
+  overflow-x: clip;
+}
+html:has(.admin),
+body:has(.admin) {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+app-root,
+app-admin {
+  display: block;
 }
 body {
   background-image: none;
@@ -142,9 +153,13 @@ a {
   font-family: var(--font-ui);
   color: var(--ad-text);
   background: var(--ad-bg);
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template-columns: 264px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   transition: grid-template-columns var(--ad-transition);
 }
 .admin.collapsed {
@@ -157,10 +172,9 @@ a {
   border-right: 1px solid var(--ad-border);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100dvh;
-  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
   transition: width var(--ad-transition), transform var(--ad-transition);
 }
 .adm-mobile-backdrop {
@@ -213,6 +227,10 @@ a {
 }
 .adm-nav {
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
   padding: 12px 12px 24px;
   display: flex;
   flex-direction: column;
@@ -364,10 +382,13 @@ a {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow-x: clip;
 }
 .adm-topbar {
-  position: sticky;
-  top: 0;
+  position: relative;
+  flex-shrink: 0;
   z-index: 30;
   background: var(--ad-surface);
   border-bottom: 1px solid var(--ad-border);
@@ -486,7 +507,11 @@ a {
   padding: 28px;
   flex: 1;
   min-width: 0;
-  overflow-x: clip;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 @media (max-width: 768px) {
   .adm-content {
@@ -1545,7 +1570,7 @@ a {
   border-bottom: 1px solid var(--ad-border);
 }
 .adm-notif-list {
-  max-height: 380px;
+  max-height: min(380px, calc(100dvh - 130px));
   overflow-y: auto;
 }
 .adm-notif-item {
@@ -1685,7 +1710,8 @@ a {
   }
 }
 @media (max-width: 768px) {
-  .admin {
+  .admin,
+  .admin.collapsed {
     grid-template-columns: minmax(0, 1fr);
   }
   .adm-sidebar {
@@ -1693,6 +1719,7 @@ a {
     left: 0;
     top: 0;
     width: 264px;
+    height: 100vh;
     height: 100dvh;
     max-height: 100dvh;
     z-index: 50;

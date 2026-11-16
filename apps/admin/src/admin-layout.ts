@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, OnInit, DestroyRef } from '@angular/core';
+import { Component, ElementRef, inject, computed, signal, viewChild, OnInit, DestroyRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs';
@@ -17,6 +17,7 @@ import type { AdminNotificationItem } from '@astec/types';
 })
 export class AdminLayout implements OnInit {
   private destroyRef = inject(DestroyRef);
+  private mainContent = viewChild<ElementRef<HTMLElement>>('mainContent');
   state = inject(AdminState);
   auth = inject(AdminAuthService);
   cmsApi = inject(CmsApiService);
@@ -150,6 +151,10 @@ export class AdminLayout implements OnInit {
       .subscribe(() => {
         this.state.closeNotif();
         this.closeMobile();
+        const contentEl = this.mainContent()?.nativeElement;
+        if (contentEl) {
+          contentEl.scrollTop = 0;
+        }
         void this.dashboardApi.refreshSidebarCounts();
       });
   }

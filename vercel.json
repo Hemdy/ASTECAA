@@ -1,11 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
-  "buildCommand": "pnpm run build:website && node scripts/sync-builds.mjs",
+  "buildCommand": "pnpm run build",
   "outputDirectory": "dist/astecaa/browser",
   "rewrites": [
     {
-      "source": "/admin/:path*",
+      "source": "/admin",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/",
+      "destination": "/admin/index.html"
+    },
+    {
+      "source": "/admin/(.*)",
       "destination": "/admin/index.html"
     },
     {

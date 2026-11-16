@@ -24,7 +24,8 @@ export class AdminLogin {
   constructor() {
     this.auth.ready().then(() => {
       if (this.auth.isAuthenticated()) {
-        this.router.navigate(['/admin/dashboard']);
+        const redirect = new URLSearchParams(window.location.search).get('redirect');
+        void this.router.navigateByUrl(redirect || '/admin/dashboard');
       }
     });
   }
@@ -38,7 +39,7 @@ export class AdminLogin {
     this.submitting.set(false);
     if (ok) {
       const redirect = new URLSearchParams(window.location.search).get('redirect');
-      this.router.navigate([redirect || '/admin/dashboard']);
+      void this.router.navigateByUrl(redirect || '/admin/dashboard');
     }
   }
 

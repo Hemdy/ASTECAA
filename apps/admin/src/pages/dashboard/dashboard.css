@@ -12,6 +12,15 @@
 .dash-grid-2 > * {
   min-width: 0;
 }
+.dash-grid > .adm-card,
+.dash-grid-2 > .adm-card {
+  display: flex;
+  flex-direction: column;
+}
+.dash-grid > .adm-card > .adm-card-pad,
+.dash-grid-2 > .adm-card > .adm-card-pad {
+  flex: 1;
+}
 @media (max-width: 1100px) {
   .dash-grid,
   .dash-grid-2 {

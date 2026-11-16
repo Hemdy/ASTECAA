@@ -53,6 +53,30 @@ export interface RolePermissionItem {
   settings: boolean;
 }
 
+export type AdminActivityCategory =
+  | 'registration'
+  | 'community'
+  | 'user'
+  | 'event'
+  | 'story'
+  | 'announcement'
+  | 'contact'
+  | 'gallery';
+
+export interface AdminActivityItem {
+  id: string;
+  user: string;
+  action: string;
+  target: string;
+  time: string;
+  icon: string;
+  category?: AdminActivityCategory;
+  detail?: string;
+  timestamp?: number;
+  createdAt?: string;
+  link?: string;
+}
+
 export interface DashboardStatsItem {
   totalUsers: number;
   upcomingEvents: number;
@@ -65,14 +89,7 @@ export interface DashboardStatsItem {
   growthData: Array<{ label: string; value: number }>;
   engagementData?: Array<{ label: string; value: number }>;
   trafficData?: Array<{ label: string; value: number }>;
-  recentActivity?: Array<{
-    id: string;
-    user: string;
-    action: string;
-    target: string;
-    time: string;
-    icon: string;
-  }>;
+  recentActivity?: AdminActivityItem[];
   pendingApprovalsList?: Array<{
     id: string;
     author: string;

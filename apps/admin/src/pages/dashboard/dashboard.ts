@@ -39,8 +39,8 @@ export class AdminDashboard {
 
   adminName = computed(() => this.auth.profile()?.full_name || 'Administrator');
   growthData = computed(() => this.stats().growthData);
-  upcomingEvents = computed(() => this.stats().upcomingEventsList as any[]);
-  newUsers = computed(() => this.stats().recentUsers as any[]);
+  upcomingEvents = computed(() => (this.stats().upcomingEventsList || []).slice(0, 5) as any[]);
+  newUsers = computed(() => (this.stats().recentUsers || []).slice(0, 5) as any[]);
 
   engagementRate = computed(() => this.stats().engagementRate ?? 85);
   engagedCount = computed(() => this.stats().engagedUsersCount ?? Math.max(1, this.stats().totalUsers));
@@ -48,9 +48,9 @@ export class AdminDashboard {
 
   engagementData = computed(() => this.stats().engagementData || []);
   trafficData = computed(() => this.stats().trafficData || []);
-  activity = computed(() => this.stats().recentActivity || []);
+  activity = computed(() => (this.stats().recentActivity || []).slice(0, 5));
 
-  pendingComments = computed(() => this.stats().pendingApprovalsList || []);
+  pendingComments = computed(() => (this.stats().pendingApprovalsList || []).slice(0, 5));
 
   quickModal = signal('');
   quickModalTitle = signal('');

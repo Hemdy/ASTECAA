@@ -12,6 +12,13 @@ export class DashboardController {
     return this.dashboard.getStats(period || '6m');
   }
 
+  @Get('activity')
+  async getRecentActivity(@Query('limit') limit?: string) {
+    const parsed = Number(limit);
+    const safeLimit = Number.isFinite(parsed) && parsed > 0 ? Math.min(Math.floor(parsed), 250) : 100;
+    return this.dashboard.getRecentActivity(safeLimit);
+  }
+
   @Get('sidebar-counts')
   async getSidebarCounts() {
     return this.dashboard.getSidebarCounts();

@@ -1,0 +1,199 @@
+<div class="adm-toolbar">
+  <div>
+    <div class="adm-section-title">Recent Activity</div>
+    <div class="adm-section-sub">A structured log of platform registrations, community notes, content updates, and inquiries.</div>
+  </div>
+  <div style="margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap">
+    <a routerLink="/admin/dashboard" class="adm-btn adm-btn-ghost">
+      <i class="ri-arrow-left-line"></i> Dashboard
+    </a>
+    <button class="adm-btn adm-btn-outline" (click)="loadActivity()" [disabled]="loading()">
+      <i class="ri-refresh-line" [class.ri-spin]="loading()"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- Summary stats -->
+<div class="adm-grid-stats" style="margin-bottom: 20px">
+  <div class="adm-stat">
+    <div class="adm-stat-top">
+      <div>
+        <div class="adm-stat-label">Total Logged Events</div>
+        <div class="adm-stat-value">{{ counts().total }}</div>
+      </div>
+      <div class="adm-stat-ico"><i class="ri-history-line"></i></div>
+    </div>
+    <span class="adm-stat-delta up">Recent platform feed</span>
+  </div>
+
+  <div class="adm-stat forest">
+    <div class="adm-stat-top">
+      <div>
+        <div class="adm-stat-label">Last 24 Hours</div>
+        <div class="adm-stat-value">{{ counts().last24h }}</div>
+      </div>
+      <div class="adm-stat-ico"><i class="ri-time-line"></i></div>
+    </div>
+    <span class="adm-stat-delta up">Recent activity window</span>
+  </div>
+
+  <div class="adm-stat info">
+    <div class="adm-stat-top">
+      <div>
+        <div class="adm-stat-label">Registrations & Notes</div>
+        <div class="adm-stat-value">{{ counts().communityAndRegs }}</div>
+      </div>
+      <div class="adm-stat-ico"><i class="ri-chat-voice-line"></i></div>
+    </div>
+    <span class="adm-stat-delta up">Member engagement</span>
+  </div>
+
+  <div class="adm-stat burgundy">
+    <div class="adm-stat-top">
+      <div>
+        <div class="adm-stat-label">New Members</div>
+        <div class="adm-stat-value">{{ counts().members }}</div>
+      </div>
+      <div class="adm-stat-ico"><i class="ri-user-add-line"></i></div>
+    </div>
+    <span class="adm-stat-delta up">Account sign-ups</span>
+  </div>
+</div>
+
+<!-- Quick category tabs -->
+<div class="adm-tabs">
+  @for (opt of categoryOptions; track opt.value) {
+    <button
+      class="adm-tab"
+      [class.active]="categoryFilter() === opt.value"
+      (click)="onCategoryChange(opt.value)"
+    >
+      {{ opt.label }}
+    </button>
+  }
+</div>
+
+<!-- Search & filter bar -->
+<div class="adm-card adm-card-pad" style="margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end">
+  <div class="adm-field" style="margin: 0; flex: 1; min-width: 220px">
+    <label class="adm-field-label">Search</label>
+    <input
+      class="adm-input"
+      [ngModel]="query()"
+      (ngModelChange)="onSearchChange($event)"
+      placeholder="Search by member, action, target, or detail…"
+    />
+  </div>
+  <div class="adm-field" style="margin: 0; min-width: 170px">
+    <label class="adm-field-label">Category</label>
+    <select class="adm-select" [ngModel]="categoryFilter()" (ngModelChange)="onCategoryChange($event)">
+      @for (opt of categoryOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  </div>
+  <div class="adm-field" style="margin: 0; min-width: 160px">
+    <label class="adm-field-label">Timeframe</label>
+    <select class="adm-select" [ngModel]="timeFilter()" (ngModelChange)="onTimeChange($event)">
+      <option value="all">All time</option>
+      <option value="24h">Last 24 hours</option>
+      <option value="7d">Last 7 days</option>
+      <option value="30d">Last 30 days</option>
+    </select>
+  </div>
+  @if (hasActiveFilters()) {
+    <button class="adm-btn adm-btn-outline" (click)="clearFilters()">
+      <i class="ri-filter-off-line"></i> Clear
+    </button>
+  }
+</div>
+
+<!-- Activity feed card -->
+<div class="adm-card">
+  <div class="adm-card-head">
+    <div>
+      <div class="adm-card-title">Activity Feed</div>
+      <div class="adm-card-sub">Showing {{ paged().length }} of {{ filtered().length }} matching activities</div>
+    </div>
+    @if (totalPages() > 1) {
+      <span class="adm-badge adm-badge-muted">Page {{ page() }} of {{ totalPages() }}</span>
+    }
+  </div>
+
+  <div class="adm-card-pad">
+    @if (loading()) {
+      <div class="adm-empty">
+        <div class="adm-empty-ico"><i class="ri-loader-4-line ri-spin"></i></div>
+        <p>Loading recent platform activity…</p>
+      </div>
+    } @else {
+      <div class="adm-feed">
+        @for (a of paged(); track a.id) {
+          <div class="adm-feed-item" style="align-items: flex-start; gap: 14px">
+            <div class="adm-feed-ico"><i [class]="a.icon"></i></div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+                <div class="adm-feed-text" style="flex: 1; min-width: 200px">
+                  <strong>{{ a.user }}</strong> {{ a.action }}
+                  <strong>{{ a.target }}</strong>
+                </div>
+                <span class="adm-badge" [class]="categoryBadgeClass(a.category)">
+                  {{ categoryLabel(a.category) }}
+                </span>
+              </div>
+              @if (a.detail) {
+                <div style="font-size: 0.8rem; color: var(--ad-text-muted); margin-top: 3px; word-break: break-word">
+                  {{ a.detail }}
+                </div>
+              }
+              <div class="adm-feed-time" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 4px">
+                <span><i class="ri-time-line"></i> {{ a.time }}</span>
+                @if (a.createdAt) {
+                  <span>· {{ formatTimestamp(a.createdAt) }}</span>
+                }
+              </div>
+            </div>
+            @if (a.link) {
+              <a
+                [routerLink]="linkPath(a.link)"
+                [queryParams]="linkQuery(a.link)"
+                class="adm-btn adm-btn-ghost adm-btn-sm"
+                style="flex-shrink: 0"
+                title="Open section"
+              >
+                Open <i class="ri-arrow-right-s-line"></i>
+              </a>
+            }
+          </div>
+        } @empty {
+          <div class="adm-empty">
+            <div class="adm-empty-ico"><i class="ri-history-line"></i></div>
+            <p>No activities match your current search or filters.</p>
+            @if (hasActiveFilters()) {
+              <button class="adm-btn adm-btn-outline adm-btn-sm" style="margin-top: 10px" (click)="clearFilters()">
+                Reset filters
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (!loading() && filtered().length > 0) {
+    <div class="adm-card-head" style="border-top: 1px solid var(--ad-border); border-bottom: none">
+      <span class="adm-card-sub">{{ filtered().length }} total activities</span>
+      <div class="adm-pagination">
+        <button class="adm-page-btn" [disabled]="page() <= 1" (click)="setPage(page() - 1)" aria-label="Previous page">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        @for (p of pageNumbers(); track p) {
+          <button class="adm-page-btn" [class.active]="page() === p" (click)="setPage(p)">{{ p }}</button>
+        }
+        <button class="adm-page-btn" [disabled]="page() >= totalPages()" (click)="setPage(page() + 1)" aria-label="Next page">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>

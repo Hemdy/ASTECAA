@@ -984,6 +984,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     section: 'Overview',
     items: [
       { label: 'Dashboard', path: '/admin/dashboard', icon: 'ri-dashboard-line' },
+      { label: 'Recent Activity', path: '/admin/activity', icon: 'ri-history-line' },
     ],
   },
   {

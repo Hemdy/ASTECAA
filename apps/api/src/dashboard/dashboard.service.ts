@@ -1,17 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { and, desc, eq, gte, or, sql } from 'drizzle-orm';
 import {
+  announcements,
   appUsers,
+  contactSubmissions,
+  communityMessages,
+  communityReactions,
+  communityReplies,
   elections,
   eventRegistrations,
   events,
-  votes,
-  communityMessages,
-  communityReplies,
-  communityReactions,
-  contactSubmissions,
+  galleryItems,
   session,
+  stories,
+  votes,
 } from '@astec/database';
+import type { AdminActivityItem } from '@astec/types';
 import { DatabaseService } from '../database/database.service.js';
 
 @Injectable()
@@ -99,7 +103,7 @@ export class DashboardService {
     const inactiveUsersCount = Math.max(0, totalUsers - engagedUsersCount);
     const engagementRate = totalUsers > 0 ? Math.round((engagedUsersCount / totalUsers) * 100) : 100;
 
-    // Recent 4 users
+    // Recent 5 users
     const recentUsers = await db
       .select({
         id: appUsers.id,
@@ -111,9 +115,9 @@ export class DashboardService {
       })
       .from(appUsers)
       .orderBy(desc(appUsers.createdAt))
-      .limit(4);
+      .limit(5);
 
-    // Recent 4 upcoming events
+    // Recent 5 upcoming events
     const upcomingEventsList = await db
       .select({
         id: events.id,
@@ -135,7 +139,7 @@ export class DashboardService {
         ),
       )
       .orderBy(events.startDate)
-      .limit(4);
+      .limit(5);
 
     // Dynamic Community Growth Registrations based on requested period
     const growthData: Array<{ label: string; value: number }> = [];
@@ -309,89 +313,10 @@ export class DashboardService {
       });
     }
 
-    // Recent real activities
-    const [latestRegistrations, latestMessages, latestUsers] = await Promise.all([
-      db
-        .select({
-          id: eventRegistrations.id,
-          name: eventRegistrations.name,
-          createdAt: eventRegistrations.createdAt,
-          eventTitle: events.title,
-        })
-        .from(eventRegistrations)
-        .innerJoin(events, eq(eventRegistrations.eventId, events.id))
-        .orderBy(desc(eventRegistrations.createdAt))
-        .limit(3),
-      db
-        .select({
-          id: communityMessages.id,
-          author: communityMessages.author,
-          page: communityMessages.page,
-          createdAt: communityMessages.createdAt,
-        })
-        .from(communityMessages)
-        .orderBy(desc(communityMessages.createdAt))
-        .limit(3),
-      db
-        .select({
-          id: appUsers.id,
-          name: appUsers.fullName,
-          createdAt: appUsers.createdAt,
-        })
-        .from(appUsers)
-        .orderBy(desc(appUsers.createdAt))
-        .limit(3),
-    ]);
+    // Recent real activities (max 5)
+    const activityList = await this.collectActivities(5);
 
-    const activityList: Array<{
-      id: string;
-      user: string;
-      action: string;
-      target: string;
-      time: string;
-      icon: string;
-      timestamp: number;
-    }> = [];
-
-    for (const reg of latestRegistrations) {
-      activityList.push({
-        id: `reg_${reg.id}`,
-        user: reg.name,
-        action: 'registered for',
-        target: reg.eventTitle,
-        time: this.formatRelativeTime(reg.createdAt),
-        icon: 'ri-calendar-check-line',
-        timestamp: reg.createdAt.getTime(),
-      });
-    }
-
-    for (const msg of latestMessages) {
-      activityList.push({
-        id: `msg_${msg.id}`,
-        user: msg.author,
-        action: 'posted a note on',
-        target: msg.page === 'community' ? 'Community Wall' : msg.page,
-        time: this.formatRelativeTime(msg.createdAt),
-        icon: 'ri-chat-voice-line',
-        timestamp: msg.createdAt.getTime(),
-      });
-    }
-
-    for (const u of latestUsers) {
-      activityList.push({
-        id: `usr_${u.id}`,
-        user: u.name || 'Alumnus',
-        action: 'joined as a verified member of',
-        target: 'ASTECAA',
-        time: this.formatRelativeTime(u.createdAt),
-        icon: 'ri-user-add-line',
-        timestamp: u.createdAt.getTime(),
-      });
-    }
-
-    activityList.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Pending approvals list from database
+    // Pending approvals list from database (max 5)
     const pendingCommentsList = await db
       .select({
         id: communityMessages.id,
@@ -404,7 +329,7 @@ export class DashboardService {
       .from(communityMessages)
       .where(eq(communityMessages.status, 'pending'))
       .orderBy(desc(communityMessages.createdAt))
-      .limit(4);
+      .limit(5);
 
     return {
       totalUsers,
@@ -452,6 +377,261 @@ export class DashboardService {
         poster: e.poster,
       })),
     };
+  }
+
+  async getRecentActivity(limit = 100): Promise<AdminActivityItem[]> {
+    const safeLimit = Math.min(Math.max(limit, 1), 250);
+    const perSource = Math.min(Math.max(Math.ceil(safeLimit / 2), 20), 60);
+    const items = await this.collectActivities(perSource);
+    return items.slice(0, safeLimit);
+  }
+
+  private async collectActivities(perSourceLimit: number): Promise<AdminActivityItem[]> {
+    const db = this.database.db;
+    const [
+      latestRegistrations,
+      latestMessages,
+      latestUsers,
+      latestEvents,
+      latestStories,
+      latestAnnouncements,
+      latestContacts,
+      latestGallery,
+    ] = await Promise.all([
+      db
+        .select({
+          id: eventRegistrations.id,
+          name: eventRegistrations.name,
+          email: eventRegistrations.emailNormalized,
+          graduationYear: eventRegistrations.graduationYear,
+          createdAt: eventRegistrations.createdAt,
+          eventTitle: events.title,
+        })
+        .from(eventRegistrations)
+        .innerJoin(events, eq(eventRegistrations.eventId, events.id))
+        .orderBy(desc(eventRegistrations.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: communityMessages.id,
+          author: communityMessages.author,
+          page: communityMessages.page,
+          message: communityMessages.message,
+          status: communityMessages.status,
+          createdAt: communityMessages.createdAt,
+        })
+        .from(communityMessages)
+        .orderBy(desc(communityMessages.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: appUsers.id,
+          name: appUsers.fullName,
+          email: appUsers.email,
+          status: appUsers.status,
+          graduationYear: appUsers.graduationYear,
+          createdAt: appUsers.createdAt,
+        })
+        .from(appUsers)
+        .orderBy(desc(appUsers.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: events.id,
+          title: events.title,
+          organizer: events.organizer,
+          category: events.category,
+          venue: events.venue,
+          status: events.status,
+          createdAt: events.createdAt,
+        })
+        .from(events)
+        .orderBy(desc(events.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: stories.id,
+          title: stories.title,
+          author: stories.author,
+          category: stories.category,
+          status: stories.status,
+          createdAt: stories.createdAt,
+        })
+        .from(stories)
+        .orderBy(desc(stories.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: announcements.id,
+          title: announcements.title,
+          channel: announcements.channel,
+          status: announcements.status,
+          createdAt: announcements.createdAt,
+        })
+        .from(announcements)
+        .orderBy(desc(announcements.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: contactSubmissions.id,
+          name: contactSubmissions.name,
+          email: contactSubmissions.email,
+          subject: contactSubmissions.subject,
+          status: contactSubmissions.status,
+          createdAt: contactSubmissions.createdAt,
+        })
+        .from(contactSubmissions)
+        .orderBy(desc(contactSubmissions.createdAt))
+        .limit(perSourceLimit),
+      db
+        .select({
+          id: galleryItems.id,
+          title: galleryItems.title,
+          album: galleryItems.album,
+          year: galleryItems.year,
+          mediaType: galleryItems.mediaType,
+          createdAt: galleryItems.createdAt,
+        })
+        .from(galleryItems)
+        .orderBy(desc(galleryItems.createdAt))
+        .limit(perSourceLimit),
+    ]);
+
+    const activityList: Array<AdminActivityItem & { timestamp: number }> = [];
+
+    for (const reg of latestRegistrations) {
+      const grad = reg.graduationYear ? `Class of ${reg.graduationYear}` : '';
+      activityList.push({
+        id: `reg_${reg.id}`,
+        user: reg.name,
+        action: 'registered for',
+        target: reg.eventTitle,
+        detail: [reg.email, grad].filter(Boolean).join(' · '),
+        category: 'registration',
+        time: this.formatRelativeTime(reg.createdAt),
+        createdAt: reg.createdAt.toISOString(),
+        icon: 'ri-calendar-check-line',
+        link: '/admin/events',
+        timestamp: reg.createdAt.getTime(),
+      });
+    }
+
+    for (const msg of latestMessages) {
+      const snippet = msg.message.length > 90 ? `${msg.message.slice(0, 90)}…` : msg.message;
+      activityList.push({
+        id: `msg_${msg.id}`,
+        user: msg.author,
+        action: 'posted a note on',
+        target: msg.page === 'community' ? 'Community Wall' : msg.page,
+        detail: `"${snippet}" · Status: ${msg.status}`,
+        category: 'community',
+        time: this.formatRelativeTime(msg.createdAt),
+        createdAt: msg.createdAt.toISOString(),
+        icon: 'ri-chat-voice-line',
+        link: '/admin/comments',
+        timestamp: msg.createdAt.getTime(),
+      });
+    }
+
+    for (const u of latestUsers) {
+      const grad = u.graduationYear ? `Class of ${u.graduationYear}` : '';
+      activityList.push({
+        id: `usr_${u.id}`,
+        user: u.name || 'Alumnus',
+        action: u.status === 'pending' ? 'requested membership in' : 'joined as a verified member of',
+        target: 'ASTECAA',
+        detail: [u.email, grad, `Status: ${u.status}`].filter(Boolean).join(' · '),
+        category: 'user',
+        time: this.formatRelativeTime(u.createdAt),
+        createdAt: u.createdAt.toISOString(),
+        icon: 'ri-user-add-line',
+        link: u.status === 'pending' ? '/admin/users?status=pending' : '/admin/users',
+        timestamp: u.createdAt.getTime(),
+      });
+    }
+
+    for (const ev of latestEvents) {
+      activityList.push({
+        id: `evt_${ev.id}`,
+        user: ev.organizer || 'ASTECAA Admin',
+        action: ev.status === 'published' ? 'published event' : 'created event',
+        target: ev.title,
+        detail: `${ev.category} · ${ev.venue} · ${ev.status}`,
+        category: 'event',
+        time: this.formatRelativeTime(ev.createdAt),
+        createdAt: ev.createdAt.toISOString(),
+        icon: 'ri-calendar-event-line',
+        link: '/admin/events',
+        timestamp: ev.createdAt.getTime(),
+      });
+    }
+
+    for (const st of latestStories) {
+      activityList.push({
+        id: `sty_${st.id}`,
+        user: st.author || 'Editor',
+        action: st.status === 'published' ? 'published story' : 'drafted story',
+        target: st.title,
+        detail: `${st.category} · ${st.status}`,
+        category: 'story',
+        time: this.formatRelativeTime(st.createdAt),
+        createdAt: st.createdAt.toISOString(),
+        icon: 'ri-article-line',
+        link: '/admin/stories',
+        timestamp: st.createdAt.getTime(),
+      });
+    }
+
+    for (const ann of latestAnnouncements) {
+      activityList.push({
+        id: `ann_${ann.id}`,
+        user: 'ASTECAA Admin',
+        action: ann.status === 'published' ? 'published announcement' : 'created announcement',
+        target: ann.title,
+        detail: `Channel: ${ann.channel} · ${ann.status}`,
+        category: 'announcement',
+        time: this.formatRelativeTime(ann.createdAt),
+        createdAt: ann.createdAt.toISOString(),
+        icon: 'ri-notification-badge-line',
+        link: '/admin/announcements',
+        timestamp: ann.createdAt.getTime(),
+      });
+    }
+
+    for (const ct of latestContacts) {
+      activityList.push({
+        id: `cnt_${ct.id}`,
+        user: ct.name,
+        action: 'submitted an inquiry about',
+        target: ct.subject,
+        detail: `${ct.email} · Status: ${ct.status}`,
+        category: 'contact',
+        time: this.formatRelativeTime(ct.createdAt),
+        createdAt: ct.createdAt.toISOString(),
+        icon: 'ri-mail-line',
+        link: '/admin/contact',
+        timestamp: ct.createdAt.getTime(),
+      });
+    }
+
+    for (const gal of latestGallery) {
+      activityList.push({
+        id: `gal_${gal.id}`,
+        user: 'Gallery Manager',
+        action: `added ${gal.mediaType === 'video' ? 'video' : 'photo'} to`,
+        target: gal.title,
+        detail: `Album: ${gal.album} (${gal.year})`,
+        category: 'gallery',
+        time: this.formatRelativeTime(gal.createdAt),
+        createdAt: gal.createdAt.toISOString(),
+        icon: 'ri-image-line',
+        link: '/admin/gallery',
+        timestamp: gal.createdAt.getTime(),
+      });
+    }
+
+    activityList.sort((a, b) => b.timestamp - a.timestamp);
+    return activityList;
   }
 
   private formatRelativeTime(date: Date): string {

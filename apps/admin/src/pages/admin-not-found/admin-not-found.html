@@ -1,0 +1,32 @@
+<div
+  class="adm-card adm-card-pad"
+  style="max-width: 560px; margin: 48px auto; text-align: center; padding: 48px 28px"
+>
+  <div
+    class="adm-confirm-ico"
+    style="background: var(--ad-gold-soft); color: var(--ad-gold); width: 64px; height: 64px; font-size: 1.8rem"
+  >
+    <i class="ri-compass-3-line"></i>
+  </div>
+  <div class="adm-badge adm-badge-gold" style="margin-bottom: 12px">404 · Page Not Found</div>
+  <h1 class="adm-section-title" style="font-size: 1.6rem; margin-bottom: 8px">
+    We couldn't find that admin page.
+  </h1>
+  <p style="color: var(--ad-text-soft); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px">
+    The URL you requested may have moved or does not exist in the ASTECAA Admin Console.
+  </p>
+  <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap">
+    @if (auth.isAdmin()) {
+      <a routerLink="/admin/dashboard" class="adm-btn adm-btn-primary">
+        <i class="ri-dashboard-line"></i> Back to Dashboard
+      </a>
+      <a routerLink="/admin/activity" class="adm-btn adm-btn-outline">
+        <i class="ri-history-line"></i> Recent Activity
+      </a>
+    } @else {
+      <a routerLink="/admin/login" class="adm-btn adm-btn-primary">
+        <i class="ri-login-box-line"></i> Sign in to Admin
+      </a>
+    }
+  </div>
+</div>

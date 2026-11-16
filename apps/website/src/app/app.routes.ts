@@ -20,6 +20,7 @@ export const routes: Routes = [
   { path: 'events/:id', component: EventDetails },
   { path: 'timeline', component: Timeline },
   { path: 'gallery', component: Gallery },
+  { path: 'memories', redirectTo: 'gallery', pathMatch: 'full' },
   { path: 'community', component: Community },
   { path: 'contact', component: Contact },
   { path: 'vote', component: Vote },

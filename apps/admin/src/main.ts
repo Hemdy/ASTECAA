@@ -18,6 +18,8 @@ import { AdminSettings } from './pages/admin-settings/admin-settings';
 import { AdminRoles } from './pages/admin-roles/admin-roles';
 import { AdminVoting } from './pages/admin-voting/admin-voting';
 import { AdminVotingResults } from './pages/admin-voting-results/admin-voting-results';
+import { AdminActivity } from './pages/admin-activity/admin-activity';
+import { AdminNotFound } from './pages/admin-not-found/admin-not-found';
 
 bootstrapApplication(AdminApp, {
   providers: [
@@ -33,6 +35,7 @@ bootstrapApplication(AdminApp, {
         children: [
           { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
           { path: 'dashboard', component: AdminDashboard },
+          { path: 'activity', component: AdminActivity },
           { path: 'events', component: AdminEvents },
           { path: 'gallery', component: AdminGallery },
           { path: 'stories', component: AdminStories },
@@ -47,9 +50,10 @@ bootstrapApplication(AdminApp, {
           { path: 'roles', component: AdminRoles },
           { path: 'voting', component: AdminVoting },
           { path: 'voting-results', component: AdminVotingResults },
+          { path: '**', component: AdminNotFound },
         ],
       },
-      { path: '**', redirectTo: 'admin/dashboard' },
+      { path: '**', component: AdminNotFound },
     ]),
   ],
 }).catch((error: unknown) => {

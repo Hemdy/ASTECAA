@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { getAstecApiUrl } from '@astec/config';
 import { applyAuthHeaders, captureAuthHeader } from './token-storage.js';
-import type { AdminSidebarCounts, DashboardStatsItem } from '@astec/types';
+import type { AdminActivityItem, AdminSidebarCounts, DashboardStatsItem } from '@astec/types';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardApiService {
@@ -12,6 +12,11 @@ export class DashboardApiService {
   async getStats(period?: string): Promise<DashboardStatsItem> {
     const qs = period ? `?period=${encodeURIComponent(period)}` : '';
     return this.request<DashboardStatsItem>(`/api/admin/v1/dashboard/stats${qs}`);
+  }
+
+  async getRecentActivity(limit = 100): Promise<AdminActivityItem[]> {
+    const qs = `?limit=${encodeURIComponent(String(limit))}`;
+    return this.request<AdminActivityItem[]>(`/api/admin/v1/dashboard/activity${qs}`);
   }
 
   async getSidebarCounts(): Promise<AdminSidebarCounts> {

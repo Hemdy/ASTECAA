@@ -1,4 +1,6 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, DestroyRef, signal, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AdmModal } from '../../components/adm-modal/adm-modal';
 import { UsersApiService, DashboardApiService } from '@astec/api-client';
@@ -12,6 +14,8 @@ import type { AdminUser, Role } from '../../admin-data';
   templateUrl: './admin-users.html',
 })
 export class AdminUsers {
+  private destroyRef = inject(DestroyRef);
+  private route = inject(ActivatedRoute);
   private toast = inject(ToastService);
   private usersApi = inject(UsersApiService);
   private dashboardApi = inject(DashboardApiService);
@@ -51,6 +55,16 @@ export class AdminUsers {
   });
 
   constructor() {
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const status = params.get('status');
+        if (status === 'active' || status === 'pending' || status === 'suspended') {
+          this.statusFilter.set(status);
+        } else {
+          this.statusFilter.set('');
+        }
+      });
     this.loadUsers();
   }
 

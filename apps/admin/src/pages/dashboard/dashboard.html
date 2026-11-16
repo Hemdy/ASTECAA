@@ -148,14 +148,14 @@
   <div class="adm-card">
     <div class="adm-card-head">
       <div class="adm-card-title">Recent Activity</div>
-      <a routerLink="/admin/dashboard" class="adm-btn adm-btn-ghost adm-btn-sm">View all</a>
+      <a routerLink="/admin/activity" class="adm-btn adm-btn-ghost adm-btn-sm">View all</a>
     </div>
     <div class="adm-card-pad">
       <div class="adm-feed">
         @for (a of activity(); track a.id) {
           <div class="adm-feed-item">
             <div class="adm-feed-ico"><i [class]="a.icon"></i></div>
-            <div style="flex: 1">
+            <div style="flex: 1; min-width: 0">
               <div class="adm-feed-text">
                 <strong>{{ a.user }}</strong> {{ a.action }}
                 <strong>{{ a.target }}</strong>
@@ -164,7 +164,7 @@
             </div>
           </div>
         } @empty {
-          <div style="text-align: center; color: var(--adm-text-sub); padding: 24px 0; font-size: 0.88rem">
+          <div style="text-align: center; color: var(--ad-text-muted); padding: 24px 0; font-size: 0.88rem">
             No recent activity recorded yet.
           </div>
         }
@@ -176,26 +176,29 @@
   <div class="adm-card">
     <div class="adm-card-head">
       <div class="adm-card-title">Pending Approvals</div>
-      <span class="adm-badge adm-badge-warning">{{ pendingComments().length }} waiting</span>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <span class="adm-badge adm-badge-warning">{{ pendingComments().length }} waiting</span>
+        <a routerLink="/admin/users" [queryParams]="{ status: 'pending' }" class="adm-btn adm-btn-ghost adm-btn-sm">View all</a>
+      </div>
     </div>
     <div class="adm-card-pad">
       <div class="adm-feed">
         @for (c of pendingComments(); track c.id) {
           <div class="adm-feed-item">
             <img class="adm-avatar adm-avatar-sm" [src]="c.avatar" [alt]="c.author" (error)="onAvatarImageError($event)" />
-            <div style="flex: 1">
+            <div style="flex: 1; min-width: 0">
               <div class="adm-feed-text">
                 <strong>{{ c.author }}</strong> on {{ c.page }}
               </div>
               <div class="adm-feed-time" style="font-style: italic">"{{ truncate(c.message) }}"</div>
             </div>
-            <div style="display: flex; gap: 4px">
+            <div style="display: flex; gap: 4px; flex-shrink: 0">
               <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="approve(c.id)" title="Approve"><i class="ri-check-line"></i></button>
               <button class="adm-btn adm-btn-ghost adm-btn-icon" (click)="reject(c.id)" title="Reject"><i class="ri-close-line"></i></button>
             </div>
           </div>
         } @empty {
-          <div style="text-align: center; color: var(--adm-text-sub); padding: 24px 0; font-size: 0.88rem">
+          <div style="text-align: center; color: var(--ad-text-muted); padding: 24px 0; font-size: 0.88rem">
             No pending community notes awaiting moderation.
           </div>
         }
@@ -224,6 +227,12 @@
                 <td>{{ shortDate(e.date) }}</td>
                 <td>{{ e.registered }}/{{ e.capacity }}</td>
                 <td><span class="adm-badge" [class.adm-badge-success]="e.status === 'published'" [class.adm-badge-warning]="e.status !== 'published'">{{ e.status }}</span></td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--ad-text-muted); padding: 24px 16px">
+                  No upcoming events scheduled.
+                </td>
               </tr>
             }
           </tbody>
@@ -259,6 +268,12 @@
                 <td>{{ shortDate(u.joined) }}</td>
                 <td>
                   <span class="adm-badge" [class.adm-badge-success]="u.status === 'active'" [class.adm-badge-warning]="u.status === 'pending'" [class.adm-badge-danger]="u.status === 'suspended'">{{ u.status }}</span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--ad-text-muted); padding: 24px 16px">
+                  No recent users found.
                 </td>
               </tr>
             }
